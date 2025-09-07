@@ -8,7 +8,7 @@
     --text-muted: #888888;
     --border-color: #555555;
     --accent-color: #4a9eff;
-    --success-color: #10b981;
+    --success-color: #4caf50;
     --error-color: #ef4444;
     --warning-color: #f59e0b;
     --radius: 8px;
@@ -489,11 +489,11 @@ body {
 }
 
 .tree-node.user {
-    color: #10b981;
+    color: #4caf50;
 }
 
 .tree-node.assistant {
-    color: #6366f1;
+    color: #757575;
 }
 
 /* Messages Container */
@@ -548,7 +548,7 @@ body {
 }
 
 .message.user .message-content {
-    background-color: var(--accent-color);
+    background-color: #4caf50;
     color: white;
 }
 

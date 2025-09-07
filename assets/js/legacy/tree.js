@@ -223,20 +223,20 @@ class VisTreeViewer {
     getNodeColor(role, isCurrent) {
         if (isCurrent) {
             return {
-                background: role === 'user' ? '#2e7d32' : '#3f51b5',
+                background: role === 'user' ? '#2e7d32' : '#5a5a5a',
                 border: '#ffeb3b',
                 highlight: {
-                    background: role === 'user' ? '#4caf50' : '#5c6bc0',
+                    background: role === 'user' ? '#4caf50' : '#6a6a6a',
                     border: '#ffeb3b'
                 }
             };
         }
         
         return {
-            background: role === 'user' ? '#4caf50' : '#6366f1',
+            background: role === 'user' ? '#4caf50' : '#757575',
             border: '#ffffff',
             highlight: {
-                background: role === 'user' ? '#66bb6a' : '#7c3aed',
+                background: role === 'user' ? '#66bb6a' : '#8a8a8a',
                 border: '#4a9eff'
             }
         };
@@ -441,9 +441,9 @@ class CanvasTreeViewer {
         if (node.id === app.currentMessageId) {
             this.ctx.fillStyle = '#4a9eff';
         } else if (node.role === 'user') {
-            this.ctx.fillStyle = '#10b981';
+            this.ctx.fillStyle = '#4caf50';
         } else {
-            this.ctx.fillStyle = '#6366f1';
+            this.ctx.fillStyle = '#757575';
         }
         
         this.ctx.fill();

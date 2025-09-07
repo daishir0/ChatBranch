@@ -254,6 +254,12 @@ class VisTreeViewer {
     }
     
     formatTimestamp(timestamp) {
+        // Use TimeZoneManager if available for date+time display
+        if (window.app && window.app.timezoneManager) {
+            return window.app.timezoneManager.formatCompactDateTime(timestamp);
+        }
+        
+        // Fallback to original implementation
         const date = new Date(timestamp);
         return date.toLocaleTimeString('ja-JP', { 
             hour: '2-digit', 

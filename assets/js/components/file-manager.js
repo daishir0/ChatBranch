@@ -409,6 +409,12 @@ class FileManager {
     }
     
     formatDate(dateString) {
+        // Use TimeZoneManager if available
+        if (window.app && window.app.timezoneManager) {
+            return window.app.timezoneManager.formatFileTime(dateString);
+        }
+        
+        // Fallback to original implementation
         const date = new Date(dateString);
         const now = new Date();
         const diff = now - date;
@@ -871,6 +877,12 @@ class FileManager {
     }
     
     formatDate(dateString) {
+        // Use TimeZoneManager if available
+        if (window.app && window.app.timezoneManager) {
+            return window.app.timezoneManager.formatDate(dateString);
+        }
+        
+        // Fallback to original implementation
         const date = new Date(dateString);
         return date.toLocaleDateString('ja-JP', {
             year: 'numeric',

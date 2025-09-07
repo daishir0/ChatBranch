@@ -229,6 +229,14 @@ class APIClient {
     }
     
     /**
+     * システム設定取得（タイムゾーン等）
+     */
+    async getSystemConfig() {
+        const response = await this.authenticatedFetch(`${this.apiBaseUrl}/settings.php?action=system`);
+        return await response.json();
+    }
+    
+    /**
      * 設定保存
      */
     async saveSettings(settings) {

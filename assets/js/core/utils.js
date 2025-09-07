@@ -14,14 +14,18 @@ class AppUtils {
      * 日付フォーマット（相対時間）
      */
     static formatDate(dateString) {
-        // Handle empty or invalid date strings
+        // Use TimeZoneManager if available, otherwise fallback to old behavior
+        if (window.app && window.app.timezoneManager) {
+            return window.app.timezoneManager.formatRelativeTime(dateString);
+        }
+        
+        // Fallback to original implementation
         if (!dateString || dateString.trim() === '') {
             return '不明';
         }
         
         const date = new Date(dateString);
         
-        // Check if the date is valid
         if (isNaN(date.getTime())) {
             return '不明';
         }
@@ -29,7 +33,6 @@ class AppUtils {
         const now = new Date();
         const diff = now - date;
         
-        // Handle future dates (should not happen but just in case)
         if (diff < 0) {
             return date.toLocaleDateString('ja-JP');
         }

@@ -61,6 +61,10 @@ try {
             handleResetSettings($settingsManager, $auth, $logger);
             break;
             
+        case 'system':
+            handleGetSystemConfig($config);
+            break;
+            
         default:
             throw new Exception('Invalid action');
     }
@@ -160,5 +164,13 @@ function handleResetSettings($settingsManager, $auth, $logger) {
         'success' => true,
         'message' => 'Settings reset to defaults',
         'settings' => $frontendSettings
+    ]);
+}
+
+function handleGetSystemConfig($config) {
+    echo json_encode([
+        'success' => true,
+        'timezone' => $config['system']['timezone'] ?? 'UTC',
+        'locale' => 'ja-JP' // 将来的にconfigから取得可能
     ]);
 }

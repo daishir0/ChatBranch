@@ -390,6 +390,7 @@ $lang = Language::getInstance();
 
     <!-- Core Framework -->
     <script src="assets/js/core/utils.js"></script>
+    <script src="assets/js/core/timezone-manager.js"></script>
     <script src="assets/js/core/api-client.js"></script>
 
     <!-- Components -->

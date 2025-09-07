@@ -52,6 +52,10 @@ class ChatBranchApp {
     }
     
     async init() {
+        // Initialize timezone manager first
+        this.timezoneManager = new TimeZoneManager();
+        await this.timezoneManager.loadSystemTimezone();
+        
         await this.settingsManager.loadSettings();
         this.bindEvents();
         this.threadManager.loadThreads();
@@ -489,3 +493,6 @@ class ChatBranchApp {
 
 // Initialize the application
 const app = new ChatBranchApp();
+
+// Make app globally available
+window.app = app;

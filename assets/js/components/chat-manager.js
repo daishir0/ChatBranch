@@ -245,7 +245,8 @@ class ChatManager {
         let actionsHTML = '';
         if (message.role === 'user') {
             // User message: edit, branch, delete buttons
-            const showBranchButton = userMessageIndex > 1;
+            // TODO: 分岐ボタンの表示条件を一時的に変更（元の仕様: userMessageIndex > 1）
+            const showBranchButton = true; // 全てのユーザーメッセージに表示
             actionsHTML = `
                 <div class="message-actions">
                     <button class="message-action-btn" onclick="app.editMessage(${message.id})" title="Edit">✏️</button>

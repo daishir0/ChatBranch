@@ -356,9 +356,16 @@ function handleCreateBranch($chatManager, $auth, $data, $logger) {
     
     // Use the same parent as the clicked message for branching
     $branchParentId = $clickedMessage['parent_message_id'];
+    $threadId = $clickedMessage['thread_id'];
     
-    // Create branch message
-    $branchMessageId = $chatManager->createBranch($branchParentId, $content, $role);
+    // Create branch message - handle null parent (root-level branching)
+    if ($branchParentId === null) {
+        // Direct root-level branch creation
+        $branchMessageId = $chatManager->addMessage($threadId, $role, $content, null);
+    } else {
+        // Standard branch creation with parent
+        $branchMessageId = $chatManager->createBranch($branchParentId, $content, $role);
+    }
     
     $logger->info('Branch message created', [
         'clicked_message_id' => $clickedMessageId,

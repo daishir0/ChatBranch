@@ -27,7 +27,8 @@ class VisTreeViewer {
                     treeSpacing: window.innerWidth < 768 ? 120 : 200,
                     blockShifting: true,
                     edgeMinimization: true,
-                    parentCentralization: true
+                    parentCentralization: true,
+                    shakeTowards: 'leaves'  // Ensure root nodes align at top
                 }
             },
             physics: {
@@ -126,7 +127,8 @@ class VisTreeViewer {
                         treeSpacing: isMobile ? 120 : 200,
                         blockShifting: true,
                         edgeMinimization: true,
-                        parentCentralization: true
+                        parentCentralization: true,
+                        shakeTowards: 'leaves'
                     }
                 },
                 nodes: {
@@ -176,13 +178,13 @@ class VisTreeViewer {
         }, 100);
     }
     
-    processTreeNodes(nodes, parentId = null) {
+    processTreeNodes(nodes, parentId = null, level = 0) {
         nodes.forEach(node => {
             const preview = this.getMessagePreview(node.content);
             const timestamp = this.formatTimestamp(node.created_at);
             const isCurrentMessage = node.id === app.currentMessageId;
             
-            // Create node
+            // Create node with explicit level for consistent root alignment
             const nodeData = {
                 id: node.id,
                 label: `[${node.role === 'user' ? 'User' : 'AI'}]\n${preview}\n${timestamp}`,
@@ -195,7 +197,9 @@ class VisTreeViewer {
                 borderColor: isCurrentMessage ? '#ffeb3b' : '#ffffff',
                 // Make AI nodes appear non-interactive
                 chosen: node.role === 'user',
-                opacity: node.role === 'user' ? 1.0 : 0.8
+                opacity: node.role === 'user' ? 1.0 : 0.8,
+                // Explicitly set level for hierarchical layout
+                level: level
             };
             
             this.nodes.add(nodeData);
@@ -209,9 +213,9 @@ class VisTreeViewer {
                 });
             }
             
-            // Process children recursively
+            // Process children recursively with incremented level
             if (node.children && node.children.length > 0) {
-                this.processTreeNodes(node.children, node.id);
+                this.processTreeNodes(node.children, node.id, level + 1);
             }
         });
     }

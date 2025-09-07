@@ -64,6 +64,17 @@ class MessageActionsManager {
             if (data.success) {
                 this.app.uiManager.hideModal('editMessageModal');
                 
+                // 編集完了後、適切なメッセージIDを設定
+                if (data.ai_response && data.ai_response.message_id) {
+                    // AIレスポンスがある場合はそのIDを設定
+                    this.app._currentMessageId = data.ai_response.message_id;
+                    console.log('Set currentMessageId to AI response:', data.ai_response.message_id);
+                } else {
+                    // AIレスポンスがない場合は編集されたメッセージ自体を設定
+                    this.app._currentMessageId = this.currentEditMessageId;
+                    console.log('Set currentMessageId to edited message:', this.currentEditMessageId);
+                }
+                
                 // Check if AI response generation was successful
                 if (data.ai_response && data.ai_response.error) {
                     alert('Message was updated but AI response generation failed: ' + data.ai_response.error);

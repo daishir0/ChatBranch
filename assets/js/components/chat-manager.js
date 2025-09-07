@@ -93,9 +93,12 @@ class ChatManager {
                 this.renderMessagePath(messagePath);
                 
                 // Set currentMessageId to the last message in the displayed path
-                if (messagePath && messagePath.length > 0) {
+                // ただし、既にcurrentMessageIdが設定されている場合（編集後など）は上書きしない
+                if (messagePath && messagePath.length > 0 && !this.app._currentMessageId) {
                     this.app._currentMessageId = messagePath[messagePath.length - 1].id;
                     console.log('Set currentMessageId to:', this.app._currentMessageId);
+                } else if (this.app._currentMessageId) {
+                    console.log('Keeping existing currentMessageId:', this.app._currentMessageId);
                 }
             } else {
                 console.error('Data success is false:', data);
@@ -117,7 +120,16 @@ class ChatManager {
         
         // Find path to currentMessageId
         const path = [];
-        this.findMessagePath(tree, this.app._currentMessageId, path);
+        const found = this.findMessagePath(tree, this.app._currentMessageId, path);
+        
+        // フォールバック: メッセージが見つからない場合、直接探索
+        if (!found || path.length === 0) {
+            const directMessage = this.findMessageById(tree, this.app._currentMessageId);
+            if (directMessage) {
+                console.log('Fallback: Found message directly, adding to path');
+                path.push(directMessage);
+            }
+        }
         
         // If clicked message has children, include the first child (AI response)
         const clickedMessage = this.findMessageById(tree, this.app._currentMessageId);

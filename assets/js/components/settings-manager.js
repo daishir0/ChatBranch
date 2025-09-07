@@ -1,4 +1,4 @@
-// ChotGPT Settings Manager Component
+// ChatBranch Settings Manager Component
 
 class SettingsManager {
     constructor(app) {

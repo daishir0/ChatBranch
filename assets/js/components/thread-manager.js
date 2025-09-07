@@ -1,4 +1,4 @@
-// ChotGPT Thread Manager Component
+// ChatBranch Thread Manager Component
 
 class ThreadManager {
     constructor(app) {
@@ -253,7 +253,7 @@ class ThreadManager {
                         document.getElementById('currentThreadName').textContent = 'Please select a chat';
                         document.getElementById('messagesContainer').innerHTML = `
                             <div class="welcome-message">
-                                <h3>Welcome to ChotGPT</h3>
+                                <h3>Welcome to ChatBranch</h3>
                                 <p>Start a new chat or select an existing thread.</p>
                             </div>
                         `;

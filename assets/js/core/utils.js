@@ -1,4 +1,4 @@
-// ChotGPT Common Utilities
+// ChatBranch Common Utilities
 
 class AppUtils {
     /**

@@ -1,4 +1,4 @@
-// ChotGPT Message Renderer Component
+// ChatBranch Message Renderer Component
 
 // Markdown rendering utility class
 class MessageRenderer {

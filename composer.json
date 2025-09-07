@@ -1,6 +1,6 @@
 {
     "name": "chat2/app",
-    "description": "ChotGPT Application",
+    "description": "ChatBranch Application",
     "type": "project",
     "require": {
         "smalot/pdfparser": "^2.12",

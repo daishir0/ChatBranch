@@ -51,7 +51,7 @@ $lang = Language::getInstance();
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ChotGPT - ChatGPT Clone</title>
+    <title>ChatBranch - AI Chat with Conversation Trees</title>
     <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body class="dark-theme">
@@ -62,7 +62,7 @@ $lang = Language::getInstance();
         <!-- Sidebar -->
         <aside class="sidebar" id="sidebar">
             <div class="sidebar-header">
-                <h1 class="logo">ChotGPT</h1>
+                <h1 class="logo">ChatBranch</h1>
                 <button class="new-chat-btn" id="newChatBtn">
                     <span>+</span> <?= __('navigation.new_chat') ?>
                 </button>

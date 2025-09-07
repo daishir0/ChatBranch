@@ -107,7 +107,7 @@ class DatabaseInitializer {
     
     private function generateConfigContent($config) {
         $content = "<?php\n";
-        $content .= "// ChotGPT Configuration File\n";
+        $content .= "// ChatBranch Configuration File\n";
         $content .= "// Database path automatically configured on first run\n\n";
         $content .= "return [\n";
         

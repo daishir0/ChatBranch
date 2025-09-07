@@ -1,4 +1,4 @@
-// ChotGPT Mobile Handler Module
+// ChatBranch Mobile Handler Module
 
 class MobileHandler {
     constructor(app) {

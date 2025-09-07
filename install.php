@@ -1,6 +1,6 @@
 <?php
 /**
- * ChotGPT セットアップ・インストールスクリプト
+ * ChatBranch Setup & Installation Script
  * 初回実行時のみ実行してください
  */
 
@@ -9,7 +9,7 @@ if (file_exists('config.php')) {
     die('❌ Already installed! Delete config.php to reinstall.');
 }
 
-echo "🚀 ChotGPT Installation Starting...\n";
+echo "🚀 ChatBranch Installation Starting...\n";
 echo str_repeat("=", 50) . "\n";
 
 try {
@@ -29,7 +29,7 @@ try {
     }
     
     // 3. .htaccessでデータディレクトリを保護
-    $htaccessContent = "# ChotGPT Data Protection\nOrder deny,allow\nDeny from all\n";
+    $htaccessContent = "# ChatBranch Data Protection\nOrder deny,allow\nDeny from all\n";
     file_put_contents($dataDir . '/.htaccess', $htaccessContent);
     echo "   Protected data directory with .htaccess\n";
     
@@ -106,7 +106,7 @@ try {
         ],
     ];
 
-    $configContent = "<?php\n// ChotGPT Configuration File\n// Generated: " . date('Y-m-d H:i:s') . "\n// Instance: {$instanceId}\n\nreturn " . var_export($config, true) . ";\n";
+    $configContent = "<?php\n// ChatBranch Configuration File\n// Generated: " . date('Y-m-d H:i:s') . "\n// Instance: {$instanceId}\n\nreturn " . var_export($config, true) . ";\n";
     
     file_put_contents('config.php', $configContent);
     chmod('config.php', 0600);
@@ -148,5 +148,5 @@ try {
     exit(1);
 }
 
-echo "\n🎉 Ready to use ChotGPT!\n";
+echo "\n🎉 Ready to use ChatBranch!\n";
 ?>

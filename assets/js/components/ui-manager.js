@@ -1,4 +1,4 @@
-// ChotGPT UI Manager Component
+// ChatBranch UI Manager Component
 
 class UIManager {
     constructor(app) {

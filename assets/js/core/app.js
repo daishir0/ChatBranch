@@ -1,6 +1,6 @@
-// ChotGPT Main Application (Lightweight Coordinator)
+// ChatBranch Main Application (Lightweight Coordinator)
 
-class ChotGPTApp {
+class ChatBranchApp {
     constructor() {
         // Internal properties (prefixed with _ for clarity)
         this._currentThread = null;
@@ -488,4 +488,4 @@ class ChotGPTApp {
 }
 
 // Initialize the application
-const app = new ChotGPTApp();
+const app = new ChatBranchApp();

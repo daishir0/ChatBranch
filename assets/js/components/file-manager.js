@@ -1,4 +1,4 @@
-// Enhanced File Manager Component
+// ChatBranch Enhanced File Manager Component
 
 class FileManager {
     constructor() {

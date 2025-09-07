@@ -2,7 +2,7 @@
 
 /**
  * Language Management Class
- * Handles internationalization and localization for the ChotGPT2 system
+ * Handles internationalization and localization for the ChatBranch system
  * Supports dynamic language switching and parameter substitution
  */
 class Language {

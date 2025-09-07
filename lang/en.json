@@ -1,8 +1,8 @@
 {
     "app": {
-        "title": "ChotGPT - ChatGPT Clone",
-        "name": "ChotGPT2",
-        "description": "Advanced ChatGPT clone with conversation trees and thread-specific AI personas"
+        "title": "ChatBranch - AI Chat with Conversation Trees",
+        "name": "ChatBranch",
+        "description": "Advanced AI chat application with conversation trees and thread-specific AI personas"
     },
     "auth": {
         "login": "Login",
@@ -36,7 +36,7 @@
         "confirm_delete": "Are you sure you want to delete this message and its branches?",
         "model_changed": "AI model changed to {model}",
         "select_chat": "Please select a chat",
-        "welcome_title": "Welcome to ChotGPT",
+        "welcome_title": "Welcome to ChatBranch",
         "welcome_message": "Start a new chat or select an existing thread."
     },
     "threads": {
@@ -158,7 +158,7 @@
         "delete": "Delete"
     },
     "setup": {
-        "welcome": "Welcome to ChotGPT2 Setup",
+        "welcome": "Welcome to ChatBranch Setup",
         "database_setup": "Database Configuration", 
         "admin_account": "Administrator Account",
         "api_configuration": "API Configuration",

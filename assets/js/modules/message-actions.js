@@ -1,4 +1,4 @@
-// ChotGPT Message Actions Manager Module
+// ChatBranch Message Actions Manager Module
 
 class MessageActionsManager {
     constructor(app) {

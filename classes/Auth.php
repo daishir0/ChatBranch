@@ -26,7 +26,7 @@ class Auth {
     }
     
     private function requireAuth() {
-        header('WWW-Authenticate: Basic realm="ChotGPT"');
+        header('WWW-Authenticate: Basic realm="ChatBranch"');
         header('HTTP/1.0 401 Unauthorized');
         echo 'Authentication required';
         exit;

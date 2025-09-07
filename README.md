@@ -1,10 +1,10 @@
-# ChotGPT2
+# ChatBranch
 
 ## Overview
-ChotGPT2 is an advanced ChatGPT clone system with sophisticated conversation tree functionality and **revolutionary thread-specific AI personas**. It provides a web-based chat interface with branching conversations, message editing, file management, and **dynamic AI model switching with GPT-5 series support**. The system features an intuitive tree visualization for conversation branches and supports multiple file formats including **CSV files** for context-aware conversations. Enhanced with **mobile-optimized UX**, **real-time thread search**, **comprehensive Markdown rendering with LaTeX math support**, **complete Mermaid diagram visualization**, **intelligent model management system**, and **responsive design** for seamless cross-platform usage.
+ChatBranch is an advanced AI chat application with sophisticated conversation tree functionality and **revolutionary thread-specific AI personas**. It provides a web-based chat interface with branching conversations, message editing, file management, and **dynamic AI model switching with GPT-5 series support**. The system features an intuitive tree visualization for conversation branches and supports multiple file formats including **CSV files** for context-aware conversations. Enhanced with **mobile-optimized UX**, **real-time thread search**, **comprehensive Markdown rendering with LaTeX math support**, **complete Mermaid diagram visualization**, **intelligent model management system**, and **responsive design** for seamless cross-platform usage.
 
 ### 🚀 BREAKTHROUGH INNOVATION: Thread-Specific AI Personas
-**ChotGPT2 introduces the world's first thread-specific AI persona system** - a revolutionary feature that no other AI chat application offers:
+**ChatBranch introduces the world's first thread-specific AI persona system** - a revolutionary feature that no other AI chat application offers:
 - **Unique AI personalities per conversation thread** - Create specialized experts, creative writers, technical advisors, or any character you need
 - **Context-aware personality switching** - The AI automatically adapts its behavior based on the active thread
 - **Persistent persona memory** - Each thread maintains its unique character across sessions
@@ -32,8 +32,8 @@ This groundbreaking innovation transforms AI chat from one-size-fits-all to trul
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/daishir0/ChotGPT2.git
-   cd ChotGPT2
+   git clone https://github.com/daishir0/ChatBranch.git
+   cd ChatBranch
    ```
 
 2. **Set up on your web server**
@@ -182,7 +182,7 @@ This groundbreaking innovation transforms AI chat from one-size-fits-all to trul
 
 ### Internationalization (i18n) Support
 
-ChotGPT2 features a comprehensive internationalization system supporting multiple languages:
+ChatBranch features a comprehensive internationalization system supporting multiple languages:
 
 #### **Available Languages**
 - **English (en)**: Complete English interface (default)
@@ -255,13 +255,13 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ---
 
-# ChotGPT2
+# ChatBranch
 
 ## 概要
-ChotGPT2は、高度な会話ツリー機能と**革新的なスレッド固有AIペルソナ**を持つChatGPTクローンシステムです。会話の分岐、メッセージ編集、ファイル管理、**GPT-5シリーズサポートによる動的AIモデル切り替え機能**を備えたWebベースのチャットインターフェースを提供します。会話の分岐を視覚化する直感的なツリー表示機能があり、**CSVファイル**を含む複数のファイル形式をサポートしてコンテキスト対応の会話が可能です。**モバイル最適化されたUX**、**リアルタイムスレッド検索**、**LaTeX数式対応の包括的Markdownレンダリング**、**完全なMermaid図表可視化**、**インテリジェントモデル管理システム**、**レスポンシブデザイン**により、シームレスなクロスプラットフォーム使用を実現しています。
+ChatBranchは、高度な会話ツリー機能と**革新的なスレッド固有AIペルソナ**を持つAIチャットアプリケーションです。会話の分岐、メッセージ編集、ファイル管理、**GPT-5シリーズサポートによる動的AIモデル切り替え機能**を備えたWebベースのチャットインターフェースを提供します。会話の分岐を視覚化する直感的なツリー表示機能があり、**CSVファイル**を含む複数のファイル形式をサポートしてコンテキスト対応の会話が可能です。**モバイル最適化されたUX**、**リアルタイムスレッド検索**、**LaTeX数式対応の包括的Markdownレンダリング**、**完全なMermaid図表可視化**、**インテリジェントモデル管理システム**、**レスポンシブデザイン**により、シームレスなクロスプラットフォーム使用を実現しています。
 
 ### 🚀 画期的イノベーション：スレッド固有AIペルソナ
-**ChotGPT2は世界初のスレッド固有AIペルソナシステムを導入** - 他のAIチャットアプリケーションにはない革新的機能：
+**ChatBranchは世界初のスレッド固有AIペルソナシステムを導入** - 他のAIチャットアプリケーションにはない革新的機能：
 - **会話スレッドごとの独自AIパーソナリティ** - 専門家、創作作家、技術顧問など必要なキャラクターを創造
 - **コンテキスト対応パーソナリティ切り替え** - アクティブなスレッドに基づいてAIが自動的に行動を適応
 - **永続的ペルソナメモリ** - 各スレッドがセッション間で独自のキャラクターを維持
@@ -284,8 +284,8 @@ ChotGPT2は、高度な会話ツリー機能と**革新的なスレッド固有A
 
 1. **リポジトリをクローン**
    ```bash
-   git clone https://github.com/daishir0/ChotGPT2.git
-   cd ChotGPT2
+   git clone https://github.com/daishir0/ChatBranch.git
+   cd ChatBranch
    ```
 
 2. **Webサーバーにセットアップ**
@@ -424,7 +424,7 @@ ChotGPT2は、高度な会話ツリー機能と**革新的なスレッド固有A
 
 ### 国際化（i18n）サポート
 
-ChotGPT2は複数言語をサポートする包括的な国際化システムを搭載：
+ChatBranchは複数言語をサポートする包括的な国際化システムを搭載：
 
 #### **利用可能言語**
 - **英語 (en)**: 完全な英語インターフェース（デフォルト）

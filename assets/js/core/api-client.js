@@ -1,4 +1,4 @@
-// ChotGPT API Client
+// ChatBranch API Client
 
 class APIClient {
     constructor() {

@@ -1,4 +1,4 @@
-// ChotGPT Chat Manager Component
+// ChatBranch Chat Manager Component
 
 class ChatManager {
     constructor(app) {
@@ -209,7 +209,7 @@ class ChatManager {
         if (!messagePath || messagePath.length === 0) {
             container.innerHTML = `
                 <div class="welcome-message">
-                    <h3>Welcome to ChotGPT</h3>
+                    <h3>Welcome to ChatBranch</h3>
                     <p>Start a new chat or select an existing thread.</p>
                 </div>
             `;

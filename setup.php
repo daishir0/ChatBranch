@@ -1,6 +1,6 @@
 <?php
 /**
- * ChotGPT Web-Based Setup Interface
+ * ChatBranch Web-Based Setup Interface
  */
 
 // Check if already installed
@@ -60,7 +60,7 @@ function performInstallation($username, $password, $openai_key, $base_url) {
         if (!is_dir($uploadsDir)) mkdir($uploadsDir, 0755, true);
         
         // 3. Protect data directory with .htaccess
-        $htaccessContent = "# ChotGPT Data Protection\nOrder deny,allow\nDeny from all\n";
+        $htaccessContent = "# ChatBranch Data Protection\nOrder deny,allow\nDeny from all\n";
         file_put_contents($dataDir . '/.htaccess', $htaccessContent);
         
         // 4. Generate configuration file
@@ -106,7 +106,7 @@ function performInstallation($username, $password, $openai_key, $base_url) {
             ],
         ];
 
-        $configContent = "<?php\n// ChotGPT Configuration File\n// Generated: " . date('Y-m-d H:i:s') . "\n// Instance: {$instanceId}\n\nreturn " . var_export($config, true) . ";\n";
+        $configContent = "<?php\n// ChatBranch Configuration File\n// Generated: " . date('Y-m-d H:i:s') . "\n// Instance: {$instanceId}\n\nreturn " . var_export($config, true) . ";\n";
         
         file_put_contents('config.php', $configContent);
         chmod('config.php', 0600);
@@ -138,7 +138,7 @@ function performInstallation($username, $password, $openai_key, $base_url) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ChotGPT Setup</title>
+    <title>ChatBranch Setup</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -310,7 +310,7 @@ function performInstallation($username, $password, $openai_key, $base_url) {
 <body>
     <div class="setup-container">
         <div class="setup-header">
-            <h1>🚀 ChotGPT Setup</h1>
+            <h1>🚀 ChatBranch Setup</h1>
             <p>Initial configuration for ChatGPT clone system</p>
         </div>
         
@@ -336,7 +336,7 @@ function performInstallation($username, $password, $openai_key, $base_url) {
                 </div>
                 
                 <p style="margin-bottom: 2rem; color: #666;">
-                    Configure the necessary settings to use ChotGPT.<br>
+                    Configure the necessary settings to use ChatBranch.<br>
                     You will need an OpenAI API key and login information.
                 </p>
                 
@@ -406,7 +406,7 @@ function performInstallation($username, $password, $openai_key, $base_url) {
                     </div>
 
                     <p style="margin: 1.5rem 0;">
-                        ChotGPT is now ready to use.<br>
+                        ChatBranch is now ready to use.<br>
                         You can start the application using the button below.
                     </p>
 
@@ -419,7 +419,7 @@ function performInstallation($username, $password, $openai_key, $base_url) {
 
                     <div style="margin-top: 2rem;">
                         <a href="index.php" class="btn" style="text-decoration: none; display: inline-block; text-align: center;">
-                            Start ChotGPT
+                            Start ChatBranch
                         </a>
                     </div>
                 </div>

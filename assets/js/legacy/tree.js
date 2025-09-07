@@ -1,72 +1,245 @@
-// Tree Visualization Component
+// Tree Visualization Component using Vis.js Network
 
-class TreeViewer {
+class VisTreeViewer {
     constructor() {
         this.container = document.getElementById('treeContainer');
-        this.currentPath = [];
+        this.network = null;
+        this.nodes = new vis.DataSet([]);
+        this.edges = new vis.DataSet([]);
+        this.currentMessageId = null;
+        
+        this.initializeNetwork();
+    }
+    
+    initializeNetwork() {
+        const data = {
+            nodes: this.nodes,
+            edges: this.edges
+        };
+        
+        const options = {
+            layout: {
+                hierarchical: {
+                    direction: 'UD',
+                    sortMethod: 'directed',
+                    nodeSpacing: window.innerWidth < 768 ? 100 : 150,
+                    levelSeparation: window.innerWidth < 768 ? 80 : 120,
+                    treeSpacing: window.innerWidth < 768 ? 120 : 200,
+                    blockShifting: true,
+                    edgeMinimization: true,
+                    parentCentralization: true
+                }
+            },
+            physics: {
+                enabled: false
+            },
+            nodes: {
+                shape: 'box',
+                margin: window.innerWidth < 768 ? 5 : 10,
+                font: {
+                    size: window.innerWidth < 768 ? 10 : 12,
+                    face: 'arial'
+                },
+                borderWidth: 2,
+                shadow: true,
+                widthConstraint: {
+                    minimum: window.innerWidth < 768 ? 100 : 120,
+                    maximum: window.innerWidth < 768 ? 200 : 250
+                },
+                heightConstraint: {
+                    minimum: window.innerWidth < 768 ? 35 : 40
+                }
+            },
+            edges: {
+                arrows: {
+                    to: {
+                        enabled: true,
+                        scaleFactor: 0.8
+                    }
+                },
+                color: {
+                    color: '#848484',
+                    highlight: '#4a9eff'
+                },
+                width: 2,
+                smooth: {
+                    enabled: true,
+                    type: 'cubicBezier'
+                }
+            },
+            interaction: {
+                selectConnectedEdges: false,
+                hover: true,
+                hoverConnectedEdges: false,
+                multiselect: false,
+                navigationButtons: false,
+                keyboard: false,
+                zoomView: true,
+                dragView: true,
+                dragNodes: false
+            }
+        };
+        
+        this.network = new vis.Network(this.container, data, options);
+        
+        // Add click event listener (only for user messages)
+        this.network.on('selectNode', (params) => {
+            if (params.nodes.length > 0) {
+                const nodeId = params.nodes[0];
+                const nodeData = this.nodes.get(nodeId);
+                
+                // Only allow selection of user messages
+                if (nodeData && nodeData.label.includes('[User]')) {
+                    this.selectNode(nodeId);
+                } else {
+                    // Deselect AI nodes immediately
+                    this.network.unselectAll();
+                }
+            }
+        });
+        
+        // Handle responsive sizing
+        this.handleResize();
+        window.addEventListener('resize', () => {
+            this.handleResize();
+            this.updateOptionsForScreenSize();
+        });
+    }
+    
+    handleResize() {
+        if (this.network) {
+            this.network.redraw();
+            this.network.fit();
+        }
+    }
+    
+    updateOptionsForScreenSize() {
+        if (this.network) {
+            const isMobile = window.innerWidth < 768;
+            const newOptions = {
+                layout: {
+                    hierarchical: {
+                        direction: 'UD',
+                        sortMethod: 'directed',
+                        nodeSpacing: isMobile ? 100 : 150,
+                        levelSeparation: isMobile ? 80 : 120,
+                        treeSpacing: isMobile ? 120 : 200,
+                        blockShifting: true,
+                        edgeMinimization: true,
+                        parentCentralization: true
+                    }
+                },
+                nodes: {
+                    shape: 'box',
+                    margin: isMobile ? 5 : 10,
+                    font: {
+                        size: isMobile ? 10 : 12,
+                        face: 'arial'
+                    },
+                    borderWidth: 2,
+                    shadow: true,
+                    widthConstraint: {
+                        minimum: isMobile ? 100 : 120,
+                        maximum: isMobile ? 200 : 250
+                    },
+                    heightConstraint: {
+                        minimum: isMobile ? 35 : 40
+                    }
+                }
+            };
+            
+            this.network.setOptions(newOptions);
+            setTimeout(() => {
+                this.network.fit();
+            }, 100);
+        }
     }
     
     render(tree) {
-        this.container.innerHTML = '';
-        this.renderNodes(tree, '', true);
+        this.nodes.clear();
+        this.edges.clear();
+        
+        if (!tree || tree.length === 0) return;
+        
+        this.processTreeNodes(tree);
+        
+        // Fit the network after rendering
+        setTimeout(() => {
+            if (this.network) {
+                this.network.fit({
+                    animation: {
+                        duration: 1000,
+                        easingFunction: 'easeInOutQuart'
+                    }
+                });
+            }
+        }, 100);
     }
     
-    renderNodes(nodes, prefix = '', isLast = true, level = 0) {
-        if (!nodes || nodes.length === 0) return;
-        
-        nodes.forEach((node, index) => {
-            const isLastChild = index === nodes.length - 1;
-            const connector = this.getConnector(prefix, isLastChild, level);
-            const nodeElement = this.createNodeElement(node, connector);
+    processTreeNodes(nodes, parentId = null) {
+        nodes.forEach(node => {
+            const preview = this.getMessagePreview(node.content);
+            const timestamp = this.formatTimestamp(node.created_at);
+            const isCurrentMessage = node.id === app.currentMessageId;
             
-            this.container.appendChild(nodeElement);
+            // Create node
+            const nodeData = {
+                id: node.id,
+                label: `[${node.role === 'user' ? 'User' : 'AI'}]\n${preview}\n${timestamp}`,
+                color: this.getNodeColor(node.role, isCurrentMessage),
+                font: {
+                    color: node.role === 'user' ? '#ffffff' : '#ffffff',
+                    size: 11
+                },
+                borderWidth: isCurrentMessage ? 4 : 2,
+                borderColor: isCurrentMessage ? '#ffeb3b' : '#ffffff',
+                // Make AI nodes appear non-interactive
+                chosen: node.role === 'user',
+                opacity: node.role === 'user' ? 1.0 : 0.8
+            };
             
-            // Recursively render children
+            this.nodes.add(nodeData);
+            
+            // Create edge from parent
+            if (parentId) {
+                this.edges.add({
+                    id: `${parentId}-${node.id}`,
+                    from: parentId,
+                    to: node.id
+                });
+            }
+            
+            // Process children recursively
             if (node.children && node.children.length > 0) {
-                const childPrefix = prefix + (isLastChild ? '    ' : '│   ');
-                this.renderNodes(node.children, childPrefix, false, level + 1);
+                this.processTreeNodes(node.children, node.id);
             }
         });
     }
     
-    getConnector(prefix, isLast, level) {
-        if (level === 0) {
-            return isLast ? '└── ' : '├── ';
-        }
-        return prefix + (isLast ? '└── ' : '├── ');
-    }
-    
-    createNodeElement(node, connector) {
-        const nodeDiv = document.createElement('div');
-        nodeDiv.className = `tree-node ${node.role}`;
-        nodeDiv.dataset.messageId = node.id;
-        
-        if (node.id === app.currentMessageId) {
-            nodeDiv.classList.add('current');
+    getNodeColor(role, isCurrent) {
+        if (isCurrent) {
+            return {
+                background: role === 'user' ? '#2e7d32' : '#3f51b5',
+                border: '#ffeb3b',
+                highlight: {
+                    background: role === 'user' ? '#4caf50' : '#5c6bc0',
+                    border: '#ffeb3b'
+                }
+            };
         }
         
-        const preview = this.getMessagePreview(node.content);
-        const timestamp = this.formatTimestamp(node.created_at);
-        
-        nodeDiv.innerHTML = `
-            <span class="tree-connector">${this.escapeHtml(connector)}</span>
-            <span class="tree-role">[${node.role === 'user' ? 'U' : 'AI'}]</span>
-            <span class="tree-preview">${this.escapeHtml(preview)}</span>
-            <span class="tree-time">(${timestamp})</span>
-        `;
-        
-        // Only add click event for user messages
-        if (node.role === 'user') {
-            nodeDiv.addEventListener('click', () => {
-                this.selectNode(node.id);
-            });
-        }
-        
-        return nodeDiv;
+        return {
+            background: role === 'user' ? '#4caf50' : '#6366f1',
+            border: '#ffffff',
+            highlight: {
+                background: role === 'user' ? '#66bb6a' : '#7c3aed',
+                border: '#4a9eff'
+            }
+        };
     }
     
     getMessagePreview(content) {
-        const maxLength = 50;
+        const maxLength = window.innerWidth < 768 ? 30 : 40;
         const preview = content.replace(/\n/g, ' ').trim();
         
         if (preview.length > maxLength) {
@@ -87,19 +260,44 @@ class TreeViewer {
     selectNode(messageId) {
         // Update current message
         app.currentMessageId = messageId;
+        this.currentMessageId = messageId;
         
-        // Update visual selection
-        this.container.querySelectorAll('.tree-node').forEach(node => {
-            node.classList.toggle('current', node.dataset.messageId == messageId);
-        });
+        // Update node colors to reflect selection
+        this.updateNodeSelection();
         
         // Reload chat display with the new message path
         if (typeof app.loadMessages === 'function') {
             app.loadMessages();
         }
         
-        // Optionally, scroll to the message in the chat view
+        // Focus on selected node
+        this.network.focus(messageId, {
+            animation: {
+                duration: 800,
+                easingFunction: 'easeInOutQuart'
+            },
+            scale: 1.2
+        });
+        
+        // Scroll to the message in the chat view
         this.scrollToMessage(messageId);
+    }
+    
+    updateNodeSelection() {
+        const updates = [];
+        this.nodes.forEach(node => {
+            const isCurrentMessage = node.id === app.currentMessageId;
+            const role = node.label.includes('[User]') ? 'user' : 'assistant';
+            
+            updates.push({
+                id: node.id,
+                color: this.getNodeColor(role, isCurrentMessage),
+                borderWidth: isCurrentMessage ? 4 : 2,
+                borderColor: isCurrentMessage ? '#ffeb3b' : '#ffffff'
+            });
+        });
+        
+        this.nodes.update(updates);
     }
     
     scrollToMessage(messageId) {
@@ -113,26 +311,21 @@ class TreeViewer {
     }
     
     expandPath(messageId) {
-        // Get the path to the message and expand all nodes in that path
-        const path = this.getPathToMessage(messageId);
-        path.forEach(nodeId => {
-            const nodeElement = document.querySelector(`[data-message-id="${nodeId}"]`);
-            if (nodeElement) {
-                nodeElement.classList.add('expanded');
-            }
-        });
+        // Focus on the specific message
+        if (this.network) {
+            this.network.focus(messageId, {
+                animation: {
+                    duration: 1000,
+                    easingFunction: 'easeInOutQuart'
+                }
+            });
+        }
     }
     
     getPathToMessage(messageId) {
-        // This would traverse the tree to find the path to a specific message
-        // Implementation depends on your tree structure
-        return [];
-    }
-    
-    escapeHtml(text) {
-        const div = document.createElement('div');
-        div.textContent = text;
-        return div.innerHTML;
+        // This would traverse the network to find the path to a specific message
+        const connectedNodes = this.network.getConnectedNodes(messageId);
+        return connectedNodes;
     }
 }
 
@@ -314,5 +507,5 @@ class CanvasTreeViewer {
 }
 
 // Initialize tree viewer
-const treeViewer = new TreeViewer();
+const treeViewer = new VisTreeViewer();
 window.treeViewer = treeViewer;

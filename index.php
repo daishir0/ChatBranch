@@ -404,10 +404,13 @@ $lang = Language::getInstance();
     <script src="assets/js/modules/mobile-handler.js"></script>
     <script src="assets/js/modules/message-actions.js"></script>
 
+    <!-- Vis.js Library for Rich Tree Visualization -->
+    <script src="https://unpkg.com/vis-network@latest/dist/vis-network.min.js"></script>
+
     <!-- Main Application -->
     <script src="assets/js/core/app.js"></script>
 
-    <!-- Legacy Components -->
+    <!-- Rich Tree Components -->
     <script src="assets/js/legacy/tree.js"></script>
 </body>
 </html>

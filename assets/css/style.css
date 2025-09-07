@@ -418,13 +418,49 @@ body {
     background-color: var(--bg-secondary);
     border-bottom: 1px solid var(--border-color);
     padding: 16px;
-    max-height: 200px;
-    overflow-y: auto;
+    display: none;
+    max-height: 300px;
+    overflow: hidden;
 }
 
 .tree-container {
     font-family: monospace;
     font-size: 14px;
+    height: 268px;
+    width: 100%;
+    background-color: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius);
+    overflow: hidden;
+    position: relative;
+}
+
+/* Vis.js Network styling overrides */
+.vis-network {
+    outline: none !important;
+    background-color: var(--bg-primary) !important;
+}
+
+.vis-network canvas {
+    outline: none !important;
+}
+
+/* Custom cursor for AI nodes (non-clickable) */
+.vis-network .vis-navigation {
+    cursor: default !important;
+}
+
+/* Custom tooltip for mobile */
+.vis-tooltip {
+    max-width: 200px !important;
+    word-wrap: break-word !important;
+    font-size: 12px !important;
+    line-height: 1.3 !important;
+    background: var(--bg-secondary) !important;
+    color: var(--text-primary) !important;
+    border: 1px solid var(--border-color) !important;
+    border-radius: var(--radius) !important;
+    box-shadow: var(--shadow) !important;
 }
 
 .tree-node {
@@ -1066,6 +1102,24 @@ body {
     .tree-toggle-btn {
         padding: 4px 8px;
         font-size: 12px;
+    }
+    
+    /* Mobile tree panel adjustments */
+    .tree-panel {
+        max-height: 250px;
+        padding: 12px;
+    }
+    
+    .tree-container {
+        height: 218px;
+        border-radius: 4px;
+    }
+    
+    /* Vis.js mobile adjustments */
+    .vis-tooltip {
+        max-width: 180px !important;
+        font-size: 11px !important;
+        z-index: 1000 !important;
     }
     
     .persona-btn {

@@ -80,7 +80,7 @@ function performInstallation($username, $password, $openai_key, $base_url) {
             'openai' => [
                 'api_key' => $openai_key,
                 'default_model' => 'gpt-4o-mini',
-                'max_tokens' => 2000,
+                'max_tokens' => 128000,
                 'temperature' => 0.7,
                 'context_window_limit' => 128000,
                 'compression_chunk_size' => 4000,

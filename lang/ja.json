@@ -119,6 +119,8 @@
         "unsupported_format": "サポートされていないファイル形式です",
         "quota_exceeded": "API制限を超えました",
         "rate_limit": "レート制限に達しました。しばらくしてから再試行してください。",
+        "token_limit_exceeded": "AI応答がトークン制限に達したため、返答が途中で切れました。より短い質問や、簡潔な内容で再度お試しください。",
+        "ai_response_empty": "AIからの返答が空でした。質問を変えるか、より具体的な内容で再度お試しください。",
         "unknown_error": "不明なエラーが発生しました"
     },
     "success": {

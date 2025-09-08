@@ -149,6 +149,15 @@ function handleSendMessage($chatManager, $openaiClient, $fileManager, $auth, $lo
     
     $response = $openaiClient->sendMessage($compressedContext, $model, $systemPrompt, $threadSystemPrompt);
     
+    // Check for token limit or empty response issues
+    if (empty($response['content'])) {
+        if (isset($response['finish_reason']) && $response['finish_reason'] === 'length') {
+            throw new Exception('token_limit_exceeded');
+        } else {
+            throw new Exception('ai_response_empty');
+        }
+    }
+    
     $assistantMessageId = $chatManager->addMessage(
         $threadId, 
         'assistant',
@@ -266,6 +275,15 @@ function generateAIResponse($chatManager, $userMessageId, $systemPrompt, $model,
         
         // Send to OpenAI
         $response = $openaiClient->sendMessage($compressedContext, $model, $systemPrompt, $threadSystemPrompt);
+        
+        // Check for token limit or empty response issues
+        if (empty($response['content'])) {
+            if (isset($response['finish_reason']) && $response['finish_reason'] === 'length') {
+                throw new Exception('token_limit_exceeded');
+            } else {
+                throw new Exception('ai_response_empty');
+            }
+        }
         
         // Save AI response as child of the edited message
         $assistantMessageId = $chatManager->addMessage(

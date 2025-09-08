@@ -124,6 +124,8 @@
         "unsupported_format": "Unsupported file format",
         "quota_exceeded": "API quota exceeded",
         "rate_limit": "Rate limit exceeded. Please try again later.",
+        "token_limit_exceeded": "The AI response was truncated due to token limit. Please try with a shorter or simpler question.",
+        "ai_response_empty": "The AI response was empty. Please rephrase your question or try with more specific content.",
         "unknown_error": "An unknown error occurred"
     },
     "success": {

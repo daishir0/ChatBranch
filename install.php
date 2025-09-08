@@ -72,7 +72,7 @@ try {
         'openai' => [
             'api_key' => 'your_openai_api_key_here',
             'default_model' => 'gpt-4o-mini',
-            'max_tokens' => 2000,
+            'max_tokens' => 128000,
             'temperature' => 0.7,
             // コンテキスト圧縮設定
             'context_window_limit' => 128000, // モデルのコンテキストウィンドウサイズ

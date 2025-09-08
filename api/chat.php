@@ -142,12 +142,10 @@ function handleSendMessage($chatManager, $openaiClient, $fileManager, $auth, $lo
         }
     }
     
-    $compressedContext = $openaiClient->compressContext($contextMessages);
-    
     // Get thread system prompt
     $threadSystemPrompt = $chatManager->getThreadSystemPrompt($threadId);
     
-    $response = $openaiClient->sendMessage($compressedContext, $model, $systemPrompt, $threadSystemPrompt);
+    $response = $openaiClient->sendMessage($contextMessages, $model, $systemPrompt, $threadSystemPrompt);
     
     // Check for token limit or empty response issues
     if (empty($response['content'])) {
@@ -268,15 +266,12 @@ function generateAIResponse($chatManager, $userMessageId, $systemPrompt, $model,
         // Get context messages for the edited message
         $contextMessages = $chatManager->getContextMessages($userMessageId);
         
-        // Compress context if needed
-        $compressedContext = $openaiClient->compressContext($contextMessages);
-        
         // Get thread system prompt
         $threadId = $chatManager->getMessage($userMessageId)['thread_id'];
         $threadSystemPrompt = $chatManager->getThreadSystemPrompt($threadId);
         
         // Send to OpenAI
-        $response = $openaiClient->sendMessage($compressedContext, $model, $systemPrompt, $threadSystemPrompt);
+        $response = $openaiClient->sendMessage($contextMessages, $model, $systemPrompt, $threadSystemPrompt);
         
         // Check for token limit or empty response issues
         if (empty($response['content'])) {

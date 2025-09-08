@@ -546,6 +546,17 @@ body {
     color: white;
 }
 
+/* ユーザーメッセージ内のリンクカラー改善（アクセシビリティ対応） */
+.message.user .message-content .markdown-content a {
+    color: #ffffff !important; /* 白色でコントラスト確保 */
+    text-decoration: underline;
+    font-weight: 500;
+}
+
+.message.user .message-content .markdown-content a:hover {
+    border-bottom-color: #ffffff;
+}
+
 .message-actions {
     position: absolute;
     top: -8px;

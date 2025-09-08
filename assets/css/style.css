@@ -1174,19 +1174,41 @@ body {
 * {
     -webkit-touch-callout: none;
     -webkit-tap-highlight-color: transparent;
-    touch-action: pan-y;
+    touch-action: manipulation;
+}
+
+/* テーブル要素は横スクロール許可 */
+.table-wrapper,
+.table-wrapper * {
+    touch-action: pan-x pan-y !important;
 }
 
 /* Specific elements that need stronger zoom prevention */
 body,
 html,
 .app-container,
-.main-content,
-.messages-container,
+.main-content {
+    touch-action: manipulation;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+/* メッセージコンテナは縦スクロールのみ */
+.messages-container {
+    touch-action: pan-y;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+/* メッセージとその内容は横縦両方許可 */
 .message,
 .message-content,
 .message-text {
-    touch-action: pan-y;
+    touch-action: pan-x pan-y;
     -webkit-user-select: none;
     -moz-user-select: none;
     -ms-user-select: none;
@@ -1950,6 +1972,18 @@ html,
     line-height: 1.5;
 }
 
+/* テーブル親要素の横スクロール対応 - :has()フォールバック付き */
+.message-content:has(.table-wrapper),
+.message.ai .message-content:has(.table-wrapper),
+.message.user .message-content:has(.table-wrapper) {
+    touch-action: pan-x pan-y !important;
+}
+
+/* フォールバック: すべてのメッセージコンテンツで横スクロール許可 */
+.message-content {
+    touch-action: pan-x pan-y !important;
+}
+
 /* テーブルレスポンシブ対応 - シンプル版 */
 .message-content .markdown-content .table-wrapper {
     position: relative;
@@ -1962,7 +1996,7 @@ html,
     max-width: 100%;
     /* モバイル横スクロール強化 */
     -webkit-overflow-scrolling: touch;
-    touch-action: pan-x;
+    touch-action: pan-x pan-y !important;
     overscroll-behavior-x: contain;
 }
 

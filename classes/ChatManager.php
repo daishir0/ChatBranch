@@ -68,6 +68,10 @@ class ChatManager {
         
         // Store usage information for assistant messages
         if ($role === 'assistant' && $usage) {
+            $this->logger->info('Storing token usage', [
+                'message_id' => $messageId,
+                'usage_data' => $usage
+            ]);
             $this->storeTokenUsage($messageId, $usage);
         }
         
@@ -75,7 +79,8 @@ class ChatManager {
             'message_id' => $messageId,
             'thread_id' => $threadId,
             'role' => $role,
-            'parent_id' => $parentMessageId
+            'parent_id' => $parentMessageId,
+            'has_usage' => $usage ? 'yes' : 'no'
         ]);
         
         return $messageId;

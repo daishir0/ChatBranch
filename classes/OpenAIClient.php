@@ -101,7 +101,8 @@ class OpenAIClient {
         
         return [
             'content' => $content,
-            'usage' => $response['usage'] ?? []
+            'usage' => $response['usage'] ?? [],
+            'finish_reason' => $response['choices'][0]['finish_reason'] ?? 'unknown'
         ];
     }
     

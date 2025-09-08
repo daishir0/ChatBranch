@@ -537,6 +537,8 @@ body {
     position: relative;
     touch-action: pan-y;
     user-select: text;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
 }
 
 .message.user .message-content {
@@ -1187,6 +1189,9 @@ html,
     -ms-user-select: text;
     user-select: text;
     -webkit-touch-callout: default;
+    word-wrap: break-word;
+    word-break: break-word;
+    overflow-wrap: break-word;
 }
 
 /* Enhanced File Manager Styles */

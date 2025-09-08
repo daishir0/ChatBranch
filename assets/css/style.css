@@ -372,11 +372,7 @@ body {
     background-color: var(--bg-tertiary);
 }
 
-.tree-toggle-btn.active {
-    background-color: var(--accent-color);
-    color: white;
-    border-color: var(--accent-color);
-}
+/* Removed active state styling to match persona button behavior */
 
 /* Persona Button - Same style as tree toggle button */
 .persona-btn {
@@ -398,11 +394,7 @@ body {
     background-color: var(--bg-tertiary);
 }
 
-.persona-btn.active {
-    background-color: var(--accent-color);
-    color: white;
-    border-color: var(--accent-color);
-}
+/* Removed active state styling to match tree toggle button behavior */
 
 .persona-btn:disabled,
 .tree-toggle-btn:disabled {

@@ -262,7 +262,7 @@ class MessageRenderer {
     
     cleanDiagramCode(code) {
         // HTMLエンティティのデコード
-        return code
+        let cleanedCode = code
             .replace(/&amp;gt;/g, '>')
             .replace(/&gt;/g, '>')
             .replace(/&amp;lt;/g, '<')
@@ -270,8 +270,64 @@ class MessageRenderer {
             .replace(/&amp;amp;/g, '&')
             .replace(/&quot;/g, '"')
             .replace(/&#39;/g, "'")
-            .replace(/&nbsp;/g, ' ')
-            .trim();
+            .replace(/&nbsp;/g, ' ');
+
+        // Mermaid構文の問題となる文字列を修正
+        cleanedCode = cleanedCode
+            // 改行文字を実際の改行に変換（Mermaid構文を維持）
+            .replace(/\\n/g, '\n')
+            // <br/>を改行に変換
+            .replace(/<br\/?>/g, '\n')
+            // ノードラベル内の特殊文字をエスケープ
+            .replace(/\[([^\]]*?)\(([^\)]*?)\)([^\]]*?)\]/g, '[$1-$2-$3]')
+            // 括弧を安全な文字に置換
+            .replace(/\[([^\]]*?)\(/g, '[$1 - ')
+            .replace(/\)([^\]]*?)\]/g, ' - $1]');
+
+        // 行を分割して処理
+        let lines = cleanedCode.split('\n')
+            .map(line => line.trim())
+            .filter(line => line.length > 0);
+
+        // mindmap特有の処理
+        if (lines.length > 0 && lines[0].toLowerCase() === 'mindmap') {
+            lines = this.fixMindmapIndentation(lines);
+        }
+
+        return lines.join('\n');
+    }
+
+    fixMindmapIndentation(lines) {
+        const result = [lines[0]]; // 'mindmap'
+        
+        if (lines.length <= 1) return result;
+        
+        let currentDepth = 0;
+        
+        for (let i = 1; i < lines.length; i++) {
+            const line = lines[i];
+            
+            // rootの場合
+            if (line.toLowerCase() === 'root') {
+                result.push('  ' + line);
+                currentDepth = 1;
+                continue;
+            }
+            
+            // 子ノードの場合、階層を推測
+            if (line.includes('1.') || line.includes('2.') || line.includes('3.')) {
+                // サブノード（例: 子ノード1.1）
+                result.push('      ' + line);
+            } else if (line.startsWith('子ノード') || line.match(/^[^.]*[12345]$/)) {
+                // 第1レベル子ノード（例: 子ノード1）
+                result.push('    ' + line);
+            } else {
+                // その他は第1レベルとして扱う
+                result.push('    ' + line);
+            }
+        }
+        
+        return result;
     }
     
     async processMermaidDiagrams() {

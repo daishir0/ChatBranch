@@ -162,7 +162,9 @@ function handleSendMessage($chatManager, $openaiClient, $fileManager, $auth, $lo
         $threadId, 
         'assistant',
         $response['content'], 
-        $userMessageId
+        $userMessageId,
+        true, // is_context
+        $response['usage'] // usage information
     );
     
     echo json_encode([
@@ -180,7 +182,7 @@ function handleGetHistory($chatManager, $threadId) {
         throw new Exception('Thread ID required');
     }
     
-    $tree = $chatManager->getMessageTree($threadId);
+    $tree = $chatManager->getMessageTreeWithTokens($threadId);
     $thread = $chatManager->getThread($threadId);
     
     // UTF-8エンコーディング修正
@@ -290,7 +292,9 @@ function generateAIResponse($chatManager, $userMessageId, $systemPrompt, $model,
             $chatManager->getMessage($userMessageId)['thread_id'], 
             'assistant',
             $response['content'], 
-            $userMessageId
+            $userMessageId,
+            true, // is_context
+            $response['usage'] // usage information
         );
         
         $logger->info('AI response generated for edited message', [

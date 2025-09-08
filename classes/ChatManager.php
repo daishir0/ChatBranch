@@ -20,12 +20,12 @@ class ChatManager {
     }
     
     public function getThreads() {
-        $sql = "SELECT * FROM threads WHERE deleted_at IS NULL ORDER BY updated_at DESC";
+        $sql = "SELECT * FROM threads ORDER BY updated_at DESC";
         return $this->db->fetchAll($sql);
     }
     
     public function getThread($threadId) {
-        $sql = "SELECT * FROM threads WHERE id = ? AND deleted_at IS NULL";
+        $sql = "SELECT * FROM threads WHERE id = ?";
         return $this->db->fetchOne($sql, [$threadId]);
     }
     
@@ -37,10 +37,10 @@ class ChatManager {
     }
     
     public function deleteThread($threadId) {
-        $sql = "UPDATE threads SET deleted_at = datetime('now','localtime') WHERE id = ?";
+        $sql = "DELETE FROM threads WHERE id = ?";
         $this->db->query($sql, [$threadId]);
         
-        $this->logger->info('Thread logically deleted', ['thread_id' => $threadId]);
+        $this->logger->info('Thread physically deleted', ['thread_id' => $threadId]);
     }
     
     public function updateThreadSystemPrompt($threadId, $systemPrompt) {
@@ -54,17 +54,22 @@ class ChatManager {
     }
     
     public function getThreadSystemPrompt($threadId) {
-        $sql = "SELECT thread_system_prompt FROM threads WHERE id = ? AND deleted_at IS NULL";
+        $sql = "SELECT thread_system_prompt FROM threads WHERE id = ?";
         $result = $this->db->fetchOne($sql, [$threadId]);
         return $result ? $result['thread_system_prompt'] : '';
     }
     
-    public function addMessage($threadId, $role, $content, $parentMessageId = null, $isContext = true) {
+    public function addMessage($threadId, $role, $content, $parentMessageId = null, $isContext = true, $usage = null) {
         $sql = "INSERT INTO messages (thread_id, parent_message_id, content, role, is_context) 
                 VALUES (?, ?, ?, ?, ?)";
         
         $this->db->query($sql, [$threadId, $parentMessageId, $content, $role, $isContext ? 1 : 0]);
         $messageId = $this->db->lastInsertId();
+        
+        // Store usage information for assistant messages
+        if ($role === 'assistant' && $usage) {
+            $this->storeTokenUsage($messageId, $usage);
+        }
         
         $this->logger->info('Message added', [
             'message_id' => $messageId,
@@ -216,5 +221,134 @@ class ChatManager {
         }
         
         return $childIds;
+    }
+    
+    /**
+     * Store token usage information in settings table
+     */
+    private function storeTokenUsage($messageId, $usage) {
+        $usageJson = json_encode($usage);
+        $sql = "INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)";
+        $this->db->query($sql, ["token_usage_{$messageId}", $usageJson]);
+    }
+    
+    /**
+     * Get token usage information for a message
+     */
+    private function getTokenUsage($messageId) {
+        $sql = "SELECT value FROM settings WHERE key = ?";
+        $result = $this->db->fetchOne($sql, ["token_usage_{$messageId}"]);
+        return $result ? json_decode($result['value'], true) : null;
+    }
+    
+    /**
+     * Get message path from root to target message for token calculation
+     */
+    public function getMessagePathForTokens($threadId, $targetMessageId) {
+        $messages = $this->getMessages($threadId);
+        $path = [];
+        $this->findMessagePath($messages, $targetMessageId, $path);
+        return $path;
+    }
+    
+    /**
+     * Find path to target message recursively
+     */
+    private function findMessagePath($messages, $targetId, &$path, $currentPath = []) {
+        // Create a message map for efficient lookups (no static variable)
+        $messageMap = [];
+        foreach ($messages as $msg) {
+            $messageMap[$msg['id']] = $msg;
+        }
+        
+        // Find the target message
+        if (!isset($messageMap[$targetId])) {
+            return false;
+        }
+        
+        // Build path from target back to root
+        $reversePath = [];
+        $currentId = $targetId;
+        
+        while ($currentId !== null) {
+            if (!isset($messageMap[$currentId])) {
+                break;
+            }
+            
+            $currentMessage = $messageMap[$currentId];
+            array_unshift($reversePath, $currentMessage);
+            $currentId = $currentMessage['parent_message_id'];
+        }
+        
+        $path = $reversePath;
+        return true;
+    }
+    
+    /**
+     * Calculate cumulative token usage for a message path
+     */
+    public function calculateCumulativeTokenUsage($messagePath) {
+        $totalTokens = 0;
+        $promptTokens = 0;
+        $completionTokens = 0;
+        $maxTokens = 128000; // GPT-5-mini limit
+        
+        foreach ($messagePath as $message) {
+            if ($message['role'] === 'assistant') {
+                $usage = $this->getTokenUsage($message['id']);
+                if ($usage) {
+                    $totalTokens += $usage['total_tokens'] ?? 0;
+                    $promptTokens += $usage['prompt_tokens'] ?? 0;
+                    $completionTokens += $usage['completion_tokens'] ?? 0;
+                }
+            }
+        }
+        
+        $usagePercentage = $maxTokens > 0 ? round(($totalTokens / $maxTokens) * 100, 2) : 0;
+        
+        return [
+            'total_tokens' => $totalTokens,
+            'prompt_tokens' => $promptTokens,
+            'completion_tokens' => $completionTokens,
+            'max_tokens' => $maxTokens,
+            'usage_percentage' => $usagePercentage,
+            'usage_display' => "Tokens used: " . number_format($totalTokens) . "/" . number_format($maxTokens) . " - {$usagePercentage}%"
+        ];
+    }
+    
+    /**
+     * Enhanced getMessageTree with token usage information
+     */
+    public function getMessageTreeWithTokens($threadId) {
+        $tree = $this->getMessageTree($threadId);
+        return $this->enrichTreeWithTokenUsage($tree, $threadId);
+    }
+    
+    /**
+     * Enrich tree with token usage information
+     */
+    private function enrichTreeWithTokenUsage($tree, $threadId) {
+        foreach ($tree as &$node) {
+            $this->enrichNodeWithTokenUsage($node, $threadId);
+        }
+        return $tree;
+    }
+    
+    /**
+     * Enrich single node with token usage information
+     */
+    private function enrichNodeWithTokenUsage(&$node, $threadId) {
+        // Calculate cumulative token usage for this message
+        $messagePath = $this->getMessagePathForTokens($threadId, $node['id']);
+        $tokenUsage = $this->calculateCumulativeTokenUsage($messagePath);
+        
+        $node['cumulative_tokens'] = $tokenUsage;
+        
+        // Process children recursively
+        if (isset($node['children']) && is_array($node['children'])) {
+            foreach ($node['children'] as &$child) {
+                $this->enrichNodeWithTokenUsage($child, $threadId);
+            }
+        }
     }
 }

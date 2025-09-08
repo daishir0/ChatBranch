@@ -583,6 +583,39 @@ body {
     color: var(--text-primary);
 }
 
+/* Token usage display */
+.token-usage-info {
+    margin-top: 8px;
+    text-align: right;
+    font-family: monospace;
+    font-size: 11px;
+    opacity: 0.8;
+}
+
+.token-info-green {
+    color: #22c55e;
+}
+
+.token-info-yellow {
+    color: #eab308;
+}
+
+.token-info-red {
+    color: #ef4444;
+}
+
+.dark-theme .token-info-green {
+    color: #4ade80;
+}
+
+.dark-theme .token-info-yellow {
+    color: #facc15;
+}
+
+.dark-theme .token-info-red {
+    color: #f87171;
+}
+
 /* Chat Input */
 .chat-input-container {
     padding: 24px;

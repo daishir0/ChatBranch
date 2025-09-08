@@ -277,10 +277,29 @@ class ChatManager {
         
         const formattedContent = await this.formatMessageContent(message.content);
         
+        // Generate token usage display for AI messages
+        let tokenInfoHTML = '';
+        if (message.role === 'assistant' && message.cumulative_tokens) {
+            const tokens = message.cumulative_tokens;
+            let colorClass = 'token-info-green';
+            if (tokens.usage_percentage > 75) {
+                colorClass = 'token-info-red';
+            } else if (tokens.usage_percentage > 50) {
+                colorClass = 'token-info-yellow';
+            }
+            
+            tokenInfoHTML = `
+                <div class="token-usage-info ${colorClass}">
+                    <small>(${tokens.usage_display})</small>
+                </div>
+            `;
+        }
+        
         messageDiv.innerHTML = `
             <div class="message-avatar ${avatarClass}">${avatar}</div>
             <div class="message-content">
                 <div class="message-text">${formattedContent}</div>
+                ${tokenInfoHTML}
                 ${actionsHTML}
             </div>
         `;

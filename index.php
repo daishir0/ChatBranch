@@ -373,6 +373,8 @@ $lang = Language::getInstance();
         // Get diagram translations safely
         const diagramTranslations = {
             expand: <?php echo json_encode(__('diagram.expand')); ?>,
+            copy: <?php echo json_encode(__('diagram.copy')); ?>,
+            copied: <?php echo json_encode(__('diagram.copied')); ?>,
             zoom_in: <?php echo json_encode(__('diagram.zoom_in')); ?>,
             zoom_out: <?php echo json_encode(__('diagram.zoom_out')); ?>,
             reset_zoom: <?php echo json_encode(__('diagram.reset_zoom')); ?>,

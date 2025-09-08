@@ -2086,11 +2086,11 @@ html,
     position: relative; /* 拡大ボタンの配置用 */
 }
 
-/* 図表拡大ボタン */
+/* 図表ボタン共通スタイル */
+.mermaid-container .diagram-copy-btn,
 .mermaid-container .expand-btn {
     position: absolute;
     bottom: 8px;
-    right: 8px;
     width: 32px;
     height: 32px;
     border: 1px solid var(--border-color);
@@ -2107,13 +2107,31 @@ html,
     transition: all 0.2s ease;
 }
 
+/* 図表拡大ボタン */
+.mermaid-container .expand-btn {
+    right: 8px;
+}
+
+/* 図表コピーボタン */
+.mermaid-container .diagram-copy-btn {
+    right: 48px; /* 拡大ボタンの左側に配置 */
+}
+
+.mermaid-container:hover .diagram-copy-btn,
 .mermaid-container:hover .expand-btn {
     opacity: 1; /* ホバー時に表示 */
 }
 
+.mermaid-container .diagram-copy-btn:hover,
 .mermaid-container .expand-btn:hover {
     background-color: var(--bg-secondary);
     transform: scale(1.1);
+}
+
+/* コピー成功時のスタイル */
+.mermaid-container .diagram-copy-btn.copy-success {
+    background-color: #28a745;
+    color: white;
 }
 
 /* Mermaid SVG要素の色調整 */

@@ -21,6 +21,91 @@ class DiagramExpander {
         this.openDiagramWindow(container);
     }
     
+    copyDiagramSource(button) {
+        const container = button.closest('.mermaid-container');
+        if (!container) {
+            console.error('Mermaid container not found');
+            return;
+        }
+        
+        const mermaidElement = container.querySelector('.mermaid');
+        if (!mermaidElement) {
+            console.error('Mermaid element not found');
+            return;
+        }
+        
+        // Get the original diagram source from data attribute
+        const encodedCode = mermaidElement.getAttribute('data-diagram-b64');
+        if (!encodedCode) {
+            console.error('Diagram source not found');
+            return;
+        }
+        
+        try {
+            // Decode the Base64 encoded diagram source
+            const diagramSource = decodeURIComponent(escape(atob(encodedCode)));
+            
+            // Format as Markdown code block
+            const markdownFormat = '```mermaid\n' + diagramSource + '\n```';
+            
+            // Copy to clipboard
+            this.copyToClipboard(markdownFormat, button);
+            
+        } catch (error) {
+            console.error('Failed to decode diagram source:', error);
+        }
+    }
+    
+    async copyToClipboard(text, button) {
+        try {
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                await navigator.clipboard.writeText(text);
+            } else {
+                // Fallback for older browsers
+                const textArea = document.createElement('textarea');
+                textArea.value = text;
+                textArea.style.position = 'fixed';
+                textArea.style.left = '-999999px';
+                textArea.style.top = '-999999px';
+                document.body.appendChild(textArea);
+                textArea.focus();
+                textArea.select();
+                const successful = document.execCommand('copy');
+                document.body.removeChild(textArea);
+                
+                if (!successful) {
+                    throw new Error('Fallback copy command failed');
+                }
+            }
+            
+            // Show success feedback
+            this.showCopyFeedback(button);
+            
+        } catch (error) {
+            console.error('Failed to copy to clipboard:', error);
+            alert('コピーに失敗しました');
+        }
+    }
+    
+    showCopyFeedback(button) {
+        const translations = (window.appConfig && window.appConfig.diagramTranslations) ? window.appConfig.diagramTranslations : {};
+        const copiedText = translations.copied || 'コピーしました';
+        const originalText = button.textContent;
+        const originalTitle = button.title;
+        
+        // Show success state
+        button.textContent = '✅';
+        button.title = copiedText;
+        button.classList.add('copy-success');
+        
+        // Reset after 2 seconds
+        setTimeout(() => {
+            button.textContent = originalText;
+            button.title = originalTitle;
+            button.classList.remove('copy-success');
+        }, 2000);
+    }
+    
     openDiagramWindow(container) {
         const mermaidElement = container.querySelector('.mermaid');
         if (!mermaidElement) {

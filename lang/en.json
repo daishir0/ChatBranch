@@ -190,6 +190,8 @@
     },
     "diagram": {
         "expand": "Open diagram in new window",
+        "copy": "Copy diagram source code",
+        "copied": "Copied!",
         "zoom_in": "Zoom In",
         "zoom_out": "Zoom Out", 
         "reset_zoom": "Reset (100%)",

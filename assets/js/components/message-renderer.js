@@ -237,13 +237,15 @@ class MessageRenderer {
                 // data-diagram属性にはBase64エンコードを使用してHTML干渉を回避
                 try {
                     const encodedCode = btoa(unescape(encodeURIComponent(cleanDiagramCode)));
-                    const expandTitle = (window.appConfig && window.appConfig.diagramTranslations) 
-                        ? window.appConfig.diagramTranslations.expand 
-                        : '図表を新しいウィンドウで拡大表示';
+                    const translations = (window.appConfig && window.appConfig.diagramTranslations) ? window.appConfig.diagramTranslations : {};
+                    const expandTitle = translations.expand || '図表を新しいウィンドウで拡大表示';
+                    const copyTitle = translations.copy || '図表のソースコードをコピー';
+                    
                     return `<div class="mermaid-container">
                         <div class="mermaid" id="${diagramId}" data-diagram-b64="${encodedCode}" data-diagram-type="${type}">
                             <!-- Diagram will be rendered here -->
                         </div>
+                        <button class="diagram-copy-btn" onclick="window.diagramExpander.copyDiagramSource(this)" title="${copyTitle}">📋</button>
                         <button class="expand-btn" onclick="window.diagramExpander.openDiagramFromButton(this)" title="${expandTitle}">🔍</button>
                     </div>`;
                 } catch (encodeError) {

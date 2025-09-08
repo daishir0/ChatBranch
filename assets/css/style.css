@@ -2083,6 +2083,37 @@ html,
     display: flex;
     justify-content: center;
     align-items: center;
+    position: relative; /* 拡大ボタンの配置用 */
+}
+
+/* 図表拡大ボタン */
+.mermaid-container .expand-btn {
+    position: absolute;
+    bottom: 8px;
+    right: 8px;
+    width: 32px;
+    height: 32px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    z-index: 10;
+    opacity: 0;
+    transition: all 0.2s ease;
+}
+
+.mermaid-container:hover .expand-btn {
+    opacity: 1; /* ホバー時に表示 */
+}
+
+.mermaid-container .expand-btn:hover {
+    background-color: var(--bg-secondary);
+    transform: scale(1.1);
 }
 
 /* Mermaid SVG要素の色調整 */

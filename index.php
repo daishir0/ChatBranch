@@ -370,10 +370,24 @@ $lang = Language::getInstance();
     
     <script>
         // Pass application configuration to JavaScript
+        // Get diagram translations safely
+        const diagramTranslations = {
+            expand: <?php echo json_encode(__('diagram.expand')); ?>,
+            zoom_in: <?php echo json_encode(__('diagram.zoom_in')); ?>,
+            zoom_out: <?php echo json_encode(__('diagram.zoom_out')); ?>,
+            reset_zoom: <?php echo json_encode(__('diagram.reset_zoom')); ?>,
+            fit_to_window: <?php echo json_encode(__('diagram.fit_to_window')); ?>,
+            print: <?php echo json_encode(__('diagram.print')); ?>,
+            close: <?php echo json_encode(__('diagram.close')); ?>,
+            expanded_view: <?php echo json_encode(__('diagram.expanded_view')); ?>
+        };
+        
         window.appConfig = {
             csrfToken: '<?php echo $csrfToken; ?>',
             authCredentials: '<?php echo base64_encode($config['auth']['username'] . ':' . $config['auth']['password']); ?>',
-            urls: <?php echo json_encode(UrlHelper::getJsConfig()); ?>
+            urls: <?php echo json_encode(UrlHelper::getJsConfig()); ?>,
+            diagramTranslations: diagramTranslations,
+            currentLanguage: '<?php echo $lang->getCurrentLanguage(); ?>'
         };
         
         // For backward compatibility
@@ -400,6 +414,7 @@ $lang = Language::getInstance();
     <script src="assets/js/components/chat-manager.js"></script>
     <script src="assets/js/components/thread-manager.js"></script>
     <script src="assets/js/components/file-manager.js"></script>
+    <script src="assets/js/components/diagram-expander.js"></script>
 
     <!-- Modules -->
     <script src="assets/js/modules/mobile-handler.js"></script>

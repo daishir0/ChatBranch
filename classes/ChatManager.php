@@ -20,7 +20,7 @@ class ChatManager {
     }
     
     public function getThreads() {
-        $sql = "SELECT * FROM threads ORDER BY updated_at DESC";
+        $sql = "SELECT * FROM threads WHERE deleted_at IS NULL ORDER BY updated_at DESC";
         return $this->db->fetchAll($sql);
     }
     

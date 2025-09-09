@@ -298,14 +298,17 @@ class ChatManager {
         messageDiv.innerHTML = `
             <div class="message-avatar ${avatarClass}">${avatar}</div>
             <div class="message-content">
+                ${actionsHTML}
                 <div class="message-text">${formattedContent}</div>
                 ${tokenInfoHTML}
-                ${actionsHTML}
             </div>
         `;
         
         // Add double-tap prevention to dynamically created messages
         this.app.mobileHandler.addDoubleTabPreventionToElement(messageDiv);
+        
+        // 折りたたみセクションがある場合、全開閉ボタンを追加
+        this.addToggleAllButtonIfNeeded(messageDiv);
         
         // Add mobile tap interaction for showing action buttons
         this.app.mobileHandler.addMobileActionInteraction(messageDiv);
@@ -318,6 +321,63 @@ class ChatManager {
      */
     async formatMessageContent(content) {
         return await this.messageRenderer.renderMessage(content);
+    }
+    
+    /**
+     * 折りたたみセクションがあるメッセージに全開閉ボタンを追加
+     */
+    addToggleAllButtonIfNeeded(messageDiv) {
+        // 折りたたみセクションが存在するかチェック
+        const collapsibleSections = messageDiv.querySelectorAll('.collapsible-section');
+        
+        if (collapsibleSections.length > 0) {
+            // メッセージアクションエリアを取得
+            const actionsDiv = messageDiv.querySelector('.message-actions');
+            
+            if (actionsDiv) {
+                // 全開閉ボタンを作成
+                const toggleAllBtn = document.createElement('button');
+                toggleAllBtn.className = 'message-action-btn toggle-all-btn';
+                toggleAllBtn.title = '全セクション開閉';
+                toggleAllBtn.innerHTML = '📂';
+                
+                // ボタンのクリックイベント
+                toggleAllBtn.onclick = () => this.toggleAllSections(messageDiv);
+                
+                // 既存のボタンの前（一番左）に追加
+                actionsDiv.insertBefore(toggleAllBtn, actionsDiv.firstChild);
+            }
+        }
+    }
+    
+    /**
+     * メッセージ内の全セクションを開閉
+     */
+    toggleAllSections(messageDiv) {
+        const sections = messageDiv.querySelectorAll('.collapsible-section');
+        if (sections.length === 0) return;
+        
+        // 現在展開されているセクション数をカウント
+        const expandedCount = messageDiv.querySelectorAll('.collapsible-section.expanded').length;
+        const shouldCollapse = expandedCount > sections.length / 2;
+        
+        // 全セクションを開閉
+        sections.forEach(section => {
+            const toggle = section.querySelector('.section-toggle');
+            const sectionId = section.getAttribute('data-section-id');
+            
+            if (shouldCollapse) {
+                // 閉じる
+                section.classList.add('collapsed');
+                section.classList.remove('expanded');
+                if (toggle) toggle.textContent = '▶';
+            } else {
+                // 開く
+                section.classList.remove('collapsed');
+                section.classList.add('expanded');
+                if (toggle) toggle.textContent = '▼';
+            }
+        });
     }
     
     /**

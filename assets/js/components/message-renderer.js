@@ -69,6 +69,9 @@ class MessageRenderer {
                 // テーブルをレスポンシブ対応に変換
                 html = this.makeTablesResponsive(html);
                 
+                // セクション折りたたみ機能の追加
+                html = this.addCollapsibleSections(html);
+                
                 const finalHtml = `<div class="markdown-content">${html}</div>`;
                 
                 // Markdownコンテンツのレンダリング完了
@@ -649,12 +652,228 @@ class MessageRenderer {
         return markdownPatterns.some(pattern => pattern.test(content));
     }
     
+    addCollapsibleSections(html) {
+        try {
+            // HTMLをDOMとして解析
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = html;
+            
+            // h1-h3要素と番号リスト項目を検出
+            const headings = this.findCollapsibleElements(tempDiv);
+            
+            // 最小セクション数のチェック（3セクション未満なら折りたたみ機能を追加しない）
+            if (headings.length < 3) {
+                return html;
+            }
+            
+            // モバイルデバイスの検出
+            const isMobile = window.innerWidth <= 768;
+            
+            // セクション一覧とコンテンツを収集
+            const sections = this.buildSectionStructure(headings, isMobile);
+            
+            // 先頭コンテンツ（最初の見出しより前の要素）を収集
+            const firstHeading = headings[0];
+            let leadingContent = '';
+            
+            if (firstHeading) {
+                const leadingElements = [];
+                let element = tempDiv.firstChild;
+                
+                // 最初の見出しまでの要素を収集
+                while (element && element !== firstHeading) {
+                    if (element.nodeType === Node.ELEMENT_NODE) {
+                        leadingElements.push(element.outerHTML);
+                    } else if (element.nodeType === Node.TEXT_NODE && element.textContent.trim()) {
+                        leadingElements.push(`<p>${element.textContent.trim()}</p>`);
+                    }
+                    element = element.nextSibling;
+                }
+                
+                leadingContent = leadingElements.join('');
+            }
+            
+            // 新しいHTMLを構築（元のDOMを変更せずに）
+            const sectionsHtml = this.buildCollapsibleHTML(sections);
+            
+            // 先頭コンテンツ + セクション構造を返す
+            return leadingContent + sectionsHtml;
+            
+        } catch (error) {
+            console.error('Collapsible sections error:', error);
+            return html; // エラー時は元のHTMLを返す
+        }
+    }
+    
+    findCollapsibleElements(container) {
+        const elements = [];
+        
+        // h1-h2見出しを追加
+        const headings = Array.from(container.querySelectorAll('h1, h2'));
+        elements.push(...headings);
+        
+        // 番号リスト項目の折りたたみ機能は無効化（バグ対応のため）
+        // const orderedLists = Array.from(container.querySelectorAll('ol'));
+        // orderedLists.forEach(ol => {
+        //     const listItems = Array.from(ol.children).filter(child => child.tagName === 'LI');
+        //     listItems.forEach((li, index) => {
+        //         // 処理を無効化
+        //     });
+        // });
+        
+        // DOM順でソート
+        elements.sort((a, b) => {
+            const position = a.compareDocumentPosition(b);
+            return position & Node.DOCUMENT_POSITION_FOLLOWING ? -1 : 1;
+        });
+        
+        return elements;
+    }
+
+    buildSectionStructure(elements, isMobile) {
+        const sections = [];
+        let sectionCounter = 0;
+        
+        elements.forEach((element, index) => {
+            // 通常の見出しのみを処理（番号リストは除外）
+            const level = parseInt(element.tagName.substring(1));
+            const title = element.textContent.trim();
+            
+            const sectionId = `section-${Date.now()}-${sectionCounter++}`;
+            
+            // セクションコンテンツを収集
+            const content = this.collectSectionContent(element, elements[index + 1]);
+            
+            // デフォルトの展開状態を決定
+            const isExpanded = !isMobile && index === 0; // PCでは最初のセクションのみ展開
+            
+            sections.push({
+                id: sectionId,
+                title: title,
+                level: level,
+                content: content,
+                isExpanded: isExpanded,
+                isListItem: false
+            });
+        });
+        
+        return sections;
+    }
+    
+    extractListItemTitle(li) {
+        // 全体のテキスト内容から最初の行を取得（より確実）
+        const fullText = li.textContent.trim();
+        const firstLine = fullText.split('\n')[0].trim();
+        return firstLine.length > 50 ? firstLine.substring(0, 47) + '...' : firstLine;
+    }
+    
+    collectSectionContent(currentHeading, nextHeading) {
+        const content = [];
+        
+        // 通常の見出しの場合のみ処理（番号リスト処理は削除）
+        let element = currentHeading.nextElementSibling;
+        
+        // 次の見出しまでの要素を収集
+        while (element && element !== nextHeading) {
+            content.push(element.outerHTML);
+            element = element.nextElementSibling;
+        }
+        
+        return content.join('');
+    }
+    
+    buildCollapsibleHTML(sections) {
+        return sections.map(section => {
+            const toggleState = section.isExpanded ? 'expanded' : 'collapsed';
+            const toggleIcon = section.isExpanded ? '▼' : '▶';
+            
+            // インデントレベルを計算
+            const indentLevel = section.level - 1; // H1=0, H2=1
+            const indentClass = `indent-level-${indentLevel}`;
+            
+            return `
+                <div class="collapsible-section ${toggleState} ${indentClass}" data-section-id="${section.id}" data-level="${section.level}">
+                    <div class="section-header" onclick="toggleSection('${section.id}')">
+                        <span class="section-toggle">${toggleIcon}</span>
+                        <h${section.level} class="section-title">${section.title}</h${section.level}>
+                    </div>
+                    <div class="section-content">
+                        ${section.content}
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+    
+    generateTableOfContents(tocItems) {
+        if (tocItems.length === 0) return '';
+        
+        const isMobile = window.innerWidth <= 768;
+        const toggleAllText = isMobile ? '全て開閉' : '全セクション開閉';
+        
+        const tocList = tocItems.map(item => 
+            `<li class="toc-item toc-level-${item.level}">
+                <a href="#" onclick="toggleSection('${item.id}'); return false;">${item.title}</a>
+            </li>`
+        ).join('');
+        
+        return `
+            <div class="section-toc">
+                <div class="toc-header">
+                    <h4>📋 セクション一覧</h4>
+                    <button class="toc-toggle-all" onclick="toggleAllSections()">${toggleAllText}</button>
+                </div>
+                <ul class="toc-list">
+                    ${tocList}
+                </ul>
+            </div>
+        `;
+    }
+
     escapeHtml(text) {
         const div = document.createElement('div');
         div.textContent = text;
         return div.innerHTML;
     }
 }
+
+// セクション折りたたみ機能のグローバル関数
+window.toggleSection = function(sectionId) {
+    const section = document.querySelector(`[data-section-id="${sectionId}"]`);
+    if (!section) return;
+    
+    const isCollapsed = section.classList.contains('collapsed');
+    const toggle = section.querySelector('.section-toggle');
+    
+    if (isCollapsed) {
+        section.classList.remove('collapsed');
+        section.classList.add('expanded');
+        toggle.textContent = '▼';
+    } else {
+        section.classList.add('collapsed');
+        section.classList.remove('expanded');
+        toggle.textContent = '▶';
+    }
+};
+
+window.toggleAllSections = function() {
+    const sections = document.querySelectorAll('.collapsible-section');
+    const expandedCount = document.querySelectorAll('.collapsible-section.expanded').length;
+    const shouldCollapse = expandedCount > sections.length / 2;
+    
+    sections.forEach(section => {
+        const toggle = section.querySelector('.section-toggle');
+        if (shouldCollapse) {
+            section.classList.add('collapsed');
+            section.classList.remove('expanded');
+            toggle.textContent = '▶';
+        } else {
+            section.classList.remove('collapsed');
+            section.classList.add('expanded');
+            toggle.textContent = '▼';
+        }
+    });
+};
 
 // グローバルに公開
 window.MessageRenderer = MessageRenderer;

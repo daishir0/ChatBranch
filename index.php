@@ -117,6 +117,10 @@ $lang = Language::getInstance();
                 </div>
             </div>
             
+            <!-- Scroll Navigation Buttons -->
+            <button class="scroll-nav-btn scroll-to-bottom" id="scrollToBottom" title="一番下へ">↓</button>
+            <button class="scroll-nav-btn scroll-to-top" id="scrollToTop" title="一番上へ">↑</button>
+            
             <!-- Chat Input -->
             <div class="chat-input-container">
                 <div class="file-attachments" id="fileAttachments" style="display: none;">

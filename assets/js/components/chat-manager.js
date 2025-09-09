@@ -92,6 +92,9 @@ class ChatManager {
                 
                 this.renderMessagePath(messagePath);
                 
+                // スレッド読み込み時にスクロールボタンを表示
+                this.showScrollButtons();
+                
                 // Set currentMessageId to the last message in the displayed path
                 // ただし、既にcurrentMessageIdが設定されている場合（編集後など）は上書きしない
                 if (messagePath && messagePath.length > 0 && !this.app._currentMessageId) {
@@ -240,6 +243,13 @@ class ChatManager {
         }
         
         container.scrollTop = container.scrollHeight;
+        
+        // スクロールボタンの表示を更新
+        setTimeout(() => {
+            if (this.app.uiManager) {
+                this.app.uiManager.updateScrollButtons();
+            }
+        }, 100);
     }
     
     /**
@@ -381,6 +391,43 @@ class ChatManager {
     }
     
     /**
+     * スクロールボタンを表示
+     */
+    showScrollButtons() {
+        const scrollToTopBtn = document.getElementById('scrollToTop');
+        const scrollToBottomBtn = document.getElementById('scrollToBottom');
+        
+        if (scrollToTopBtn) {
+            scrollToTopBtn.style.display = 'flex';
+        }
+        if (scrollToBottomBtn) {
+            scrollToBottomBtn.style.display = 'flex';
+        }
+        
+        // UIManagerのボタン表示ロジックを呼び出し
+        if (this.app.uiManager) {
+            setTimeout(() => {
+                this.app.uiManager.updateScrollButtons();
+            }, 100);
+        }
+    }
+    
+    /**
+     * スクロールボタンを非表示
+     */
+    hideScrollButtons() {
+        const scrollToTopBtn = document.getElementById('scrollToTop');
+        const scrollToBottomBtn = document.getElementById('scrollToBottom');
+        
+        if (scrollToTopBtn) {
+            scrollToTopBtn.style.display = 'none';
+        }
+        if (scrollToBottomBtn) {
+            scrollToBottomBtn.style.display = 'none';
+        }
+    }
+    
+    /**
      * 新しいチャット開始
      */
     async newChat() {
@@ -432,6 +479,7 @@ class ChatManager {
                     updated_at: localDateTime
                 });
                 
+                this.hideScrollButtons();
                 this.app.uiManager.hideTreeView();
             }
         } catch (error) {
@@ -459,6 +507,7 @@ class ChatManager {
                 item.classList.remove('active');
             });
             
+            this.hideScrollButtons();
             this.app.uiManager.hideTreeView();
         }
     }

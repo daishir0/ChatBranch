@@ -185,11 +185,11 @@ class DiagramExpander {
         
         return `
 <!DOCTYPE html>
-<html lang="ja">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>${diagramType} - 拡大表示</title>
+    <title>${diagramType} - ${translations.expanded_view}</title>
     <style>
         body {
             margin: 0;
@@ -526,13 +526,23 @@ class DiagramExpander {
         
         // ダブルタップでズームリセット（モバイル用）
         let lastTouchTime = 0;
+        let touchStartCount = 0;
+        
+        viewport.addEventListener('touchstart', (e) => {
+            touchStartCount = e.touches.length;
+        });
+        
         viewport.addEventListener('touchend', (e) => {
             const currentTime = new Date().getTime();
             const tapLength = currentTime - lastTouchTime;
-            if (tapLength < 500 && tapLength > 0) {
+            
+            // シングルタップ（1本指）のダブルタップのみ検出
+            // ピンチ操作（2本指以上）は除外
+            if (touchStartCount === 1 && tapLength < 300 && tapLength > 50) {
                 e.preventDefault();
                 resetZoom();
             }
+            
             lastTouchTime = currentTime;
         });
     </script>

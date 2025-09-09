@@ -630,11 +630,11 @@ body {
 }
 
 .scroll-to-bottom {
-    top: 60px; /* より下に配置 */
+    top: 120px; /* さらに下に配置 */
 }
 
 .scroll-to-top {
-    bottom: 140px; /* より上に配置 */
+    bottom: 160px; /* さらに上に配置 */
 }
 
 /* モバイル対応 */
@@ -647,11 +647,11 @@ body {
     }
     
     .scroll-to-bottom {
-        top: 50px;
+        top: 100px;
     }
     
     .scroll-to-top {
-        bottom: 120px;
+        bottom: 160px;
     }
 }
 

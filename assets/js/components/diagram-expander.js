@@ -179,7 +179,6 @@ class DiagramExpander {
                 zoom_in: 'Zoom In', 
                 zoom_out: 'Zoom Out',
                 reset_zoom: 'Reset (100%)',
-                fit_to_window: 'Fit to Window',
                 print: 'Print',
                 close: 'Close'
             };
@@ -343,7 +342,6 @@ class DiagramExpander {
             <button onclick="resetZoom()" title="${translations.reset_zoom}">🔄</button>
             <button onclick="zoomIn()" id="zoomInBtn" title="${translations.zoom_in}">🔍+</button>
         </div>
-        <button onclick="fitToWindow()" title="${translations.fit_to_window}">📐</button>
         <button onclick="window.print()" title="${translations.print}">🖨️</button>
         <button onclick="window.close()" title="${translations.close}">✕</button>
     </div>
@@ -392,22 +390,6 @@ class DiagramExpander {
         
         function resetZoom() {
             scale = 1;
-            translateX = 0;
-            translateY = 0;
-            updateTransform();
-        }
-        
-        function fitToWindow() {
-            const svg = container.querySelector('svg');
-            if (!svg) return;
-            
-            const viewportRect = viewport.getBoundingClientRect();
-            const svgRect = svg.getBoundingClientRect();
-            
-            const scaleX = viewportRect.width / svgRect.width;
-            const scaleY = viewportRect.height / svgRect.height;
-            
-            scale = Math.min(scaleX, scaleY, 1) * 0.9;
             translateX = 0;
             translateY = 0;
             updateTransform();
@@ -549,11 +531,7 @@ class DiagramExpander {
             const tapLength = currentTime - lastTouchTime;
             if (tapLength < 500 && tapLength > 0) {
                 e.preventDefault();
-                if (scale === 1) {
-                    fitToWindow();
-                } else {
-                    resetZoom();
-                }
+                resetZoom();
             }
             lastTouchTime = currentTime;
         });

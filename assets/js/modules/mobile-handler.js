@@ -50,8 +50,8 @@ class MobileHandler {
         let lastTouchEnd = 0;
         
         document.addEventListener('touchend', function (event) {
-            // Allow scrolling in thread list and sidebar areas
-            if (event.target.closest('.thread-list, .sidebar')) {
+            // Allow scrolling in thread list, sidebar areas, and chat actions
+            if (event.target.closest('.thread-list, .sidebar, .chat-actions')) {
                 return;
             }
             
@@ -69,8 +69,8 @@ class MobileHandler {
             let tapTimeout;
             
             element.addEventListener('touchstart', function(event) {
-                // テーブル要素内とthread-list内のタッチは除外
-                if (event.target.closest('.table-wrapper, table, .thread-list, .sidebar')) {
+                // テーブル要素内とthread-list内、chat-actions内のタッチは除外
+                if (event.target.closest('.table-wrapper, table, .thread-list, .sidebar, .chat-actions')) {
                     return;
                 }
                 

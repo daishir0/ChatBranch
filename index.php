@@ -98,7 +98,7 @@ $lang = Language::getInstance();
                 </div>
                 <div class="chat-actions">
                     <button class="persona-btn" id="personaBtn" title="<?= __('settings.thread_persona') ?>">🎭</button>
-                    <button class="tree-toggle-btn" id="treeToggleBtn">🌳</button>
+                    <button class="tree-toggle-btn" id="treeToggleBtn" title="Toggle Message Tree">🌳</button>
                 </div>
             </header>
             
@@ -118,8 +118,8 @@ $lang = Language::getInstance();
             </div>
             
             <!-- Scroll Navigation Buttons -->
-            <button class="scroll-nav-btn scroll-to-bottom" id="scrollToBottom" title="一番下へ">↓</button>
-            <button class="scroll-nav-btn scroll-to-top" id="scrollToTop" title="一番上へ">↑</button>
+            <button class="scroll-nav-btn scroll-to-bottom" id="scrollToBottom" title="Scroll to Bottom">↓</button>
+            <button class="scroll-nav-btn scroll-to-top" id="scrollToTop" title="Scroll to Top">↑</button>
             
             <!-- Chat Input -->
             <div class="chat-input-container">

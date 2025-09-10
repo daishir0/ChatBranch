@@ -11,19 +11,27 @@ class TimeZoneManager {
     /**
      * システムタイムゾーン設定を読み込み
      */
-    async loadSystemTimezone() {
+    async loadSystemTimezone(appInstance = null) {
         try {
-            const config = await app.apiClient.getSystemConfig();
-            if (config.success) {
-                this.timezone = config.timezone || 'Asia/Tokyo';
-                this.locale = config.locale || 'ja-JP';
-                this.loaded = true;
-                console.log('Timezone loaded:', { timezone: this.timezone, locale: this.locale });
+            // appInstanceが渡された場合はそれを使用、なければグローバルapp
+            const targetApp = appInstance || window.app;
+            if (targetApp && targetApp.apiClient) {
+                const config = await targetApp.apiClient.getSystemConfig();
+                if (config.success) {
+                    this.timezone = config.timezone || 'UTC';
+                    this.locale = config.locale || 'en-US';
+                    this.loaded = true;
+                    return;
+                }
             }
         } catch (error) {
-            console.warn('Failed to load timezone config, using defaults:', error);
-            this.loaded = true; // デフォルト値で続行
+            // API呼び出しが失敗した場合はデフォルト値を使用
         }
+        
+        // デフォルト値で初期化（UTC）
+        this.timezone = 'UTC';
+        this.locale = 'en-US';
+        this.loaded = true;
     }
     
     /**

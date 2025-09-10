@@ -54,7 +54,7 @@ class ChatBranchApp {
     async init() {
         // Initialize timezone manager first
         this.timezoneManager = new TimeZoneManager();
-        await this.timezoneManager.loadSystemTimezone();
+        await this.timezoneManager.loadSystemTimezone(this);
         
         await this.settingsManager.loadSettings();
         this.bindEvents();

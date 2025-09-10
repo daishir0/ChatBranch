@@ -739,48 +739,36 @@ class FileManager {
      * ファイル内容をクリップボードにコピー
      */
     async copyFileContent(fileId) {
-        console.log('📱 MOBILE DEBUG: Starting copyFileContent for fileId:', fileId);
         
         try {
             const file = this.allFiles.find(f => f.id === fileId);
             if (!file) {
-                console.log('📱 MOBILE DEBUG: File not found in allFiles');
                 this.showToast('File not found', 'error');
                 return;
             }
             
-            console.log('📱 MOBILE DEBUG: File found:', file.original_name);
             
             // ファイルの内容を取得（一覧にはもう含まれないので、必ずAPIから取得）
-            console.log('📱 MOBILE DEBUG: Fetching file content from API...');
             let content = '';
             const response = await this.authenticatedFetch(`${this.apiBaseUrl}/files.php?action=get&id=${fileId}`);
-            console.log('📱 MOBILE DEBUG: API response status:', response.status);
             
             const data = await response.json();
-            console.log('📱 MOBILE DEBUG: API response data:', data);
             
             if (data.success && data.file && data.file.content_markdown) {
                 content = data.file.content_markdown;
-                console.log('📱 MOBILE DEBUG: Content retrieved, length:', content.length);
             } else {
-                console.log('📱 MOBILE DEBUG: Failed to get content:', data);
                 this.showToast('Failed to retrieve file content: ' + (data.error || 'Unknown error'), 'error');
                 return;
             }
             
             // クリップボードにコピー（オーバーレイUI経由）
-            console.log('📱 MOBILE DEBUG: Starting clipboard copy overlay...');
             await this.copyTextToClipboard(content);
-            console.log('📱 MOBILE DEBUG: Clipboard copy overlay completed');
             
             // Remove automatic success messages - the overlay handles feedback
             this.showCopyFeedback(fileId);
-            console.log('📱 MOBILE DEBUG: Copy process completed successfully');
             
         } catch (error) {
-            console.error('📱 MOBILE DEBUG: Copy file content error:', error);
-            console.error('📱 MOBILE DEBUG: Error stack:', error.stack);
+            console.error('Copy file content error:', error);
             
             // Show detailed error for mobile debugging
             let debugInfo = '';
@@ -798,15 +786,7 @@ class FileManager {
      * テキストをクリップボードにコピー（モバイル対応強化版）
      */
     async copyTextToClipboard(text) {
-        console.log('📱 CLIPBOARD DEBUG: Starting copy, text length:', text.length);
-        console.log('📱 CLIPBOARD DEBUG: User agent:', navigator.userAgent);
-        console.log('📱 CLIPBOARD DEBUG: Clipboard API available:', !!navigator.clipboard);
-        
         // Always show overlay UI for better user experience (PC and mobile)
-        console.log('📱 CLIPBOARD DEBUG: Always showing overlay for user confirmation');
-        
-        // Enhanced fallback for mobile devices
-        console.log('📱 CLIPBOARD DEBUG: Using enhanced fallback clipboard method');
         return new Promise((resolve, reject) => {
             const textArea = document.createElement('textarea');
             textArea.value = text;
@@ -904,14 +884,12 @@ class FileManager {
             overlay.appendChild(closeBtn);
             document.body.appendChild(overlay);
             
-            console.log('📱 CLIPBOARD DEBUG: TextArea created and styled');
             
             // Focus and select - critical for mobile
             textArea.focus();
             textArea.select();
             textArea.setSelectionRange(0, textArea.value.length);
             
-            console.log('📱 CLIPBOARD DEBUG: Text focused and selected');
             
             // Close function (no copy)
             const closeOverlay = () => {
@@ -927,7 +905,6 @@ class FileManager {
                     // Try modern clipboard API first
                     if (navigator.clipboard && navigator.clipboard.writeText) {
                         await navigator.clipboard.writeText(text);
-                        console.log('📱 CLIPBOARD DEBUG: Modern clipboard API successful');
                     } else {
                         // Fallback to execCommand - temporarily select all for copying
                         textArea.focus();
@@ -938,7 +915,6 @@ class FileManager {
                         if (!successful) {
                             throw new Error('Copy command failed');
                         }
-                        console.log('📱 CLIPBOARD DEBUG: Fallback copy successful');
                         
                         // Clear selection after copy
                         textArea.setSelectionRange(0, 0);
@@ -957,7 +933,7 @@ class FileManager {
                     }, 500);
                     
                 } catch (error) {
-                    console.error('📱 CLIPBOARD DEBUG: Copy failed:', error);
+                    console.error('Clipboard copy failed:', error);
                     copyBtn.innerHTML = 'Copy Failed';
                     copyBtn.style.backgroundColor = '#dc3545';
                     

@@ -1587,7 +1587,7 @@ html,
 
 #fileManagerModal .file-card .file-actions {
     position: absolute;
-    top: 4px;
+    bottom: 4px;
     right: 4px;
     display: flex;
     gap: 2px;
@@ -1617,6 +1617,10 @@ html,
 #fileManagerModal .file-card .action-btn:hover {
     background: rgba(0, 0, 0, 0.9);
     transform: scale(1.1);
+}
+
+#fileManagerModal .file-card .action-btn:first-child:hover {
+    background: #28a745 !important; /* Green for copy button */
 }
 
 #fileManagerModal .file-card .action-btn.delete:hover {
@@ -1708,6 +1712,10 @@ html,
 #fileManagerModal .file-item .action-btn:hover {
     background: var(--accent-color);
     color: white;
+}
+
+#fileManagerModal .file-item .action-btn:first-child:hover {
+    background: #28a745 !important; /* Green for copy button */
 }
 
 #fileManagerModal .file-item .action-btn.delete:hover {

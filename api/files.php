@@ -205,10 +205,7 @@ function handleGet($fileManager, $params) {
     $content = preg_replace('/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/', '', $content); // Remove control chars
     $content = mb_convert_encoding($content, 'UTF-8', 'UTF-8'); // Clean UTF-8
     
-    // Check if file has meaningful content
-    if (!hasMeaningfulContent($content)) {
-        throw new Exception('File has no meaningful content for display');
-    }
+    // Note: Allow all files for copy functionality, even if they don't have meaningful markdown content
     
     echo json_encode([
         'success' => true,

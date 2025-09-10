@@ -793,69 +793,252 @@ class FileManager {
      * ファイル内容をクリップボードにコピー
      */
     async copyFileContent(fileId) {
+        console.log('📱 MOBILE DEBUG: Starting copyFileContent for fileId:', fileId);
+        
         try {
             const file = this.allFiles.find(f => f.id === fileId);
             if (!file) {
+                console.log('📱 MOBILE DEBUG: File not found in allFiles');
                 this.showToast('File not found', 'error');
                 return;
             }
             
-            // ファイルの内容を取得
+            console.log('📱 MOBILE DEBUG: File found:', file.original_name);
+            
+            // ファイルの内容を取得（一覧にはもう含まれないので、必ずAPIから取得）
+            console.log('📱 MOBILE DEBUG: Fetching file content from API...');
             let content = '';
-            if (file.content_markdown && file.content_markdown.trim()) {
-                content = file.content_markdown;
+            const response = await this.authenticatedFetch(`${this.apiBaseUrl}/files.php?action=get&id=${fileId}`);
+            console.log('📱 MOBILE DEBUG: API response status:', response.status);
+            
+            const data = await response.json();
+            console.log('📱 MOBILE DEBUG: API response data:', data);
+            
+            if (data.success && data.file && data.file.content_markdown) {
+                content = data.file.content_markdown;
+                console.log('📱 MOBILE DEBUG: Content retrieved, length:', content.length);
             } else {
-                // APIからコンテンツを取得
-                const response = await this.authenticatedFetch(`${this.apiBaseUrl}/files.php?action=get&id=${fileId}`);
-                const data = await response.json();
-                if (data.success && data.file && data.file.content_markdown) {
-                    content = data.file.content_markdown;
-                } else {
-                    this.showToast('Failed to retrieve file content', 'error');
-                    return;
-                }
+                console.log('📱 MOBILE DEBUG: Failed to get content:', data);
+                this.showToast('Failed to retrieve file content: ' + (data.error || 'Unknown error'), 'error');
+                return;
             }
             
-            // クリップボードにコピー
+            // クリップボードにコピー（オーバーレイUI経由）
+            console.log('📱 MOBILE DEBUG: Starting clipboard copy overlay...');
             await this.copyTextToClipboard(content);
+            console.log('📱 MOBILE DEBUG: Clipboard copy overlay completed');
+            
+            // Remove automatic success messages - the overlay handles feedback
             this.showCopyFeedback(fileId);
-            this.showToast('File content copied to clipboard', 'success');
+            console.log('📱 MOBILE DEBUG: Copy process completed successfully');
             
         } catch (error) {
-            console.error('Copy file content error:', error);
-            this.showToast('Copy failed', 'error');
+            console.error('📱 MOBILE DEBUG: Copy file content error:', error);
+            console.error('📱 MOBILE DEBUG: Error stack:', error.stack);
+            
+            // Show detailed error for mobile debugging
+            let debugInfo = '';
+            debugInfo += `Error: ${error.message}\n`;
+            debugInfo += `Type: ${error.name}\n`;
+            debugInfo += `UserAgent: ${navigator.userAgent.substring(0, 50)}...\n`;
+            debugInfo += `ClipboardAPI: ${!!navigator.clipboard}\n`;
+            debugInfo += `HTTPS: ${location.protocol === 'https:'}\n`;
+            
+            this.showToast(`Copy failed - ${debugInfo}`, 'error');
         }
     }
     
     /**
-     * テキストをクリップボードにコピー（message-actions.jsから参考）
+     * テキストをクリップボードにコピー（モバイル対応強化版）
      */
     async copyTextToClipboard(text) {
-        console.log('Copying text to clipboard, length:', text.length);
+        console.log('📱 CLIPBOARD DEBUG: Starting copy, text length:', text.length);
+        console.log('📱 CLIPBOARD DEBUG: User agent:', navigator.userAgent);
+        console.log('📱 CLIPBOARD DEBUG: Clipboard API available:', !!navigator.clipboard);
         
-        if (navigator.clipboard && navigator.clipboard.writeText) {
-            console.log('Using modern clipboard API');
-            await navigator.clipboard.writeText(text);
-        } else {
-            console.log('Using fallback clipboard method');
-            // Fallback for older browsers
+        // Always show overlay UI for better user experience (PC and mobile)
+        console.log('📱 CLIPBOARD DEBUG: Always showing overlay for user confirmation');
+        
+        // Enhanced fallback for mobile devices
+        console.log('📱 CLIPBOARD DEBUG: Using enhanced fallback clipboard method');
+        return new Promise((resolve, reject) => {
             const textArea = document.createElement('textarea');
             textArea.value = text;
-            textArea.style.position = 'fixed';
-            textArea.style.left = '-999999px';
-            textArea.style.top = '-999999px';
-            document.body.appendChild(textArea);
+            
+            // Create overlay with instructions
+            const overlay = document.createElement('div');
+            overlay.style.position = 'fixed';
+            overlay.style.top = '0';
+            overlay.style.left = '0';
+            overlay.style.width = '100%';
+            overlay.style.height = '100%';
+            overlay.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
+            overlay.style.zIndex = '9998';
+            overlay.style.display = 'flex';
+            overlay.style.alignItems = 'center';
+            overlay.style.justifyContent = 'center';
+            overlay.style.flexDirection = 'column';
+            overlay.style.padding = '60px 20px 20px 20px'; // Extra top padding for buttons
+            
+            // Remove instruction text - we'll use action buttons instead
+            
+            // Large content area styling - 80% of viewport
+            textArea.style.position = 'relative';
+            textArea.style.width = '80vw';
+            textArea.style.height = '80vh';
+            textArea.style.maxWidth = '80vw';
+            textArea.style.maxHeight = '80vh';
+            textArea.style.padding = '20px';
+            textArea.style.border = '2px solid #007AFF';
+            textArea.style.borderRadius = '12px';
+            textArea.style.backgroundColor = 'white';
+            textArea.style.color = '#000';
+            textArea.style.fontSize = '14px';
+            textArea.style.fontFamily = 'monospace';
+            textArea.style.lineHeight = '1.5';
+            textArea.style.resize = 'none';
+            textArea.style.boxShadow = '0 8px 32px rgba(0,0,0,0.3)';
+            textArea.style.overflow = 'auto';
+            
+            // Add copy button (green)
+            const copyBtn = document.createElement('button');
+            copyBtn.innerHTML = 'Copy';
+            copyBtn.style.position = 'absolute';
+            copyBtn.style.top = '20px';
+            copyBtn.style.right = '120px';
+            copyBtn.style.padding = '12px 20px';
+            copyBtn.style.backgroundColor = '#28a745';
+            copyBtn.style.color = 'white';
+            copyBtn.style.border = 'none';
+            copyBtn.style.borderRadius = '6px';
+            copyBtn.style.fontSize = '16px';
+            copyBtn.style.fontWeight = 'bold';
+            copyBtn.style.cursor = 'pointer';
+            copyBtn.style.boxShadow = '0 2px 4px rgba(0,0,0,0.2)';
+            copyBtn.style.transition = 'all 0.2s ease';
+            
+            // Add close button (red)
+            const closeBtn = document.createElement('button');
+            closeBtn.innerHTML = 'Close';
+            closeBtn.style.position = 'absolute';
+            closeBtn.style.top = '20px';
+            closeBtn.style.right = '20px';
+            closeBtn.style.padding = '12px 20px';
+            closeBtn.style.backgroundColor = '#dc3545';
+            closeBtn.style.color = 'white';
+            closeBtn.style.border = 'none';
+            closeBtn.style.borderRadius = '6px';
+            closeBtn.style.fontSize = '16px';
+            closeBtn.style.fontWeight = 'bold';
+            closeBtn.style.cursor = 'pointer';
+            closeBtn.style.boxShadow = '0 2px 4px rgba(0,0,0,0.2)';
+            closeBtn.style.transition = 'all 0.2s ease';
+            
+            // Add hover effects
+            copyBtn.addEventListener('mouseenter', () => {
+                copyBtn.style.backgroundColor = '#218838';
+                copyBtn.style.transform = 'translateY(-1px)';
+            });
+            copyBtn.addEventListener('mouseleave', () => {
+                copyBtn.style.backgroundColor = '#28a745';
+                copyBtn.style.transform = 'translateY(0)';
+            });
+            
+            closeBtn.addEventListener('mouseenter', () => {
+                closeBtn.style.backgroundColor = '#c82333';
+                closeBtn.style.transform = 'translateY(-1px)';
+            });
+            closeBtn.addEventListener('mouseleave', () => {
+                closeBtn.style.backgroundColor = '#dc3545';
+                closeBtn.style.transform = 'translateY(0)';
+            });
+            
+            overlay.appendChild(textArea);
+            overlay.appendChild(copyBtn);
+            overlay.appendChild(closeBtn);
+            document.body.appendChild(overlay);
+            
+            console.log('📱 CLIPBOARD DEBUG: TextArea created and styled');
+            
+            // Focus and select - critical for mobile
             textArea.focus();
             textArea.select();
-            const successful = document.execCommand('copy');
-            document.body.removeChild(textArea);
+            textArea.setSelectionRange(0, textArea.value.length);
             
-            if (!successful) {
-                throw new Error('Fallback copy command failed');
-            }
-        }
-        
-        console.log('Copy successful');
+            console.log('📱 CLIPBOARD DEBUG: Text focused and selected');
+            
+            // Close function (no copy)
+            const closeOverlay = () => {
+                if (document.body.contains(overlay)) {
+                    document.body.removeChild(overlay);
+                }
+                resolve(); // Just close without copying
+            };
+            
+            // Copy function
+            const copyAndClose = async () => {
+                try {
+                    // Try modern clipboard API first
+                    if (navigator.clipboard && navigator.clipboard.writeText) {
+                        await navigator.clipboard.writeText(text);
+                        console.log('📱 CLIPBOARD DEBUG: Modern clipboard API successful');
+                    } else {
+                        // Fallback to execCommand - temporarily select all for copying
+                        textArea.focus();
+                        textArea.select();
+                        textArea.setSelectionRange(0, textArea.value.length);
+                        
+                        const successful = document.execCommand('copy');
+                        if (!successful) {
+                            throw new Error('Copy command failed');
+                        }
+                        console.log('📱 CLIPBOARD DEBUG: Fallback copy successful');
+                        
+                        // Clear selection after copy
+                        textArea.setSelectionRange(0, 0);
+                    }
+                    
+                    // Show success feedback
+                    copyBtn.innerHTML = '✓ Copied!';
+                    copyBtn.style.backgroundColor = '#198754';
+                    
+                    // Close after brief delay
+                    setTimeout(() => {
+                        if (document.body.contains(overlay)) {
+                            document.body.removeChild(overlay);
+                        }
+                        // Don't call resolve() here to prevent success toast
+                    }, 500);
+                    
+                } catch (error) {
+                    console.error('📱 CLIPBOARD DEBUG: Copy failed:', error);
+                    copyBtn.innerHTML = 'Copy Failed';
+                    copyBtn.style.backgroundColor = '#dc3545';
+                    
+                    setTimeout(() => {
+                        copyBtn.innerHTML = 'Copy';
+                        copyBtn.style.backgroundColor = '#28a745';
+                    }, 2000);
+                    // Don't call resolve/reject - keep overlay open for retry
+                }
+            };
+            
+            // Button events
+            copyBtn.addEventListener('click', copyAndClose);
+            closeBtn.addEventListener('click', closeOverlay);
+            
+            // Close on overlay click (outside content)
+            overlay.addEventListener('click', (e) => {
+                if (e.target === overlay) {
+                    closeOverlay();
+                }
+            });
+            
+            // Set cursor to beginning and clear selection for better readability
+            textArea.focus();
+            textArea.setSelectionRange(0, 0); // Cursor at start, no selection
+            textArea.scrollTop = 0; // Ensure scroll to top
+        });
     }
     
     /**

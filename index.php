@@ -168,10 +168,6 @@ $lang = Language::getInstance();
                         </div>
                         
                         <div class="file-actions">
-                            <div class="view-toggle">
-                                <button class="view-btn active" id="gridViewBtn" data-view="grid" title="<?= __('files.grid_view') ?>">⚏</button>
-                                <button class="view-btn" id="listViewBtn" data-view="list" title="<?= __('files.list_view') ?>">☰</button>
-                            </div>
                             
                             <select class="sort-select" id="sortSelect">
                                 <option value="name"><?= __('files.sort_name') ?></option>

@@ -7,7 +7,7 @@ class FileManager {
         this.allFiles = [];
         this.filteredFiles = [];
         this.searchTimeout = null;
-        this.currentView = 'grid'; // 'grid' or 'list'
+        this.currentView = 'grid'; // Fixed to grid view only
         this.currentFilter = 'all';
         this.currentSort = 'name';
         this.selectionMode = false;
@@ -32,42 +32,49 @@ class FileManager {
     }
     
     init() {
-        this.bindEvents();
-        this.setupDragAndDrop();
+        try {
+            this.bindEvents();
+            this.setupDragAndDrop();
+        } catch (error) {
+            console.error('FileManager init() failed:', error);
+        }
     }
     
     bindEvents() {
         // File Manager Modal
-        document.getElementById('fileManagerClose').addEventListener('click', () => {
-            this.hide();
-        });
+        const closeBtn = document.getElementById('fileManagerClose');
+        if (closeBtn) {
+            closeBtn.addEventListener('click', () => {
+                this.hide();
+            });
+        }
         
         // File Upload
-        document.getElementById('fileUpload').addEventListener('change', (e) => {
-            this.handleFileUpload(e.target.files);
-        });
+        const fileUpload = document.getElementById('fileUpload');
+        if (fileUpload) {
+            fileUpload.addEventListener('change', (e) => {
+                this.handleFileUpload(e.target.files);
+            });
+        }
         
         // File Search
-        document.getElementById('fileSearch').addEventListener('input', (e) => {
-            clearTimeout(this.searchTimeout);
-            this.searchTimeout = setTimeout(() => {
-                this.searchFiles(e.target.value);
-            }, 300);
-        });
-        
-        // View Toggle
-        document.getElementById('gridViewBtn').addEventListener('click', () => {
-            this.setView('grid');
-        });
-        
-        document.getElementById('listViewBtn').addEventListener('click', () => {
-            this.setView('list');
-        });
+        const fileSearch = document.getElementById('fileSearch');
+        if (fileSearch) {
+            fileSearch.addEventListener('input', (e) => {
+                clearTimeout(this.searchTimeout);
+                this.searchTimeout = setTimeout(() => {
+                    this.searchFiles(e.target.value);
+                }, 300);
+            });
+        }
         
         // Sort Change
-        document.getElementById('sortSelect').addEventListener('change', (e) => {
-            this.setSortBy(e.target.value);
-        });
+        const sortSelect = document.getElementById('sortSelect');
+        if (sortSelect) {
+            sortSelect.addEventListener('change', (e) => {
+                this.setSortBy(e.target.value);
+            });
+        }
         
         // Filter Chips
         document.querySelectorAll('.chip').forEach(chip => {
@@ -147,6 +154,12 @@ class FileManager {
         this.loadFiles();
         this.renderSelectedFiles();
         document.getElementById('fileManagerModal').style.display = 'flex';
+        
+        // Set fixed grid view
+        const fileList = document.getElementById('fileList');
+        if (fileList) {
+            fileList.className = 'file-list grid-view';
+        }
     }
     
     hide() {
@@ -162,64 +175,14 @@ class FileManager {
             
             if (data.success) {
                 this.allFiles = data.files;
-                this.renderFileList(this.allFiles);
+                this.filteredFiles = data.files;
+                this.applySortAndFilter();
             }
         } catch (error) {
             console.error('Failed to load files:', error);
         }
     }
     
-    renderFileList(files) {
-        const fileList = document.getElementById('fileList');
-        fileList.innerHTML = '';
-        
-        if (files.length === 0) {
-            fileList.innerHTML = '<p class="text-muted">No files available</p>';
-            return;
-        }
-        
-        files.forEach(file => {
-            const fileElement = this.createFileElement(file);
-            fileList.appendChild(fileElement);
-        });
-    }
-    
-    createFileElement(file) {
-        const fileDiv = document.createElement('div');
-        fileDiv.className = 'file-item';
-        fileDiv.dataset.fileId = file.id;
-        
-        if (this.selectedFiles.includes(file.id)) {
-            fileDiv.classList.add('selected');
-        }
-        
-        const icon = this.getFileIcon(file.original_name);
-        const size = this.formatFileSize(file.file_size);
-        const date = this.formatDate(file.created_at);
-        
-        fileDiv.innerHTML = `
-            <div class="file-icon">${icon}</div>
-            <div class="file-info">
-                <div class="file-name">${this.escapeHtml(file.original_name)}</div>
-                <div class="file-meta">${size} • ${date}</div>
-            </div>
-            <input type="checkbox" class="file-checkbox" ${this.selectedFiles.includes(file.id) ? 'checked' : ''}>
-        `;
-        
-        const checkbox = fileDiv.querySelector('.file-checkbox');
-        checkbox.addEventListener('change', (e) => {
-            this.toggleFileSelection(file.id, e.target.checked);
-        });
-        
-        fileDiv.addEventListener('click', (e) => {
-            if (e.target.type !== 'checkbox') {
-                checkbox.checked = !checkbox.checked;
-                checkbox.dispatchEvent(new Event('change'));
-            }
-        });
-        
-        return fileDiv;
-    }
     
     toggleFileSelection(fileId, isSelected) {
         // Handle both call patterns: toggleFileSelection(fileId, boolean) and toggleFileSelection(fileId)
@@ -331,7 +294,8 @@ class FileManager {
     
     async searchFiles(query) {
         if (!query.trim()) {
-            this.renderFileList(this.allFiles);
+            this.filteredFiles = [...this.allFiles];
+            this.renderFiles();
             return;
         }
         
@@ -340,15 +304,16 @@ class FileManager {
             const data = await response.json();
             
             if (data.success) {
-                this.renderFileList(data.files);
+                this.filteredFiles = data.files;
+                this.renderFiles();
             }
         } catch (error) {
             console.error('Search failed:', error);
             // Fallback to client-side filtering
-            const filtered = this.allFiles.filter(file => 
+            this.filteredFiles = this.allFiles.filter(file => 
                 file.original_name.toLowerCase().includes(query.toLowerCase())
             );
-            this.renderFileList(filtered);
+            this.renderFiles();
         }
     }
     
@@ -378,7 +343,7 @@ class FileManager {
                 app.updateFileAttachments();
                 
                 // Refresh file list
-                this.loadFiles();
+                await this.loadFiles();
             } else {
                 throw new Error(data.error || 'Delete failed');
             }
@@ -447,22 +412,6 @@ class FileManager {
         const div = document.createElement('div');
         div.textContent = text;
         return div.innerHTML;
-    }
-    // View Management
-    setView(view) {
-        this.currentView = view;
-        const fileList = document.getElementById('fileList');
-        
-        // Update view buttons
-        document.querySelectorAll('.view-btn').forEach(btn => {
-            btn.classList.toggle('active', btn.dataset.view === view);
-        });
-        
-        // Update file list class
-        fileList.className = `file-list ${view}-view`;
-        
-        // Re-render files
-        this.renderFiles();
     }
     
     // Sorting
@@ -564,12 +513,12 @@ class FileManager {
         
         if (this.filteredFiles.length === 0) {
             fileList.style.display = 'none';
-            emptyState.style.display = 'block';
+            if (emptyState) emptyState.style.display = 'block';
             return;
         }
         
-        fileList.style.display = this.currentView === 'grid' ? 'grid' : 'flex';
-        emptyState.style.display = 'none';
+        fileList.style.display = 'grid';
+        if (emptyState) emptyState.style.display = 'none';
         
         fileList.innerHTML = '';
         
@@ -580,14 +529,11 @@ class FileManager {
     }
     
     createFileElement(file) {
-        const isSelected = this.selectedFileIds.has(file.id);
+        const isSelected = this.selectedFiles.includes(file.id);
         const fileIcon = this.getFileIcon(file.original_name);
         
-        if (this.currentView === 'grid') {
-            return this.createFileCard(file, fileIcon, isSelected);
-        } else {
-            return this.createFileItem(file, fileIcon, isSelected);
-        }
+        // Always use grid view
+        return this.createFileCard(file, fileIcon, isSelected);
     }
     
     createFileCard(file, fileIcon, isSelected) {

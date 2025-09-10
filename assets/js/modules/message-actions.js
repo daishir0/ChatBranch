@@ -52,17 +52,29 @@ class MessageActionsManager {
         document.getElementById('loadingSpinner').style.display = 'flex';
         
         try {
+            // Get selected files for edit message
+            const selectedFiles = window.editSelectedFiles || [];
+            
             const data = await this.app.apiClient.editMessage(
                 this.currentEditMessageId,
                 newContent,
                 this.app.settingsManager.settings.systemPrompt,
-                this.app.settingsManager.settings.model
+                this.app.settingsManager.settings.model,
+                selectedFiles
             );
             
             console.log('Edit message response:', data);
             
             if (data.success) {
                 this.app.uiManager.hideModal('editMessageModal');
+                
+                // Clear edit file attachments
+                window.editSelectedFiles = [];
+                const editAttachments = document.getElementById('editFileAttachments');
+                if (editAttachments) {
+                    editAttachments.style.display = 'none';
+                    editAttachments.innerHTML = '';
+                }
                 
                 // 編集完了後、適切なメッセージIDを設定
                 if (data.ai_response && data.ai_response.message_id) {
@@ -133,17 +145,29 @@ class MessageActionsManager {
         document.getElementById('loadingSpinner').style.display = 'flex';
         
         try {
+            // Get selected files for branch message
+            const selectedFiles = window.branchSelectedFiles || [];
+            
             const data = await this.app.apiClient.branchMessage(
                 this.currentBranchParentId,
                 content,
                 this.app.settingsManager.settings.systemPrompt,
-                this.app.settingsManager.settings.model
+                this.app.settingsManager.settings.model,
+                selectedFiles
             );
             
             console.log('Branch message response:', data);
             
             if (data.success) {
                 this.app.uiManager.hideModal('branchMessageModal');
+                
+                // Clear branch file attachments
+                window.branchSelectedFiles = [];
+                const branchAttachments = document.getElementById('branchFileAttachments');
+                if (branchAttachments) {
+                    branchAttachments.style.display = 'none';
+                    branchAttachments.innerHTML = '';
+                }
                 
                 // Update current message to the AI response (for proper path display)
                 this.app._currentMessageId = data.ai_response && data.ai_response.message_id ? data.ai_response.message_id : data.user_message_id;

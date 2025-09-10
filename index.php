@@ -254,9 +254,19 @@ $lang = Language::getInstance();
                     <button class="modal-close" id="editMessageClose">×</button>
                 </div>
                 <div class="modal-body">
+                    <!-- File Attachments Area -->
+                    <div class="file-attachments" id="editFileAttachments" style="display: none;">
+                        <!-- File attachment display area -->
+                    </div>
+                    
                     <div class="edit-message-form">
                         <label for="editMessageTextarea"><?= __('messages.message_content') ?>:</label>
-                        <textarea id="editMessageTextarea" rows="6" placeholder="<?= __('messages.edit_placeholder') ?>"></textarea>
+                        <div class="textarea-container">
+                            <textarea id="editMessageTextarea" rows="6" placeholder="<?= __('messages.edit_placeholder') ?>"></textarea>
+                            <div class="input-actions">
+                                <button type="button" id="editAttachFileBtn" title="<?= __('files.upload') ?>">📎</button>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -274,9 +284,19 @@ $lang = Language::getInstance();
                     <button class="modal-close" id="branchMessageClose">×</button>
                 </div>
                 <div class="modal-body">
+                    <!-- File Attachments Area -->
+                    <div class="file-attachments" id="branchFileAttachments" style="display: none;">
+                        <!-- File attachment display area -->
+                    </div>
+                    
                     <div class="branch-message-form">
                         <label for="branchMessageTextarea"><?= __('messages.branch_content') ?>:</label>
-                        <textarea id="branchMessageTextarea" rows="6" placeholder="<?= __('messages.branch_placeholder') ?>"></textarea>
+                        <div class="textarea-container">
+                            <textarea id="branchMessageTextarea" rows="6" placeholder="<?= __('messages.branch_placeholder') ?>"></textarea>
+                            <div class="input-actions">
+                                <button type="button" id="branchAttachFileBtn" title="<?= __('files.upload') ?>">📎</button>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div class="modal-footer">

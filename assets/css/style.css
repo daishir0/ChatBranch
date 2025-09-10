@@ -1295,7 +1295,11 @@ html,
 }
 
 /* Enhanced File Manager Styles */
-.file-manager-modal .modal-content {
+#fileManagerModal {
+    z-index: 2000 !important;
+}
+
+.file-manager-modal {
     max-width: 900px;
     width: 90%;
     max-height: 80vh;
@@ -1808,6 +1812,42 @@ html,
     .file-upload-area {
         padding: 30px 15px;
     }
+}
+
+/* Branch and Edit Message Modal Styles */
+#branchMessageModal .modal-content,
+#editMessageModal .modal-content {
+    max-width: 600px;
+}
+
+.textarea-container {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+}
+
+.input-actions {
+    position: absolute;
+    bottom: 8px;
+    right: 8px;
+    display: flex;
+    gap: 4px;
+    z-index: 10;
+}
+
+.input-actions button {
+    background: rgba(255, 255, 255, 0.9);
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 4px 6px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.2s;
+}
+
+.input-actions button:hover {
+    background: rgba(255, 255, 255, 1);
+    border-color: #bbb;
 }
 
 /* Persona Modal Styles */
@@ -2750,11 +2790,11 @@ html,
     opacity: 1;
 }
 
-/* AI message actions (右下配置) */
+/* AI message actions (右上配置) */
 .message.assistant .message-actions.ai-actions {
     position: absolute;
-    top: auto !important;
-    bottom: 8px;
+    top: 8px;
+    bottom: auto;
     right: 8px;
     margin: 0;
     background: var(--bg-secondary);
@@ -2823,7 +2863,8 @@ html,
     }
     
     .message.assistant .message-actions.ai-actions {
-        bottom: 4px;
+        top: 4px;
+        bottom: auto;
         right: 4px;
         padding: 1px;
     }

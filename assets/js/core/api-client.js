@@ -52,7 +52,7 @@ class APIClient {
     /**
      * メッセージ編集
      */
-    async editMessage(messageId, content, systemPrompt, model) {
+    async editMessage(messageId, content, systemPrompt, model, files = []) {
         const response = await this.authenticatedFetch(`${this.apiBaseUrl}/chat.php?action=edit`, {
             method: 'POST',
             headers: {
@@ -63,6 +63,7 @@ class APIClient {
                 content: content,
                 system_prompt: systemPrompt,
                 model: model,
+                files: files,
                 csrf_token: window.csrfToken
             })
         });
@@ -73,7 +74,7 @@ class APIClient {
     /**
      * メッセージ分岐作成
      */
-    async branchMessage(clickedMessageId, content, systemPrompt, model) {
+    async branchMessage(clickedMessageId, content, systemPrompt, model, files = []) {
         const response = await this.authenticatedFetch(`${this.apiBaseUrl}/chat.php?action=branch`, {
             method: 'POST',
             headers: {
@@ -84,6 +85,7 @@ class APIClient {
                 content: content,
                 system_prompt: systemPrompt,
                 model: model,
+                files: files,
                 csrf_token: window.csrfToken
             })
         });

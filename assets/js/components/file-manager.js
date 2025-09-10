@@ -1,7 +1,8 @@
 // ChatBranch Enhanced File Manager Component
 
 class FileManager {
-    constructor() {
+    constructor(context = 'main') {
+        this.context = context; // 'main', 'branch', or 'edit'
         this.selectedFiles = [];
         this.allFiles = [];
         this.filteredFiles = [];
@@ -259,14 +260,27 @@ class FileManager {
     }
     
     selectFiles() {
-        app.selectedFiles = [...this.selectedFiles];
-        app.updateFileAttachments();
+        if (this.context === 'main') {
+            app.selectedFiles = [...this.selectedFiles];
+            app.updateFileAttachments();
+        } else if (this.context === 'branch') {
+            this.updateAttachmentsForContext('branchFileAttachments');
+        } else if (this.context === 'edit') {
+            this.updateAttachmentsForContext('editFileAttachments');
+        }
         this.hide();
     }
     
     renderSelectedFiles() {
-        // Clear previous selections
-        this.selectedFiles = [...app.selectedFiles];
+        // Clear previous selections based on context
+        if (this.context === 'main') {
+            this.selectedFiles = [...app.selectedFiles];
+        } else if (this.context === 'branch') {
+            this.selectedFiles = [...(window.branchSelectedFiles || [])];
+        } else if (this.context === 'edit') {
+            this.selectedFiles = [...(window.editSelectedFiles || [])];
+        }
+        
         this.updateSelectButton();
         
         // Update checkboxes in the file list
@@ -968,6 +982,42 @@ class FileManager {
     }
     
     /**
+     * 指定されたコンテキストの添付ファイル表示を更新
+     */
+    updateAttachmentsForContext(containerId) {
+        const attachmentsContainer = document.getElementById(containerId);
+        
+        if (this.selectedFiles.length === 0) {
+            if (attachmentsContainer) {
+                attachmentsContainer.style.display = 'none';
+            }
+            // Update global context variables
+            if (this.context === 'branch') {
+                window.branchSelectedFiles = [];
+            } else if (this.context === 'edit') {
+                window.editSelectedFiles = [];
+            }
+            return;
+        }
+        
+        // Update global context variables
+        if (this.context === 'branch') {
+            window.branchSelectedFiles = [...this.selectedFiles];
+        } else if (this.context === 'edit') {
+            window.editSelectedFiles = [...this.selectedFiles];
+        }
+        
+        if (attachmentsContainer) {
+            attachmentsContainer.style.display = 'block';
+            attachmentsContainer.innerHTML = '';
+            
+            this.selectedFiles.forEach(fileId => {
+                this.createAttachmentElementForContext(fileId, attachmentsContainer, containerId);
+            });
+        }
+    }
+    
+    /**
      * チャット用添付ファイル要素を作成
      */
     async createAttachmentElementForChat(fileId, container) {
@@ -1005,14 +1055,80 @@ class FileManager {
     }
     
     /**
+     * コンテキスト用添付ファイル要素を作成
+     */
+    async createAttachmentElementForContext(fileId, container, containerId) {
+        try {
+            // Try to find file in loaded data first
+            let file = this.allFiles.find(f => f.id == fileId);
+            
+            if (!file) {
+                // If not found, fetch from API
+                const data = await this.authenticatedFetch(`${this.apiBaseUrl}/files.php?action=get&id=${fileId}`);
+                const result = await data.json();
+                if (result.success) {
+                    file = result.file;
+                } else {
+                    console.error('File info API error:', result.error || 'Unknown error');
+                    return;
+                }
+            }
+            
+            const attachmentDiv = document.createElement('div');
+            attachmentDiv.className = 'attachment-item';
+            attachmentDiv.innerHTML = `
+                <span>📎 ${this.escapeHtml(file.original_name)}</span>
+                <button class="attachment-remove" onclick="window.removeAttachmentFromContext('${this.context}', ${fileId})">×</button>
+            `;
+            container.appendChild(attachmentDiv);
+            
+        } catch (error) {
+            console.error('Failed to load file info:', error);
+        }
+    }
+    
+    /**
      * 添付ファイルを削除（チャット用）
      */
     removeAttachment(fileId) {
         this.selectedFiles = this.selectedFiles.filter(id => id !== fileId);
         this.updateFileAttachments();
     }
+    
+    /**
+     * コンテキスト別添付ファイル削除
+     */
+    removeAttachmentFromContext(fileId) {
+        this.selectedFiles = this.selectedFiles.filter(id => id !== fileId);
+        
+        if (this.context === 'branch') {
+            window.branchSelectedFiles = [...this.selectedFiles];
+            this.updateAttachmentsForContext('branchFileAttachments');
+        } else if (this.context === 'edit') {
+            window.editSelectedFiles = [...this.selectedFiles];
+            this.updateAttachmentsForContext('editFileAttachments');
+        }
+    }
 }
 
-// Initialize file manager
-const fileManager = new FileManager();
+// Initialize file managers for different contexts
+const fileManager = new FileManager('main');
+const branchFileManager = new FileManager('branch');
+const editFileManager = new FileManager('edit');
+
 window.fileManager = fileManager;
+window.branchFileManager = branchFileManager;
+window.editFileManager = editFileManager;
+
+// Global helper functions for attachment removal
+window.removeAttachmentFromContext = function(context, fileId) {
+    if (context === 'branch') {
+        branchFileManager.removeAttachmentFromContext(fileId);
+    } else if (context === 'edit') {
+        editFileManager.removeAttachmentFromContext(fileId);
+    }
+};
+
+// Initialize global context variables
+window.branchSelectedFiles = [];
+window.editSelectedFiles = [];

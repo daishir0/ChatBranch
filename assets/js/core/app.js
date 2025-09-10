@@ -270,6 +270,15 @@ class ChatBranchApp {
             }
         });
         
+        // File attachment buttons for Branch/Edit modals
+        document.getElementById('branchAttachFileBtn').addEventListener('click', () => {
+            window.branchFileManager.show();
+        });
+        
+        document.getElementById('editAttachFileBtn').addEventListener('click', () => {
+            window.editFileManager.show();
+        });
+        
         // Modal Close Events
         document.querySelectorAll('.modal').forEach(modal => {
             modal.addEventListener('click', (e) => {

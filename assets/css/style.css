@@ -1294,24 +1294,50 @@ html,
     overflow-wrap: break-word;
 }
 
-/* Enhanced File Manager Styles */
+/* Enhanced File Manager Styles - Fullscreen Layout */
 #fileManagerModal {
     z-index: 2000 !important;
 }
 
-.file-manager-modal {
-    max-width: 900px;
-    width: 90%;
-    max-height: 80vh;
+#fileManagerModal .modal-content {
+    width: 100vw;
+    height: 100vh;
+    max-width: none;
+    max-height: none;
+    margin: 0;
+    border-radius: 0;
+    display: flex;
+    flex-direction: column;
 }
 
-.file-upload-area {
+#fileManagerModal .modal-header {
+    padding: 16px 24px;
+    border-bottom: 1px solid var(--border-color);
+    flex-shrink: 0;
+}
+
+#fileManagerModal .modal-body {
+    padding: 0;
+    flex: 1;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+#fileManagerModal .modal-footer {
+    padding: 16px 24px;
+    border-top: 1px solid var(--border-color);
+    flex-shrink: 0;
+}
+
+#fileManagerModal .file-upload-area {
     border: 2px dashed var(--border-color);
     border-radius: var(--radius);
-    padding: 40px 20px;
+    padding: 20px;
     text-align: center;
-    margin-bottom: 20px;
+    margin: 16px 24px;
     transition: border-color 0.3s, background-color 0.3s;
+    flex-shrink: 0;
 }
 
 .file-upload-area:hover,
@@ -1338,12 +1364,13 @@ html,
 }
 
 /* File Controls */
-.file-controls {
+#fileManagerModal .file-controls {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 16px;
+    margin: 0 24px 16px 24px;
     gap: 16px;
+    flex-shrink: 0;
 }
 
 .file-search {
@@ -1474,183 +1501,216 @@ html,
     padding: 16px;
 }
 
-/* Grid View */
-.file-list.grid-view {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 16px;
-}
-
-/* List View */
-.file-list.list-view {
+/* FileManager File List Container */
+#fileManagerModal .file-list-container {
+    flex: 1;
+    overflow: hidden;
+    margin: 0 24px 16px 24px;
     display: flex;
     flex-direction: column;
-    gap: 8px;
 }
 
-/* File Card (Grid View) */
-.file-card {
+/* Grid View - Compact Layout */
+#fileManagerModal .file-list.grid-view {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 8px;
+    overflow-y: auto;
+    padding: 8px;
+}
+
+/* List View - Compact Layout */
+#fileManagerModal .file-list.list-view {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    overflow-y: auto;
+    padding: 8px;
+}
+
+/* Compact File Card (Grid View) */
+#fileManagerModal .file-card {
     border: 1px solid var(--border-color);
-    border-radius: var(--radius);
-    padding: 16px;
+    border-radius: 6px;
+    padding: 8px;
     background: var(--bg-secondary);
     transition: all 0.2s;
     cursor: pointer;
     position: relative;
+    display: flex;
+    flex-direction: column;
+    min-height: 80px;
 }
 
-.file-card:hover {
+#fileManagerModal .file-card:hover {
     border-color: var(--accent-color);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    background: rgba(74, 158, 255, 0.05);
 }
 
-.file-card.selected {
+#fileManagerModal .file-card.selected {
     border-color: var(--accent-color);
     background: rgba(74, 158, 255, 0.1);
 }
 
-.file-card .file-icon {
-    font-size: 48px;
+#fileManagerModal .file-card .file-icon {
+    font-size: 24px;
     text-align: center;
-    margin-bottom: 8px;
-}
-
-.file-card .file-info {
-    text-align: center;
-}
-
-.file-card .file-name {
-    display: block;
-    font-weight: bold;
     margin-bottom: 4px;
-    word-break: break-word;
+    flex-shrink: 0;
 }
 
-.file-card .file-meta {
-    font-size: 12px;
+#fileManagerModal .file-card .file-info {
+    text-align: center;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+#fileManagerModal .file-card .file-name {
+    font-size: 11px;
+    font-weight: 500;
+    margin-bottom: 2px;
+    line-height: 1.2;
+    word-break: break-word;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+#fileManagerModal .file-card .file-meta {
+    font-size: 10px;
     color: var(--text-muted);
     display: block;
 }
 
-.file-card .file-actions {
+#fileManagerModal .file-card .file-actions {
     position: absolute;
-    top: 8px;
-    right: 8px;
+    top: 4px;
+    right: 4px;
     display: flex;
-    gap: 4px;
+    gap: 2px;
     opacity: 0;
     transition: opacity 0.2s;
 }
 
-.file-card:hover .file-actions {
+#fileManagerModal .file-card:hover .file-actions {
     opacity: 1;
 }
 
-.file-card .action-btn {
+#fileManagerModal .file-card .action-btn {
     background: rgba(0, 0, 0, 0.7);
     border: none;
     color: white;
-    width: 28px;
-    height: 28px;
+    width: 20px;
+    height: 20px;
     border-radius: 50%;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 12px;
+    font-size: 10px;
     transition: all 0.2s;
 }
 
-.file-card .action-btn:hover {
+#fileManagerModal .file-card .action-btn:hover {
     background: rgba(0, 0, 0, 0.9);
     transform: scale(1.1);
 }
 
-.file-card .action-btn.delete:hover {
+#fileManagerModal .file-card .action-btn.delete:hover {
     background: var(--error-color);
 }
 
-/* File Item (List View) */
-.file-item {
+/* Compact File Item (List View) */
+#fileManagerModal .file-item {
     display: flex;
     align-items: center;
-    padding: 12px;
+    padding: 6px 8px;
     border: 1px solid var(--border-color);
-    border-radius: var(--radius);
+    border-radius: 4px;
     background: var(--bg-secondary);
     transition: all 0.2s;
     cursor: pointer;
+    min-height: 40px;
 }
 
-.file-item:hover {
+#fileManagerModal .file-item:hover {
+    border-color: var(--accent-color);
+    background: rgba(74, 158, 255, 0.05);
+}
+
+#fileManagerModal .file-item.selected {
     border-color: var(--accent-color);
     background: rgba(74, 158, 255, 0.1);
 }
 
-.file-item.selected {
-    border-color: var(--accent-color);
-    background: rgba(74, 158, 255, 0.1);
-}
-
-.file-item .file-left {
+#fileManagerModal .file-item .file-left {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 8px;
     flex: 1;
+    min-width: 0;
 }
 
-.file-item .file-icon {
-    font-size: 24px;
+#fileManagerModal .file-item .file-icon {
+    font-size: 16px;
+    flex-shrink: 0;
 }
 
-.file-item .file-info {
+#fileManagerModal .file-item .file-info {
     flex: 1;
+    min-width: 0;
 }
 
-.file-item .file-name {
-    display: block;
-    font-weight: bold;
-    margin-bottom: 2px;
-}
-
-.file-item .file-meta {
+#fileManagerModal .file-item .file-name {
     font-size: 12px;
+    font-weight: 500;
+    margin-bottom: 1px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+#fileManagerModal .file-item .file-meta {
+    font-size: 10px;
     color: var(--text-muted);
 }
 
-.file-item .file-actions {
+#fileManagerModal .file-item .file-actions {
     display: flex;
-    gap: 4px;
+    gap: 2px;
     opacity: 0;
     transition: opacity 0.2s;
+    flex-shrink: 0;
 }
 
-.file-item:hover .file-actions {
+#fileManagerModal .file-item:hover .file-actions {
     opacity: 1;
 }
 
-.file-item .action-btn {
+#fileManagerModal .file-item .action-btn {
     background: var(--bg-tertiary);
     border: 1px solid var(--border-color);
     color: var(--text-primary);
-    width: 32px;
-    height: 32px;
+    width: 24px;
+    height: 24px;
     border-radius: 4px;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 14px;
+    font-size: 10px;
     transition: all 0.2s;
 }
 
-.file-item .action-btn:hover {
+#fileManagerModal .file-item .action-btn:hover {
     background: var(--accent-color);
     color: white;
 }
 
-.file-item .action-btn.delete:hover {
+#fileManagerModal .file-item .action-btn.delete:hover {
     background: var(--error-color);
 }
 
@@ -1761,11 +1821,69 @@ html,
     background: var(--bg-tertiary);
 }
 
-/* Mobile Responsive */
+/* FileManager Mobile Responsive */
 @media (max-width: 768px) {
-    .file-manager-modal .modal-content {
-        width: 95%;
-        max-height: 90vh;
+    #fileManagerModal .modal-content {
+        width: 100vw;
+        height: 100vh;
+    }
+    
+    #fileManagerModal .modal-header {
+        padding: 12px 16px;
+    }
+    
+    #fileManagerModal .modal-footer {
+        padding: 12px 16px;
+    }
+    
+    #fileManagerModal .file-controls {
+        flex-direction: column;
+        gap: 8px;
+        margin: 0 16px 12px 16px;
+    }
+    
+    #fileManagerModal .file-upload-area {
+        margin: 12px 16px;
+        padding: 16px;
+    }
+    
+    #fileManagerModal .file-list-container {
+        margin: 0 16px 12px 16px;
+    }
+    
+    #fileManagerModal .file-list.grid-view {
+        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+        gap: 6px;
+    }
+    
+    #fileManagerModal .file-card {
+        min-height: 70px;
+        padding: 6px;
+    }
+    
+    #fileManagerModal .file-card .file-icon {
+        font-size: 20px;
+    }
+    
+    #fileManagerModal .file-card .file-name {
+        font-size: 10px;
+    }
+    
+    #fileManagerModal .file-card .file-meta {
+        font-size: 9px;
+    }
+    
+    #fileManagerModal .file-item {
+        min-height: 36px;
+        padding: 4px 6px;
+    }
+    
+    #fileManagerModal .file-item .file-name {
+        font-size: 11px;
+    }
+    
+    #fileManagerModal .file-item .file-meta {
+        font-size: 9px;
     }
     
     .file-controls {

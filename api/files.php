@@ -116,40 +116,18 @@ function handleList($fileManager, $params) {
     
     $files = $fileManager->getFiles($limit, $offset);
     
-    // Format files to expose markdown content as main content
-    // Only include files with meaningful content
+    // Format files for file manager list - lightweight response without content
     $formattedFiles = array_map(function($file) {
-        $content = $file['content_markdown'] ?? '';
-        // Clean UTF-8 content more aggressively
-        $content = preg_replace('/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/', '', $content); // Remove control chars
-        $content = mb_convert_encoding($content, 'UTF-8', 'UTF-8'); // Clean UTF-8
-        $preview = mb_strlen($content) > 200 ? mb_substr($content, 0, 200) . '...' : $content;
-        
         return [
             'id' => $file['id'],
             'original_name' => $file['original_name'],
-            'content' => $content, // Main content is markdown
-            'content_preview' => $preview, // Safe preview
             'metadata' => json_decode($file['metadata'] ?? '{}', true),
             'file_size' => $file['file_size'],
-            'created_at' => $file['created_at'],
-            'has_meaningful_content' => hasMeaningfulContent($content)
+            'created_at' => $file['created_at']
         ];
     }, $files);
     
-    // Keep all files in file manager list - filtering only applies to chat usage
-    // Note: Files without meaningful content won't be useful for chat, but should be visible in file manager
-    // $formattedFiles = array_filter($formattedFiles, function($file) {
-    //     return $file['has_meaningful_content'];
-    // });
-    
-    // Remove the has_meaningful_content flag from the response
-    $formattedFiles = array_map(function($file) {
-        unset($file['has_meaningful_content']);
-        return $file;
-    }, $formattedFiles);
-    
-    // Re-index array after filtering
+    // Re-index array
     $formattedFiles = array_values($formattedFiles);
     
     echo json_encode([

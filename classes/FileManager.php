@@ -452,22 +452,18 @@ class FileManager {
     public function searchFiles($query, $limit = null) {
         if ($limit === null) {
             $sql = "SELECT * FROM files WHERE 
-                    original_name LIKE ? OR 
-                    content_markdown LIKE ? OR 
-                    metadata LIKE ? 
+                    original_name LIKE ? 
                     ORDER BY created_at DESC";
             
             $searchTerm = "%{$query}%";
-            return $this->db->fetchAll($sql, [$searchTerm, $searchTerm, $searchTerm]);
+            return $this->db->fetchAll($sql, [$searchTerm]);
         } else {
             $sql = "SELECT * FROM files WHERE 
-                    original_name LIKE ? OR 
-                    content_markdown LIKE ? OR 
-                    metadata LIKE ? 
+                    original_name LIKE ? 
                     ORDER BY created_at DESC LIMIT ?";
             
             $searchTerm = "%{$query}%";
-            return $this->db->fetchAll($sql, [$searchTerm, $searchTerm, $searchTerm, $limit]);
+            return $this->db->fetchAll($sql, [$searchTerm, $limit]);
         }
     }
     

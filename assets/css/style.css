@@ -630,7 +630,7 @@ body {
 }
 
 .scroll-to-bottom {
-    top: 120px; /* さらに下に配置 */
+    bottom: 215px; /* 上ボタンの直上に配置 */
 }
 
 .scroll-to-top {
@@ -647,7 +647,7 @@ body {
     }
     
     .scroll-to-bottom {
-        top: 100px;
+        bottom: 210px; /* モバイルでも上ボタンの直上に配置 */
     }
     
     .scroll-to-top {

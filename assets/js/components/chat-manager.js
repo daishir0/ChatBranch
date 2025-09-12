@@ -271,10 +271,10 @@ class ChatManager {
             const showBranchButton = true; // 全てのユーザーメッセージに表示
             actionsHTML = `
                 <div class="message-actions">
+                    <button class="message-action-btn copy-btn" onclick="app.copyMessage(${message.id})" title="Copy">📋</button>
                     <button class="message-action-btn" onclick="app.editMessage(${message.id})" title="Edit">✏️</button>
                     ${showBranchButton ? `<button class="message-action-btn" onclick="app.branchMessage(${message.id})" title="Branch">🌿</button>` : ''}
                     <button class="message-action-btn" onclick="app.deleteMessage(${message.id})" title="Delete">🗑️</button>
-                    <button class="message-action-btn copy-btn" onclick="app.copyMessage(${message.id})" title="Copy">📋</button>
                 </div>
             `;
         } else if (message.role === 'assistant') {

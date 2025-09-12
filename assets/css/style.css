@@ -257,12 +257,77 @@ body {
     color: var(--text-muted);
 }
 
+/* 複数選択機能のスタイル */
+.thread-item.selected {
+    background-color: rgba(74, 158, 255, 0.1);
+    border: 1px solid var(--accent-color);
+}
+
+.thread-checkbox {
+    margin-right: 12px;
+    accent-color: var(--accent-color);
+    cursor: pointer;
+    width: 16px;
+    height: 16px;
+}
+
+/* バルクアクションバー */
+.bulk-action-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: var(--accent-color);
+    color: white;
+    padding: 12px 20px;
+    display: none;
+    align-items: center;
+    justify-content: space-between;
+    z-index: 1000;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.bulk-info {
+    font-weight: 500;
+    font-size: 14px;
+}
+
+.bulk-actions {
+    display: flex;
+    gap: 12px;
+}
+
+.bulk-btn {
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    color: white;
+    padding: 6px 12px;
+    border-radius: var(--radius);
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 500;
+    transition: background-color 0.2s;
+}
+
+.bulk-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.bulk-btn.danger {
+    background: var(--error-color);
+}
+
+.bulk-btn.danger:hover {
+    background: rgba(239, 68, 68, 0.8);
+}
+
 .sidebar-footer {
     padding: 20px;
     border-top: 1px solid var(--border-color);
     display: flex;
     flex-direction: column;
     gap: 8px;
+    flex-shrink: 0; /* Prevent footer from shrinking */
 }
 
 .sidebar-file-btn {
@@ -1167,6 +1232,11 @@ body {
     
     .sidebar.open {
         left: 0;
+    }
+    
+    .sidebar-footer {
+        padding: 12px;
+        gap: 6px;
     }
     
     .main-content {
@@ -3112,6 +3182,34 @@ html,
     }
 }
 
+/* 複数選択機能のモバイル対応 */
+@media (max-width: 768px) {
+    .bulk-action-bar {
+        padding: 10px 16px;
+        font-size: 14px;
+    }
+    
+    .bulk-actions {
+        gap: 8px;
+    }
+    
+    .bulk-btn {
+        padding: 8px 12px;
+        font-size: 12px;
+    }
+    
+    .thread-checkbox {
+        width: 18px;
+        height: 18px;
+        margin-right: 10px;
+    }
+    
+    .thread-item {
+        padding: 8px 16px;
+        min-height: 50px;
+    }
+}
+
 /* 極小画面での最適化 */
 @media (max-width: 480px) {
     .message-content .markdown-content .table-wrapper::after {
@@ -3127,5 +3225,115 @@ html,
     .message-content .markdown-content th,
     .message-content .markdown-content td {
         padding: 0.3rem 0.4rem;
+    }
+    
+    /* 極小画面でのサイドバー調整 */
+    .sidebar-footer {
+        padding: 8px;
+        gap: 4px;
+    }
+    
+    .settings-btn {
+        padding: 8px;
+        font-size: 12px;
+    }
+    
+    .sidebar-header {
+        padding: 12px;
+    }
+    
+    .thread-search {
+        padding: 8px 12px;
+    }
+    
+    /* 極小画面での複数選択調整 */
+    .bulk-action-bar {
+        padding: 8px 12px;
+        font-size: 13px;
+    }
+    
+    .bulk-actions {
+        gap: 6px;
+    }
+    
+    .bulk-btn {
+        padding: 6px 10px;
+        font-size: 11px;
+    }
+}
+
+/* 横向きモバイル（高さが極小）での最適化 */
+@media (max-height: 400px) {
+    .sidebar-footer {
+        padding: 6px 12px;
+        gap: 3px;
+    }
+    
+    .settings-btn {
+        padding: 6px 10px;
+        font-size: 11px;
+    }
+    
+    .sidebar-header {
+        padding: 4px 12px;
+    }
+    
+    .sidebar-header .logo {
+        font-size: 16px;
+        margin-bottom: 4px;
+    }
+    
+    .sidebar-header .new-chat-btn {
+        padding: 6px 12px;
+        font-size: 12px;
+    }
+    
+    .thread-search {
+        padding: 4px 12px;
+    }
+    
+    .thread-search input {
+        padding: 6px 8px;
+        font-size: 12px;
+    }
+    
+    .thread-list {
+        padding: 4px 12px;
+    }
+}
+
+/* 超極小画面（横向きなど）での緊急対応 */
+@media (max-height: 350px) {
+    .sidebar-header {
+        padding: 2px 8px;
+    }
+    
+    .sidebar-header .logo {
+        font-size: 14px;
+        margin-bottom: 2px;
+    }
+    
+    .sidebar-header .new-chat-btn {
+        padding: 4px 8px;
+        font-size: 11px;
+    }
+    
+    .thread-search {
+        padding: 2px 8px;
+    }
+    
+    .thread-search input {
+        padding: 4px 6px;
+        font-size: 11px;
+    }
+    
+    .sidebar-footer {
+        padding: 4px 8px;
+        gap: 2px;
+    }
+    
+    .settings-btn {
+        padding: 4px 8px;
+        font-size: 10px;
     }
 }

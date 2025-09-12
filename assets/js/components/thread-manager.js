@@ -5,6 +5,12 @@ class ThreadManager {
         this.app = app;
         this.allThreads = []; // Store all threads for search
         this.filteredThreads = []; // Store filtered threads
+        
+        // 複数選択機能
+        this.selectionMode = false;
+        this.selectedThreads = new Set();
+        
+        this.setupBulkActionUI();
     }
     
     /**
@@ -48,21 +54,46 @@ class ThreadManager {
             threadElement.className = 'thread-item';
             threadElement.dataset.threadId = thread.id;
             
+            // 選択モード時はチェックボックスを表示
+            const checkboxHtml = this.selectionMode ? 
+                `<input type="checkbox" class="thread-checkbox" data-thread-id="${thread.id}" ${this.selectedThreads.has(thread.id) ? 'checked' : ''}>` : '';
+            
             threadElement.innerHTML = `
+                ${checkboxHtml}
                 <div class="thread-content" data-thread-id="${thread.id}">
                     <div class="thread-name" data-thread-name="${AppUtils.escapeHtml(thread.name)}">${AppUtils.escapeHtml(thread.name)}</div>
                     <div class="thread-time" data-raw-date="${thread.updated_at}">${AppUtils.formatDate(thread.updated_at)}</div>
                 </div>
-                <div class="thread-actions">
+                <div class="thread-actions" style="${this.selectionMode ? 'display: none;' : ''}">
                     <button class="thread-edit-btn" data-thread-id="${thread.id}" title="Edit">✏️</button>
                     <button class="thread-delete-btn" data-thread-id="${thread.id}" title="Delete">🗑️</button>
                 </div>
             `;
             
+            // 選択状態を視覚的に反映
+            if (this.selectionMode && this.selectedThreads.has(thread.id)) {
+                threadElement.classList.add('selected');
+            }
+            
+            // チェックボックスイベント（選択モード時）
+            const checkbox = threadElement.querySelector('.thread-checkbox');
+            if (checkbox) {
+                checkbox.addEventListener('change', (e) => {
+                    e.stopPropagation();
+                    this.toggleThreadSelection(thread.id, e.target.checked);
+                });
+            }
+            
             // Thread content click event
             const threadContent = threadElement.querySelector('.thread-content');
             threadContent.addEventListener('click', () => {
-                this.selectThread(thread.id, thread.name);
+                if (this.selectionMode) {
+                    // 選択モード時はチェックボックスを切り替え
+                    this.toggleThreadSelection(thread.id);
+                } else {
+                    // 通常モード時はスレッドを開く
+                    this.selectThread(thread.id, thread.name);
+                }
             });
             
             // Add touch events for mobile responsiveness without preventing scroll
@@ -271,6 +302,149 @@ class ThreadManager {
                 console.error('Delete thread error:', error);
                 alert('An error occurred while deleting thread');
             }
+        }
+    }
+    
+    // === 複数選択機能 ===
+    
+    setupBulkActionUI() {
+        // バルクアクションボタンを既存のsidebarに追加
+        const sidebarFooter = document.querySelector('.sidebar-footer');
+        if (sidebarFooter) {
+            const bulkButton = document.createElement('button');
+            bulkButton.className = 'settings-btn';
+            bulkButton.id = 'bulkSelectBtn';
+            bulkButton.innerHTML = '☑️ 選択';
+            bulkButton.addEventListener('click', () => this.toggleSelectionMode());
+            
+            sidebarFooter.insertBefore(bulkButton, sidebarFooter.firstChild);
+        }
+    }
+    
+    toggleSelectionMode() {
+        this.selectionMode = !this.selectionMode;
+        this.selectedThreads.clear();
+        
+        // ボタンテキストを更新
+        const btn = document.getElementById('bulkSelectBtn');
+        if (btn) {
+            btn.innerHTML = this.selectionMode ? '✕ 終了' : '☑️ 選択';
+        }
+        
+        // バルクアクションバーの表示切り替え
+        this.updateBulkActionBar();
+        
+        // スレッドリストを再描画
+        this.renderThreads(this.filteredThreads);
+    }
+    
+    toggleThreadSelection(threadId, forceState = null) {
+        const shouldSelect = forceState !== null ? forceState : !this.selectedThreads.has(threadId);
+        
+        if (shouldSelect) {
+            this.selectedThreads.add(threadId);
+        } else {
+            this.selectedThreads.delete(threadId);
+        }
+        
+        // UI更新
+        const threadElement = document.querySelector(`[data-thread-id="${threadId}"]`);
+        if (threadElement) {
+            const checkbox = threadElement.querySelector('.thread-checkbox');
+            if (checkbox) checkbox.checked = shouldSelect;
+            
+            threadElement.classList.toggle('selected', shouldSelect);
+        }
+        
+        this.updateBulkActionBar();
+    }
+    
+    updateBulkActionBar() {
+        let bar = document.getElementById('bulkActionBar');
+        
+        if (this.selectionMode) {
+            if (!bar) {
+                // バルクアクションバーを作成
+                bar = document.createElement('div');
+                bar.id = 'bulkActionBar';
+                bar.className = 'bulk-action-bar';
+                bar.innerHTML = `
+                    <div class="bulk-info">
+                        <span id="bulkCount">0</span> 件選択中
+                    </div>
+                    <div class="bulk-actions">
+                        <button class="bulk-btn" id="selectAllBtn">全選択</button>
+                        <button class="bulk-btn" id="deselectAllBtn">選択解除</button>
+                        <button class="bulk-btn danger" id="threadBulkDeleteBtn">削除</button>
+                    </div>
+                `;
+                document.body.appendChild(bar);
+                
+                // イベントリスナー追加
+                document.getElementById('selectAllBtn').addEventListener('click', () => this.selectAll());
+                document.getElementById('deselectAllBtn').addEventListener('click', () => this.deselectAll());
+                document.getElementById('threadBulkDeleteBtn').addEventListener('click', () => this.bulkDelete());
+            }
+            
+            // 選択数を更新
+            document.getElementById('bulkCount').textContent = this.selectedThreads.size;
+            bar.style.display = 'flex';
+        } else if (bar) {
+            bar.style.display = 'none';
+        }
+    }
+    
+    selectAll() {
+        this.filteredThreads.forEach(thread => {
+            this.selectedThreads.add(thread.id);
+        });
+        this.renderThreads(this.filteredThreads);
+        this.updateBulkActionBar();
+    }
+    
+    deselectAll() {
+        this.selectedThreads.clear();
+        this.renderThreads(this.filteredThreads);
+        this.updateBulkActionBar();
+    }
+    
+    async bulkDelete() {
+        const count = this.selectedThreads.size;
+        if (count === 0) return;
+        
+        const confirmed = confirm(`選択した${count}個のスレッドを削除しますか？\n\nこの操作は元に戻すことができません。`);
+        if (!confirmed) return;
+        
+        try {
+            const threadIds = Array.from(this.selectedThreads);
+            
+            // 順次削除（シンプルな実装）
+            let deletedCount = 0;
+            for (const threadId of threadIds) {
+                try {
+                    const result = await this.app.apiClient.deleteThread(threadId);
+                    if (result.success) {
+                        deletedCount++;
+                        this.selectedThreads.delete(threadId);
+                    }
+                } catch (error) {
+                    console.error(`Failed to delete thread ${threadId}:`, error);
+                }
+            }
+            
+            // 結果表示
+            if (deletedCount > 0) {
+                alert(`${deletedCount}個のスレッドを削除しました。`);
+                this.loadThreads(); // リストを再読み込み
+            }
+            
+            if (deletedCount < count) {
+                alert(`${count - deletedCount}個のスレッドの削除に失敗しました。`);
+            }
+            
+        } catch (error) {
+            console.error('Bulk delete error:', error);
+            alert('削除処理中にエラーが発生しました。');
         }
     }
 }

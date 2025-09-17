@@ -157,6 +157,18 @@ class ChatBranchApp {
             e.preventDefault();
             treeToggleHandler();
         });
+
+        // New Tree Mode Event
+        const newTreeToggleHandler = () => {
+            this.uiManager.toggleNewTreeMode();
+        };
+
+        const newTreeBtn = document.getElementById('newTreeBtn');
+        newTreeBtn.addEventListener('click', newTreeToggleHandler);
+        newTreeBtn.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            newTreeToggleHandler();
+        });
     }
     
     /**

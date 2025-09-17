@@ -3,6 +3,7 @@
 class UIManager {
     constructor(app) {
         this.app = app;
+        this.newTreeMode = false;
         this.initScrollNavigation();
     }
     
@@ -76,15 +77,115 @@ class UIManager {
      */
     async loadTree() {
         if (!this.app.currentThread) return;
-        
+
         try {
             const data = await this.app.apiClient.getThreadTree(this.app.currentThread);
-            
+
             if (data.success) {
                 window.treeViewer.render(data.tree);
             }
         } catch (error) {
             console.error('Failed to load tree:', error);
+        }
+    }
+
+    /**
+     * 新規ツリーモード切り替え
+     */
+    toggleNewTreeMode() {
+        this.newTreeMode = !this.newTreeMode;
+
+        if (this.newTreeMode) {
+            this.enterNewTreeMode();
+        } else {
+            this.exitNewTreeMode();
+        }
+    }
+
+    /**
+     * 新規ツリーモード開始
+     */
+    enterNewTreeMode() {
+        console.log('Entering New Tree Mode');
+        this.newTreeMode = true;
+
+        // UI状態更新
+        this.updateNewTreeModeUI();
+
+        // currentMessageIdをnullに設定
+        this.app._currentMessageId = null;
+
+        // メッセージ入力エリアのプレースホルダー更新
+        this.updateMessageInputPlaceholder();
+
+        // ツリービューがある場合は閉じる
+        this.hideTreeView();
+    }
+
+    /**
+     * 新規ツリーモード終了
+     */
+    exitNewTreeMode() {
+        console.log('Exiting New Tree Mode');
+        this.newTreeMode = false;
+
+        // UI状態更新
+        this.updateNewTreeModeUI();
+
+        // メッセージ入力エリアのプレースホルダーを元に戻す
+        this.updateMessageInputPlaceholder();
+
+        // メッセージを再読み込み
+        if (this.app._currentThread) {
+            this.app.chatManager.loadMessages();
+        }
+    }
+
+    /**
+     * 新規ツリーモードUI更新
+     */
+    updateNewTreeModeUI() {
+        const newTreeBtn = document.getElementById('newTreeBtn');
+        const messagesContainer = document.getElementById('messagesContainer');
+        const newTreeMode = document.getElementById('newTreeMode');
+
+        if (this.newTreeMode) {
+            // ボタンをアクティブ状態に
+            newTreeBtn.classList.add('active');
+
+            // メッセージコンテナを非表示、新規ツリーモードを表示
+            messagesContainer.style.display = 'none';
+            newTreeMode.style.display = 'flex';
+        } else {
+            // ボタンのアクティブ状態を解除
+            newTreeBtn.classList.remove('active');
+
+            // 新規ツリーモードを非表示、メッセージコンテナを表示
+            newTreeMode.style.display = 'none';
+            messagesContainer.style.display = 'block';
+        }
+    }
+
+    /**
+     * メッセージ入力エリアのプレースホルダー更新
+     */
+    updateMessageInputPlaceholder() {
+        const messageInput = document.getElementById('messageInput');
+
+        if (this.newTreeMode) {
+            messageInput.placeholder = 'Start a new conversation tree...';
+        } else {
+            messageInput.placeholder = 'Type your message...';
+        }
+    }
+
+    /**
+     * スレッド切り替え時のクリーンアップ
+     */
+    onThreadSwitch() {
+        // 新規ツリーモードが有効な場合は終了
+        if (this.newTreeMode) {
+            this.exitNewTreeMode();
         }
     }
     

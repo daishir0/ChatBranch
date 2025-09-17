@@ -106,6 +106,7 @@ $lang = Language::getInstance();
                 <div class="chat-actions">
                     <button class="persona-btn" id="personaBtn" title="<?= __('settings.thread_persona') ?>">🎭</button>
                     <button class="tree-toggle-btn" id="treeToggleBtn" title="Toggle Message Tree">🌳</button>
+                    <button class="new-tree-btn" id="newTreeBtn" title="Start New Tree">🆕</button>
                 </div>
             </header>
             
@@ -121,6 +122,18 @@ $lang = Language::getInstance();
                 <div class="welcome-message">
                     <h3><?= __('chat.welcome_title') ?></h3>
                     <p><?= __('chat.welcome_message') ?></p>
+                </div>
+            </div>
+
+            <!-- New Tree Mode Placeholder -->
+            <div class="new-tree-mode" id="newTreeMode" style="display: none;">
+                <div class="new-tree-placeholder">
+                    <div class="new-tree-icon">🌱</div>
+                    <h3>Start New Tree</h3>
+                    <p>Enter your message below to begin a fresh conversation tree.</p>
+                    <div class="new-tree-tips">
+                        <small>💡 This will create a new root message without any parent connection</small>
+                    </div>
                 </div>
             </div>
             

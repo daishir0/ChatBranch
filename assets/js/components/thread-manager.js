@@ -155,7 +155,10 @@ class ThreadManager {
         document.querySelectorAll('.thread-item').forEach(item => {
             item.classList.toggle('active', item.dataset.threadId == threadId);
         });
-        
+
+        // Reset new tree mode if active
+        this.app.uiManager.onThreadSwitch();
+
         // Update thread-dependent buttons
         this.app.updateThreadDependentButtons();
         

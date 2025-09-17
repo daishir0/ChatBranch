@@ -52,6 +52,12 @@ class ChatManager {
                 // currentThread should be set in advance
                 
                 this.app._currentMessageId = data.assistant_message_id;
+
+                // 新規ツリーモードが有効な場合は終了
+                if (this.app.uiManager.newTreeMode) {
+                    this.app.uiManager.exitNewTreeMode();
+                }
+
                 this.loadMessages();
                 this.app.uiManager.loadTree();
             } else {

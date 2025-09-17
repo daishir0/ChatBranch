@@ -6,3 +6,5 @@ uploads/
 tests/
 composer.phar
 CLAUDE.md
+vendor/
+composer.lock

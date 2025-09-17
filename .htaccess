@@ -3,30 +3,63 @@ RewriteEngine On
 # Redirect to index.php for the root directory
 DirectoryIndex index.php
 
-# Security headers
-Header always set X-Frame-Options DENY
-Header always set X-Content-Type-Options nosniff
-Header always set X-XSS-Protection "1; mode=block"
-Header always set Referrer-Policy "strict-origin-when-cross-origin"
-
-# Hide sensitive files
-<Files "config.php">
-    Order allow,deny
-    Deny from all
-</Files>
-
-<Files "*.log">
-    Order allow,deny
-    Deny from all
-</Files>
-
-<Files "*.db">
-    Order allow,deny
-    Deny from all
-</Files>
-
-# Deny access to uploads directory browsing
+# ディレクトリ一覧表示を完全無効化
 Options -Indexes
+
+# API個別ファイルは許可（ディレクトリブロックより前に配置）
+RewriteCond %{REQUEST_URI} ^/chat2/api/[^/]+\.php$ [NC]
+RewriteRule ^.*$ - [L]
+
+# RewriteEngineを使ってディレクトリアクセスを制御
+RewriteCond %{REQUEST_URI} ^/chat2/(api|classes|data|database|logs|uploads|vendor|tests|\.git|\.claude)/? [NC]
+RewriteRule ^.*$ - [F,L]
+
+# アセットファイル拒否を解除
+<FilesMatch "\.(css|js|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot)$">
+    Require all granted
+</FilesMatch>
+
+# index.php, setup.phpは許可
+<Files "index.php">
+    Require all granted
+</Files>
+<Files "setup.php">
+    Require all granted
+</Files>
+
+# 機密ファイル拡張子のアクセス拒否
+<FilesMatch "\.(htaccess|htpasswd|ini|log|sh|sql|conf|env|lock|md|txt|bak|backup|old|orig|save|tmp|db|phar)$">
+    Require all denied
+</FilesMatch>
+
+# PHPファイルのアクセス拒否（index.php, setup.php以外）
+<FilesMatch "\.php$">
+    Require all denied
+</FilesMatch>
+<Files "index.php">
+    Require all granted
+</Files>
+<Files "setup.php">
+    Require all granted
+</Files>
+
+# JSONファイルのアクセス拒否
+<FilesMatch "\.json$">
+    Require all denied
+</FilesMatch>
+
+# 隠しファイル（.で始まる）のアクセス拒否
+<FilesMatch "^\.">
+    Require all denied
+</FilesMatch>
+
+# Security headers
+<IfModule mod_headers.c>
+    Header always set X-Content-Type-Options nosniff
+    Header always set X-Frame-Options DENY
+    Header always set X-XSS-Protection "1; mode=block"
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+</IfModule>
 
 # Enable compression
 <IfModule mod_deflate.c>

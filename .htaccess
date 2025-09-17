@@ -6,36 +6,30 @@ DirectoryIndex index.php
 # ディレクトリ一覧表示を完全無効化
 Options -Indexes
 
-# API個別ファイルは許可（ディレクトリブロックより前に配置）
-RewriteCond %{REQUEST_URI} ^/chat2/api/[^/]+\.php$ [NC]
-RewriteRule ^.*$ - [L]
-
-# RewriteEngineを使ってディレクトリアクセスを制御
-RewriteCond %{REQUEST_URI} ^/chat2/(api|classes|data|database|logs|uploads|vendor|tests|\.git|\.claude)/? [NC]
-RewriteRule ^.*$ - [F,L]
-
-# アセットファイル拒否を解除
+# アセットファイル許可
 <FilesMatch "\.(css|js|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot)$">
     Require all granted
 </FilesMatch>
 
-# index.php, setup.phpは許可
-<Files "index.php">
-    Require all granted
-</Files>
-<Files "setup.php">
-    Require all granted
-</Files>
+# API個別ファイルは許可（ディレクトリブロックより前に配置）
+RewriteCond %{REQUEST_URI} ^/chat2/api/[^/]+\.php$ [NC]
+RewriteRule ^.*$ - [L]
+
+# RewriteEngineを使ってディレクトリアクセスを制御（apiディレクトリを除外）
+RewriteCond %{REQUEST_URI} ^/chat2/(classes|data|database|logs|uploads|vendor|tests|\.git|\.claude)/? [NC]
+RewriteRule ^.*$ - [F,L]
 
 # 機密ファイル拡張子のアクセス拒否
 <FilesMatch "\.(htaccess|htpasswd|ini|log|sh|sql|conf|env|lock|md|txt|bak|backup|old|orig|save|tmp|db|phar)$">
     Require all denied
 </FilesMatch>
 
-# PHPファイルのアクセス拒否（index.php, setup.php以外）
+# その他のPHPファイルのアクセス拒否（許可されたもの以外）
 <FilesMatch "\.php$">
     Require all denied
 </FilesMatch>
+
+# 許可するPHPファイル（最後に配置して上書き）
 <Files "index.php">
     Require all granted
 </Files>

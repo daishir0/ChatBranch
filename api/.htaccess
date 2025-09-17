@@ -1,0 +1,11 @@
+# API directory - allow access to PHP files
+<FilesMatch "\.php$">
+    Require all granted
+</FilesMatch>
+
+# Security headers for API
+<IfModule mod_headers.c>
+    Header always set X-Content-Type-Options nosniff
+    Header always set X-Frame-Options DENY
+    Header always set Content-Type "application/json; charset=utf-8"
+</IfModule>

@@ -39,8 +39,8 @@ This groundbreaking innovation transforms AI chat from one-size-fits-all to trul
 2. **Set up on your web server**
    ```bash
    # Copy to your web server directory
-   sudo cp -r . /var/www/html/chotgpt2/
-   cd /var/www/html/chotgpt2/
+   sudo cp -r . /var/www/html/ChatBranch/
+   cd /var/www/html/ChatBranch/
    ```
 
 3. **Install Office document parsing libraries**
@@ -49,17 +49,26 @@ This groundbreaking innovation transforms AI chat from one-size-fits-all to trul
    curl -sS https://getcomposer.org/installer | php
    
    # Install required libraries for PDF, Word, Excel, PowerPoint parsing
-   php composer.phar require smalot/pdfparser phpoffice/phpword phpoffice/phpspreadsheet phpoffice/phppresentation
+   php composer.phar install
    ```
 
 4. **Set permissions**
    ```bash
-   sudo chmod 755 /var/www/html/chotgpt2/
-   sudo chown -R www-data:www-data /var/www/html/chotgpt2/
+   sudo chmod 755 /var/www/html/ChatBranch/
+   
+   # Check your web server user first
+   grep -E "^User|^Group" /etc/httpd/conf/httpd.conf  # For Apache
+   # or
+   grep -E "^user" /etc/nginx/nginx.conf  # For Nginx
+   
+   # Set ownership based on your system
+   sudo chown -R apache:apache /var/www/html/ChatBranch/     # CentOS/RHEL/Amazon Linux
+   # or
+   sudo chown -R www-data:www-data /var/www/html/ChatBranch/ # Ubuntu/Debian
    ```
 
 5. **Access the web setup**
-   - Open your browser and navigate to: `http://your-domain.com/chotgpt2/`
+   - Open your browser and navigate to: `http://your-domain.com/ChatBranch/`
    - The setup wizard will automatically appear
 
 ![install](assets/install.png)
@@ -68,12 +77,13 @@ This groundbreaking innovation transforms AI chat from one-size-fits-all to trul
 6. **Complete the web setup**
    - Enter administrator username and password
    - Input your OpenAI API key (get one from [OpenAI API Keys](https://platform.openai.com/api-keys))
-   - Set base URL (optional, e.g., `/chotgpt2`)
+   - Set base URL (optional, e.g., `/ChatBranch`)
    - Click "Install"
 
 7. **Security cleanup**
    - After successful setup, delete `setup.php` for security:
    ```bash
+   cd /var/www/html/ChatBranch/
    rm setup.php
    ```
 
@@ -244,6 +254,23 @@ echo $lang->t('errors.network_error');
 - **Math equations not showing**: Verify KaTeX library is properly included
 - **Mermaid diagrams not rendering**: Check Mermaid.js library loading and browser console for errors
 
+#### Permission Errors
+- **`chown: invalid user: 'www-data:www-data'` error**: Check your web server user first:
+  ```bash
+  # Check Apache user
+  ps aux | grep -E "(httpd|apache)" | head -1
+  grep -E "^User|^Group" /etc/httpd/conf/httpd.conf
+  
+  # Check Nginx user
+  ps aux | grep nginx | head -1
+  grep -E "^user" /etc/nginx/nginx.conf
+  ```
+
+#### System-Specific Notes
+- **CentOS/RHEL/Amazon Linux**: Web server user is typically `apache:apache`
+- **Ubuntu/Debian**: Web server user is typically `www-data:www-data`
+- **Other systems**: Check your actual environment configuration
+
 ### Technical Requirements
 - Minimum PHP 7.4 (PHP 8+ recommended)
 - At least 256MB RAM for PHP
@@ -291,8 +318,8 @@ ChatBranchは、高度な会話ツリー機能と**革新的なスレッド固�
 2. **Webサーバーにセットアップ**
    ```bash
    # Webサーバーディレクトリにコピー
-   sudo cp -r . /var/www/html/chotgpt2/
-   cd /var/www/html/chotgpt2/
+   sudo cp -r . /var/www/html/ChatBranch/
+   cd /var/www/html/ChatBranch/
    ```
 
 3. **Officeドキュメント解析ライブラリのインストール**
@@ -301,28 +328,38 @@ ChatBranchは、高度な会話ツリー機能と**革新的なスレッド固�
    curl -sS https://getcomposer.org/installer | php
    
    # PDF、Word、Excel、PowerPoint解析用の必要ライブラリをインストール
-   php composer.phar require smalot/pdfparser phpoffice/phpword phpoffice/phpspreadsheet phpoffice/phppresentation
+   php composer.phar install
    ```
 
 4. **権限設定**
    ```bash
-   sudo chmod 755 /var/www/html/chotgpt2/
-   sudo chown -R www-data:www-data /var/www/html/chotgpt2/
+   sudo chmod 755 /var/www/html/ChatBranch/
+   
+   # Webサーバーのユーザーを最初に確認
+   grep -E "^User|^Group" /etc/httpd/conf/httpd.conf  # Apache用
+   # または
+   grep -E "^user" /etc/nginx/nginx.conf  # Nginx用
+   
+   # システムに応じて所有者を設定
+   sudo chown -R apache:apache /var/www/html/ChatBranch/     # CentOS/RHEL/Amazon Linux
+   # または
+   sudo chown -R www-data:www-data /var/www/html/ChatBranch/ # Ubuntu/Debian
    ```
 
 5. **Webセットアップにアクセス**
-   - ブラウザで `http://your-domain.com/chotgpt2/` にアクセス
+   - ブラウザで `http://your-domain.com/ChatBranch/` にアクセス
    - セットアップウィザードが自動的に表示されます
 
 6. **Webセットアップを完了**
    - 管理者ユーザー名とパスワードを入力
    - OpenAI APIキーを入力（[OpenAI API Keys](https://platform.openai.com/api-keys)から取得）
-   - ベースURLを設定（オプション、例：`/chotgpt2`）
+   - ベースURLを設定（オプション、例：`/ChatBranch`）
    - 「インストール」をクリック
 
 7. **セキュリティクリーンアップ**
    - セットアップ完了後、セキュリティのため`setup.php`を削除：
    ```bash
+   cd /var/www/html/ChatBranch/
    rm setup.php
    ```
 
@@ -485,6 +522,23 @@ echo $lang->t('errors.network_error');
 - **Markdownがレンダリングされない**: Marked.jsとHighlight.jsライブラリが読み込まれていることを確認してください
 - **数式が表示されない**: KaTeXライブラリが適切にインクルードされていることを確認してください
 - **Mermaid図表がレンダリングされない**: Mermaid.jsライブラリの読み込みとブラウザコンソールのエラーを確認してください
+
+#### 権限エラーの解決
+- **`chown: invalid user: 'www-data:www-data'` エラー**: Webサーバーのユーザーを最初に確認してください：
+  ```bash
+  # Apacheユーザーの確認
+  ps aux | grep -E "(httpd|apache)" | head -1
+  grep -E "^User|^Group" /etc/httpd/conf/httpd.conf
+  
+  # Nginxユーザーの確認
+  ps aux | grep nginx | head -1
+  grep -E "^user" /etc/nginx/nginx.conf
+  ```
+
+#### システム別の注意事項
+- **CentOS/RHEL/Amazon Linux**: Webサーバーユーザーは通常 `apache:apache`
+- **Ubuntu/Debian**: Webサーバーユーザーは通常 `www-data:www-data`
+- **その他のシステム**: 実際の環境設定を確認してください
 
 ### 技術要件
 - 最低PHP 7.4（PHP 8+推奨）

@@ -71,7 +71,7 @@ try {
         // OpenAI API設定
         'openai' => [
             'api_key' => 'your_openai_api_key_here',
-            'default_model' => 'gpt-4o-mini',
+            'default_model' => 'gpt-5-mini',
             'max_tokens' => 128000,
             'temperature' => 0.7,
             // コンテキスト圧縮設定
@@ -100,8 +100,27 @@ try {
 
         // アップロード設定
         'upload' => [
-            'allowed_types' => ['pdf', 'txt', 'docx', 'pptx', 'xlsx', 'md', 'csv'],
-            'max_size' => 5 * 1024 * 1024, // 5MB
+            'allowed_types' => [
+                // PDF files
+                'pdf',
+                // Word documents
+                'doc', 'docx',
+                // Excel spreadsheets
+                'xls', 'xlsx',
+                // PowerPoint presentations
+                'ppt', 'pptx',
+                // Text files - basic
+                'txt', 'md', 'markdown',
+                // Text files - data formats
+                'csv', 'json', 'xml',
+                // Text files - logs and config
+                'log', 'conf', 'config', 'ini', 'properties',
+                // Text files - web and programming
+                'html', 'htm', 'css', 'js', 'ts', 'php', 'py', 'sql', 'yaml', 'yml', 'toml',
+                // Text files - other
+                'rtf', 'bat', 'sh',
+            ],
+            'max_size' => 15 * 1024 * 1024, // 15MB
             'storage_path' => $uploadsDir,
         ],
     ];

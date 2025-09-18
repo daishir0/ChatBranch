@@ -3,7 +3,7 @@
         'name' => 'chat2/app',
         'pretty_version' => 'dev-main',
         'version' => 'dev-main',
-        'reference' => 'b513e912ce002ad9239d4c6bada04109814ac6bb',
+        'reference' => 'c54c07d0a009da6de4f285101fe64e91ff379b2c',
         'type' => 'project',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -13,7 +13,7 @@
         'chat2/app' => array(
             'pretty_version' => 'dev-main',
             'version' => 'dev-main',
-            'reference' => 'b513e912ce002ad9239d4c6bada04109814ac6bb',
+            'reference' => 'c54c07d0a009da6de4f285101fe64e91ff379b2c',
             'type' => 'project',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),

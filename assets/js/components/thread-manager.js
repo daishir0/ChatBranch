@@ -317,7 +317,7 @@ class ThreadManager {
             const bulkButton = document.createElement('button');
             bulkButton.className = 'settings-btn';
             bulkButton.id = 'bulkSelectBtn';
-            bulkButton.innerHTML = '☑️ 選択';
+            bulkButton.innerHTML = '☑️ Select';
             bulkButton.addEventListener('click', () => this.toggleSelectionMode());
             
             sidebarFooter.insertBefore(bulkButton, sidebarFooter.firstChild);
@@ -331,7 +331,7 @@ class ThreadManager {
         // ボタンテキストを更新
         const btn = document.getElementById('bulkSelectBtn');
         if (btn) {
-            btn.innerHTML = this.selectionMode ? '✕ 終了' : '☑️ 選択';
+            btn.innerHTML = this.selectionMode ? '✕ Exit' : '☑️ Select';
         }
         
         // バルクアクションバーの表示切り替え
@@ -373,12 +373,12 @@ class ThreadManager {
                 bar.className = 'bulk-action-bar';
                 bar.innerHTML = `
                     <div class="bulk-info">
-                        <span id="bulkCount">0</span> 件選択中
+                        <span id="bulkCount">0</span> selected
                     </div>
                     <div class="bulk-actions">
-                        <button class="bulk-btn" id="selectAllBtn">全選択</button>
-                        <button class="bulk-btn" id="deselectAllBtn">選択解除</button>
-                        <button class="bulk-btn danger" id="threadBulkDeleteBtn">削除</button>
+                        <button class="bulk-btn" id="selectAllBtn">Select All</button>
+                        <button class="bulk-btn" id="deselectAllBtn">Deselect All</button>
+                        <button class="bulk-btn danger" id="threadBulkDeleteBtn">Delete</button>
                     </div>
                 `;
                 document.body.appendChild(bar);
@@ -415,7 +415,7 @@ class ThreadManager {
         const count = this.selectedThreads.size;
         if (count === 0) return;
         
-        const confirmed = confirm(`選択した${count}個のスレッドを削除しますか？\n\nこの操作は元に戻すことができません。`);
+        const confirmed = confirm(`Delete ${count} selected threads?\n\nThis action cannot be undone.`);
         if (!confirmed) return;
         
         try {
@@ -437,17 +437,17 @@ class ThreadManager {
             
             // 結果表示
             if (deletedCount > 0) {
-                alert(`${deletedCount}個のスレッドを削除しました。`);
+                alert(`${deletedCount} threads deleted successfully.`);
                 this.loadThreads(); // リストを再読み込み
             }
             
             if (deletedCount < count) {
-                alert(`${count - deletedCount}個のスレッドの削除に失敗しました。`);
+                alert(`Failed to delete ${count - deletedCount} threads.`);
             }
             
         } catch (error) {
             console.error('Bulk delete error:', error);
-            alert('削除処理中にエラーが発生しました。');
+            alert('An error occurred during the deletion process.');
         }
     }
 }

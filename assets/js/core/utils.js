@@ -37,10 +37,10 @@ class AppUtils {
             return date.toLocaleDateString('ja-JP');
         }
         
-        if (diff < 60000) return 'たった今';
-        if (diff < 3600000) return Math.floor(diff / 60000) + '分前';
-        if (diff < 86400000) return Math.floor(diff / 3600000) + '時間前';
-        if (diff < 604800000) return Math.floor(diff / 86400000) + '日前';
+        if (diff < 60000) return 'Just now';
+        if (diff < 3600000) return Math.floor(diff / 60000) + 'm ago';
+        if (diff < 86400000) return Math.floor(diff / 3600000) + 'h ago';
+        if (diff < 604800000) return Math.floor(diff / 86400000) + 'd ago';
         
         return date.toLocaleDateString('ja-JP');
     }

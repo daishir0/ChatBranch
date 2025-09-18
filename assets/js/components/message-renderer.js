@@ -379,8 +379,8 @@ class MessageRenderer {
                 if (!diagramCode || !diagramCode.trim()) {
                     console.warn('No diagram code found for:', diagram.id);
                     diagram.innerHTML = `<div class="mermaid-error">
-                        <strong>図表エラー:</strong><br>
-                        <code>図表コードが見つかりません</code>
+                        <strong>Diagram Error:</strong><br>
+                        <code>Diagram code not found</code>
                     </div>`;
                     diagram.classList.add('mermaid-processed');
                     continue;
@@ -509,10 +509,10 @@ class MessageRenderer {
                     font-family: monospace;
                     font-size: 12px;
                 ">
-                    <strong style="color: var(--error-text, #c00);">🚨 Mermaid図表レンダリングエラー</strong><br>
+                    <strong style="color: var(--error-text, #c00);">🚨 Mermaid Diagram Rendering Error</strong><br>
                     <code style="background: var(--code-bg, #f5f5f5); padding: 2px 4px; border-radius: 2px;">${this.escapeHtml(error.message)}</code>
                     <details style="margin-top: 8px;">
-                        <summary style="cursor: pointer; color: var(--primary-color, #007bff);">図表コードを表示</summary>
+                        <summary style="cursor: pointer; color: var(--primary-color, #007bff);">Show diagram code</summary>
                         <pre style="white-space: pre-wrap; margin-top: 8px; font-size: 11px;">${this.escapeHtml(failedCode.substring(0, 500))}${failedCode.length > 500 ? '\n... (truncated)' : ''}</pre>
                     </details>
                 </div>`;
@@ -809,7 +809,7 @@ class MessageRenderer {
         if (tocItems.length === 0) return '';
         
         const isMobile = window.innerWidth <= 768;
-        const toggleAllText = isMobile ? '全て開閉' : '全セクション開閉';
+        const toggleAllText = isMobile ? 'Toggle All' : 'Toggle All Sections';
         
         const tocList = tocItems.map(item => 
             `<li class="toc-item toc-level-${item.level}">
@@ -820,7 +820,7 @@ class MessageRenderer {
         return `
             <div class="section-toc">
                 <div class="toc-header">
-                    <h4>📋 セクション一覧</h4>
+                    <h4>📋 Table of Contents</h4>
                     <button class="toc-toggle-all" onclick="toggleAllSections()">${toggleAllText}</button>
                 </div>
                 <ul class="toc-list">

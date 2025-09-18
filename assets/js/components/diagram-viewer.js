@@ -128,7 +128,7 @@ class DiagramViewer {
         
         const expandBtn = document.createElement('button');
         expandBtn.innerHTML = '🔍';
-        expandBtn.title = '図表を拡大表示';
+        expandBtn.title = 'Expand diagram';
         expandBtn.style.position = 'absolute';
         expandBtn.style.top = '4px';
         expandBtn.style.right = '4px';
@@ -171,11 +171,11 @@ class DiagramViewer {
         header.className = 'diagram-fullscreen-header';
         
         const title = document.createElement('div');
-        title.textContent = '図表';
+        title.textContent = 'Diagram';
         title.style.fontWeight = 'bold';
         
         const closeBtn = document.createElement('button');
-        closeBtn.innerHTML = '✕ 閉じる';
+        closeBtn.innerHTML = '✕ Close';
         closeBtn.style.padding = '4px 8px';
         closeBtn.addEventListener('click', () => this.closeFullscreen());
         

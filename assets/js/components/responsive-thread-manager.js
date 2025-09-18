@@ -66,26 +66,26 @@ class ResponsiveThreadManager extends ThreadManager {
             <div class="mobile-toolbar-actions" data-device="mobile" style="display: none;">
                 <button class="action-btn primary" id="selectModeBtn">
                     <span class="icon">☑️</span>
-                    <span class="label">選択</span>
+                    <span class="label">Select</span>
                 </button>
             </div>
             
             <!-- Desktop Actions -->
             <div class="desktop-actions" data-device="desktop" style="display: none;">
                 <div class="toolbar-left">
-                    <button class="select-mode-btn" id="selectModeBtn">☑️ 選択モード</button>
+                    <button class="select-mode-btn" id="selectModeBtn">☑️ Select Mode</button>
                     <div class="thread-stats">
-                        <span class="total-count" id="totalCount">全0件</span>
+                        <span class="total-count" id="totalCount">Total: 0</span>
                         <span class="selected-count" id="selectedInfo" style="display:none;">
-                            / <span id="selectedNum">0</span>件選択
+                            / <span id="selectedNum">0</span> selected
                         </span>
                     </div>
                 </div>
                 <div class="toolbar-right" id="bulkActions" style="display: none;">
-                    <button class="btn-secondary" id="selectAllBtn">全選択</button>
-                    <button class="btn-secondary" id="deselectAllBtn">選択解除</button>
+                    <button class="btn-secondary" id="selectAllBtn">Select All</button>
+                    <button class="btn-secondary" id="deselectAllBtn">Deselect All</button>
                     <button class="btn-danger" id="bulkDeleteBtn">
-                        削除 (<span id="deleteCount">0</span>)
+                        Delete (<span id="deleteCount">0</span>)
                     </button>
                 </div>
             </div>
@@ -95,15 +95,15 @@ class ResponsiveThreadManager extends ThreadManager {
                 <div class="mobile-action-grid">
                     <button class="mobile-action-btn secondary" id="mobileDeselectAllBtn">
                         <div class="action-icon">↶</div>
-                        <div class="action-label">解除</div>
+                        <div class="action-label">Clear</div>
                     </button>
                     <button class="mobile-action-btn secondary" id="mobileSelectAllBtn">
                         <div class="action-icon">☑</div>
-                        <div class="action-label">全選択</div>
+                        <div class="action-label">Select All</div>
                     </button>
                     <button class="mobile-action-btn danger" id="mobileBulkDeleteBtn">
                         <div class="action-icon">🗑️</div>
-                        <div class="action-label">削除 (<span id="mobileDeleteCount">0</span>)</div>
+                        <div class="action-label">Delete (<span id="mobileDeleteCount">0</span>)</div>
                         <div class="selected-badge" id="selectedBadge">0</div>
                     </button>
                 </div>
@@ -166,7 +166,7 @@ class ResponsiveThreadManager extends ThreadManager {
         // 総件数更新
         const totalCount = document.getElementById('totalCount');
         if (totalCount) {
-            totalCount.textContent = `全${threads.length}件`;
+            totalCount.textContent = `Total: ${threads.length}`;
         }
         
         threads.forEach(thread => {
@@ -195,15 +195,15 @@ class ResponsiveThreadManager extends ThreadManager {
                     <div class="mobile-actions" data-device="mobile" style="display: none;">
                         <button class="action-menu-trigger" data-thread-id="${thread.id}">⋮</button>
                         <div class="action-menu" style="display: none;">
-                            <div class="menu-item" data-action="rename" data-thread-id="${thread.id}">✏️ 名前変更</div>
-                            <div class="menu-item danger" data-action="delete" data-thread-id="${thread.id}">🗑️ 削除</div>
+                            <div class="menu-item" data-action="rename" data-thread-id="${thread.id}">✏️ Rename</div>
+                            <div class="menu-item danger" data-action="delete" data-thread-id="${thread.id}">🗑️ Delete</div>
                         </div>
                     </div>
                     
                     <!-- Desktop Actions -->
                     <div class="desktop-actions" data-device="desktop" style="display: none;">
-                        <button class="thread-edit-btn" data-thread-id="${thread.id}" title="名前変更">✏️</button>
-                        <button class="thread-delete-btn" data-thread-id="${thread.id}" title="削除">🗑️</button>
+                        <button class="thread-edit-btn" data-thread-id="${thread.id}" title="Rename">✏️</button>
+                        <button class="thread-delete-btn" data-thread-id="${thread.id}" title="Delete">🗑️</button>
                     </div>
                 </div>
             `;
@@ -356,11 +356,11 @@ class ResponsiveThreadManager extends ThreadManager {
         
         selectModeButtons.forEach(btn => {
             if (this.deviceType === 'mobile') {
-                btn.innerHTML = this.selectionMode ? 
-                    '<span class="icon">✕</span><span class="label">終了</span>' :
-                    '<span class="icon">☑️</span><span class="label">選択</span>';
+                btn.innerHTML = this.selectionMode ?
+                    '<span class="icon">✕</span><span class="label">Exit</span>' :
+                    '<span class="icon">☑️</span><span class="label">Select</span>';
             } else {
-                btn.textContent = this.selectionMode ? '✕ 選択終了' : '☑️ 選択モード';
+                btn.textContent = this.selectionMode ? '✕ Exit Selection' : '☑️ Select Mode';
             }
         });
         
@@ -496,9 +496,9 @@ class ResponsiveThreadManager extends ThreadManager {
             
             // 結果表示
             if (errors.length === 0) {
-                this.showSuccessMessage(`${completed}個のスレッドを削除しました。`);
+                this.showSuccessMessage(`${completed} threads deleted successfully.`);
             } else {
-                this.showWarningMessage(`${completed}個のスレッドを削除しました。${errors.length}個でエラーが発生しました。`);
+                this.showWarningMessage(`${completed} threads deleted. ${errors.length} errors occurred.`);
             }
             
             // UI状態をリセット
@@ -507,12 +507,12 @@ class ResponsiveThreadManager extends ThreadManager {
             
         } catch (error) {
             console.error('Bulk delete error:', error);
-            this.showErrorMessage('削除処理中にエラーが発生しました。');
+            this.showErrorMessage('An error occurred during the deletion process.');
         }
     }
     
     async showBulkDeleteConfirmation(count) {
-        const message = `選択した${count}個のスレッドを削除しますか？\n\nこの操作は元に戻すことができません。`;
+        const message = `Delete ${count} selected threads?\n\nThis action cannot be undone.`;
         return confirm(message);
     }
     
@@ -523,12 +523,12 @@ class ResponsiveThreadManager extends ThreadManager {
         overlay.innerHTML = `
             <div class="progress-card">
                 <div class="progress-icon">🗑️</div>
-                <div class="progress-title">スレッドを削除中</div>
+                <div class="progress-title">Deleting threads</div>
                 <div class="progress-bar">
                     <div class="progress-fill" id="progressFill"></div>
                 </div>
                 <div class="progress-text">
-                    <span id="progressCurrent">0</span> / ${total} 完了
+                    <span id="progressCurrent">0</span> / ${total} completed
                 </div>
             </div>
         `;

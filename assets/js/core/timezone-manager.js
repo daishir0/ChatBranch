@@ -38,13 +38,13 @@ class TimeZoneManager {
      * UTC文字列を設定タイムゾーンの日付+時刻に変換
      */
     formatDateTime(utcDateString, options = {}) {
-        if (!utcDateString) return '不明';
-        
+        if (!utcDateString) return 'Unknown';
+
         const date = new Date(utcDateString + 'Z'); // UTCであることを明示
-        
+
         // 日付が不正な場合
         if (isNaN(date.getTime())) {
-            return '不明';
+            return 'Unknown';
         }
         
         const defaultOptions = {
@@ -93,7 +93,7 @@ class TimeZoneManager {
      */
     formatCompactDateTime(utcDateString) {
         const date = new Date(utcDateString + 'Z');
-        if (isNaN(date.getTime())) return '不明';
+        if (isNaN(date.getTime())) return 'Unknown';
         
         try {
             const dateStr = date.toLocaleDateString(this.locale, {
@@ -125,7 +125,7 @@ class TimeZoneManager {
      * 相対時間フォーマット（スレッド一覧用）
      */
     formatRelativeTime(utcDateString) {
-        if (!utcDateString) return '不明';
+        if (!utcDateString) return 'Unknown';
         
         const date = new Date(utcDateString + 'Z');
         const now = new Date();
@@ -133,7 +133,7 @@ class TimeZoneManager {
         
         // 不正な日付
         if (isNaN(date.getTime())) {
-            return '不明';
+            return 'Unknown';
         }
         
         // 未来の日付（起こりえないが念のため）
@@ -142,10 +142,10 @@ class TimeZoneManager {
         }
         
         // 相対時間の閾値
-        if (diff < 60000) return 'たった今';                    // 1分未満
-        if (diff < 3600000) return Math.floor(diff / 60000) + '分前';     // 1時間未満
-        if (diff < 86400000) return Math.floor(diff / 3600000) + '時間前'; // 1日未満
-        if (diff < 604800000) return Math.floor(diff / 86400000) + '日前'; // 1週間未満
+        if (diff < 60000) return 'Just now';                    // 1分未満
+        if (diff < 3600000) return Math.floor(diff / 60000) + 'm ago';     // 1時間未満
+        if (diff < 86400000) return Math.floor(diff / 3600000) + 'h ago'; // 1日未満
+        if (diff < 604800000) return Math.floor(diff / 86400000) + 'd ago'; // 1週間未満
         
         // 1週間以上は絶対日付
         return this.formatDate(utcDateString);
@@ -155,14 +155,14 @@ class TimeZoneManager {
      * ファイル用の時刻フォーマット（1日未満は時刻、それ以外は日付）
      */
     formatFileTime(utcDateString) {
-        if (!utcDateString) return '不明';
+        if (!utcDateString) return 'Unknown';
         
         const date = new Date(utcDateString + 'Z');
         const now = new Date();
         const diff = now - date;
         
         if (isNaN(date.getTime())) {
-            return '不明';
+            return 'Unknown';
         }
         
         // 1日未満は時刻のみ

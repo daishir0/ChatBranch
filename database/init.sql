@@ -58,8 +58,8 @@ CREATE INDEX IF NOT EXISTS idx_threads_updated_at ON threads (updated_at);
 CREATE INDEX IF NOT EXISTS idx_files_created_at ON files (created_at);
 
 -- デフォルト設定値
-INSERT OR IGNORE INTO settings (key, value) VALUES 
-    ('default_model', 'gpt-4o-mini'),
+INSERT OR IGNORE INTO settings (key, value) VALUES
+    ('default_model', 'gpt-5-mini'),
     ('system_prompt', 'You are a helpful assistant.'),
     ('theme', 'dark');
 

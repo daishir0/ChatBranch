@@ -83,13 +83,13 @@ class DiagramExpander {
             
         } catch (error) {
             console.error('Failed to copy to clipboard:', error);
-            alert('コピーに失敗しました');
+            alert('Failed to copy to clipboard');
         }
     }
     
     showCopyFeedback(button) {
         const translations = (window.appConfig && window.appConfig.diagramTranslations) ? window.appConfig.diagramTranslations : {};
-        const copiedText = translations.copied || 'コピーしました';
+        const copiedText = translations.copied || 'Copied!';
         const originalText = button.textContent;
         const originalTitle = button.title;
         
@@ -138,7 +138,7 @@ class DiagramExpander {
             newWindow.focus();
         } else {
             // ポップアップブロックされた場合の処理
-            alert('ポップアップがブロックされました。ブラウザの設定でポップアップを許可してください。');
+            alert('Popup blocked. Please allow popups in your browser settings.');
         }
     }
     
@@ -148,25 +148,25 @@ class DiagramExpander {
         switch(role) {
             case 'flowchart-v2':
             case 'flowchart':
-                return 'フローチャート';
+                return 'Flowchart';
             case 'sequence':
-                return 'シーケンス図';
+                return 'Sequence Diagram';
             case 'gantt':
-                return 'ガントチャート';
+                return 'Gantt Chart';
             case 'classDiagram':
-                return 'クラス図';
+                return 'Class Diagram';
             case 'stateDiagram':
-                return '状態遷移図';
+                return 'State Diagram';
             case 'pie':
-                return '円グラフ';
+                return 'Pie Chart';
             case 'er':
-                return 'ER図';
+                return 'ER Diagram';
             case 'journey':
-                return 'ジャーニー図';
+                return 'Journey Map';
             case 'mindmap':
-                return 'マインドマップ';
+                return 'Mind Map';
             default:
-                return 'Mermaid図表';
+                return 'Mermaid Diagram';
         }
     }
     

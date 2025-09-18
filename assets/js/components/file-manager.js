@@ -12,6 +12,7 @@ class FileManager {
         this.currentSort = 'name';
         this.selectionMode = false;
         this.selectedFileIds = new Set();
+        this.uploading = false;
         
         // URL設定を取得
         this.apiBaseUrl = window.appConfig?.urls?.apiUrl || '/api';
@@ -48,24 +49,36 @@ class FileManager {
                 this.hide();
             });
         }
-        
-        // File Upload
-        const fileUpload = document.getElementById('fileUpload');
-        if (fileUpload) {
-            fileUpload.addEventListener('change', (e) => {
-                this.handleFileUpload(e.target.files);
-            });
+
+        // File Upload - only bind for main context to avoid duplicate handlers
+        if (this.context === 'main') {
+            const fileUpload = document.getElementById('fileUpload');
+            if (fileUpload) {
+                fileUpload.addEventListener('change', (e) => {
+                    this.handleFileUpload(e.target.files);
+                });
+            }
         }
         
-        // File Search
-        const fileSearch = document.getElementById('fileSearch');
-        if (fileSearch) {
-            fileSearch.addEventListener('input', (e) => {
-                clearTimeout(this.searchTimeout);
-                this.searchTimeout = setTimeout(() => {
-                    this.searchFiles(e.target.value);
-                }, 300);
-            });
+        // File Search - only bind for main context to avoid duplicate handlers
+        if (this.context === 'main') {
+            const fileSearch = document.getElementById('fileSearch');
+            if (fileSearch) {
+                fileSearch.addEventListener('input', (e) => {
+                    clearTimeout(this.searchTimeout);
+                    this.searchTimeout = setTimeout(() => {
+                        const query = e.target.value.trim();
+                        if (query === '') {
+                            // 0文字の場合は直接全ファイルを表示（APIコールなし）
+                            this.filteredFiles = [...this.allFiles];
+                            this.renderFiles();
+                        } else {
+                            // 文字がある場合のみ検索APIを実行
+                            this.searchFiles(query);
+                        }
+                    }, 300);
+                });
+            }
         }
         
         // Sort Change
@@ -121,9 +134,14 @@ class FileManager {
     }
     
     setupDragAndDrop() {
+        // Only setup drag and drop for main context to avoid duplicate handlers
+        if (this.context !== 'main') {
+            return;
+        }
+
         const uploadArea = document.querySelector('.file-upload-area');
         
-        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        ['dragenter', 'dragover', 'dragleave'].forEach(eventName => {
             uploadArea.addEventListener(eventName, this.preventDefaults, false);
         });
         
@@ -133,13 +151,14 @@ class FileManager {
             }, false);
         });
         
-        ['dragleave', 'drop'].forEach(eventName => {
-            uploadArea.addEventListener(eventName, () => {
-                uploadArea.classList.remove('dragover');
-            }, false);
-        });
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        }, false);
         
         uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            uploadArea.classList.remove('dragover');
             const files = e.dataTransfer.files;
             this.handleFileUpload(files);
         }, false);
@@ -259,7 +278,15 @@ class FileManager {
     
     async handleFileUpload(files) {
         if (!files || files.length === 0) return;
-        
+
+        // Prevent duplicate uploads
+        if (this.uploading) {
+            console.log('Upload already in progress, ignoring duplicate request');
+            return;
+        }
+
+        this.uploading = true;
+
         const formData = new FormData();
         formData.append('csrf_token', window.csrfToken);
         
@@ -290,6 +317,9 @@ class FileManager {
         
         // Refresh file list
         await this.loadFiles();
+
+        // Reset upload flag
+        this.uploading = false;
     }
     
     async searchFiles(query) {
@@ -317,41 +347,6 @@ class FileManager {
         }
     }
     
-    async deleteFile(fileId) {
-        if (!confirm('Are you sure you want to delete this file?')) {
-            return;
-        }
-        
-        try {
-            const response = await this.authenticatedFetch(`${this.apiBaseUrl}/files.php?action=delete`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    file_id: fileId,
-                    csrf_token: window.csrfToken
-                })
-            });
-            
-            const data = await response.json();
-            
-            if (data.success) {
-                // Remove from selected files if it was selected
-                this.selectedFiles = this.selectedFiles.filter(id => id !== fileId);
-                app.selectedFiles = app.selectedFiles.filter(id => id !== fileId);
-                app.updateFileAttachments();
-                
-                // Refresh file list
-                await this.loadFiles();
-            } else {
-                throw new Error(data.error || 'Delete failed');
-            }
-        } catch (error) {
-            console.error('Delete failed:', error);
-            alert('Delete failed: ' + error.message);
-        }
-    }
     
     getFileIcon(filename) {
         const extension = filename.split('.').pop().toLowerCase();

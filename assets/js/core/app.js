@@ -400,12 +400,8 @@ class ChatBranchApp {
     }
     
     set selectedFiles(files) {
-        console.log('🔍 app.selectedFiles setter called with:', files);
-        console.log('🔍 fileAttachmentManager available:', !!this.fileAttachmentManager);
-        
         if (this.fileAttachmentManager) {
             this.fileAttachmentManager.selectedFiles = files;
-            console.log('🔍 Set fileAttachmentManager.selectedFiles to:', this.fileAttachmentManager.selectedFiles);
         } else {
             console.warn('⚠️ fileAttachmentManager not available, cannot set selectedFiles');
         }

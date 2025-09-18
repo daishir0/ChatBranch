@@ -42,12 +42,14 @@ class FileManager {
     }
     
     bindEvents() {
-        // File Manager Modal
-        const closeBtn = document.getElementById('fileManagerClose');
-        if (closeBtn) {
-            closeBtn.addEventListener('click', () => {
-                this.hide();
-            });
+        // File Manager Modal - only bind for main context to avoid duplicate handlers
+        if (this.context === 'main') {
+            const closeBtn = document.getElementById('fileManagerClose');
+            if (closeBtn) {
+                closeBtn.addEventListener('click', () => {
+                    this.hide();
+                });
+            }
         }
 
         // File Upload - only bind for main context to avoid duplicate handlers
@@ -81,56 +83,64 @@ class FileManager {
             }
         }
         
-        // Sort Change
-        const sortSelect = document.getElementById('sortSelect');
-        if (sortSelect) {
-            sortSelect.addEventListener('change', (e) => {
-                this.setSortBy(e.target.value);
+        // Sort Change - only bind for main context to avoid duplicate handlers
+        if (this.context === 'main') {
+            const sortSelect = document.getElementById('sortSelect');
+            if (sortSelect) {
+                sortSelect.addEventListener('change', (e) => {
+                    this.setSortBy(e.target.value);
+                });
+            }
+        }
+        
+        // Filter Chips - only bind for main context to avoid duplicate handlers
+        if (this.context === 'main') {
+            document.querySelectorAll('.chip').forEach(chip => {
+                chip.addEventListener('click', () => {
+                    this.setFilter(chip.dataset.type);
+                });
             });
         }
         
-        // Filter Chips
-        document.querySelectorAll('.chip').forEach(chip => {
-            chip.addEventListener('click', () => {
-                this.setFilter(chip.dataset.type);
+        // Selection Controls - only bind for main context to avoid duplicate handlers
+        if (this.context === 'main') {
+            document.getElementById('cancelSelectionBtn').addEventListener('click', () => {
+                this.exitSelectionMode();
             });
-        });
+
+            document.getElementById('clearSelectionBtn').addEventListener('click', () => {
+                this.clearFileSelection();
+            });
+        }
         
-        // Selection Controls
-        document.getElementById('cancelSelectionBtn').addEventListener('click', () => {
-            this.exitSelectionMode();
-        });
-        
-        document.getElementById('clearSelectionBtn').addEventListener('click', () => {
-            this.clearFileSelection();
-        });
-        
-        // Bulk Actions
-        document.getElementById('bulkDeleteBtn').addEventListener('click', () => {
-            this.bulkDeleteFiles();
-        });
-        
-        document.getElementById('bulkDownloadBtn').addEventListener('click', () => {
-            this.bulkDownloadFiles();
-        });
-        
-        // Delete Confirmation Modal
-        document.getElementById('deleteConfirmClose').addEventListener('click', () => {
-            this.hideModal('deleteConfirmModal');
-        });
-        
-        document.getElementById('deleteConfirmCancel').addEventListener('click', () => {
-            this.hideModal('deleteConfirmModal');
-        });
-        
-        document.getElementById('deleteConfirmOk').addEventListener('click', () => {
-            this.confirmDelete();
-        });
-        
-        // Select Files Button
-        document.getElementById('selectFilesBtn').addEventListener('click', () => {
-            this.selectFiles();
-        });
+        // Bulk Actions - only bind for main context to avoid duplicate handlers
+        if (this.context === 'main') {
+            document.getElementById('bulkDeleteBtn').addEventListener('click', () => {
+                this.bulkDeleteFiles();
+            });
+
+            document.getElementById('bulkDownloadBtn').addEventListener('click', () => {
+                this.bulkDownloadFiles();
+            });
+
+            // Delete Confirmation Modal
+            document.getElementById('deleteConfirmClose').addEventListener('click', () => {
+                this.hideModal('deleteConfirmModal');
+            });
+
+            document.getElementById('deleteConfirmCancel').addEventListener('click', () => {
+                this.hideModal('deleteConfirmModal');
+            });
+
+            document.getElementById('deleteConfirmOk').addEventListener('click', () => {
+                this.confirmDelete();
+            });
+
+            // Select Files Button
+            document.getElementById('selectFilesBtn').addEventListener('click', () => {
+                this.selectFiles();
+            });
+        }
     }
     
     setupDragAndDrop() {
@@ -722,12 +732,43 @@ class FileManager {
     
     async bulkDownloadFiles() {
         const selectedFiles = this.allFiles.filter(file => this.selectedFileIds.has(file.id));
-        
+
         for (const file of selectedFiles) {
             await this.downloadFile(file.id);
             // Add small delay between downloads
             await new Promise(resolve => setTimeout(resolve, 100));
         }
+    }
+
+    /**
+     * Clear all file selections
+     */
+    clearFileSelection() {
+        // Clear selected file IDs
+        this.selectedFileIds.clear();
+
+        // Clear the selectedFiles array (for attachment functionality)
+        this.selectedFiles = [];
+
+        // Update global context variables
+        if (this.context === 'branch') {
+            window.branchSelectedFiles = [];
+        } else if (this.context === 'edit') {
+            window.editSelectedFiles = [];
+        } else if (this.context === 'main') {
+            // Update app.selectedFiles to trigger UI updates
+            if (window.app) {
+                window.app.selectedFiles = [];
+            }
+        }
+
+        // Re-render files to update checkboxes
+        this.renderFiles();
+
+        // Update attachment display
+        this.updateFileAttachments();
+
+        this.showToast('Selection cleared', 'info');
     }
     
     /**

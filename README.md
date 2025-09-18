@@ -45,26 +45,30 @@ This groundbreaking innovation transforms AI chat from one-size-fits-all to trul
 
 3. **Install Office document parsing libraries**
    ```bash
+   # Navigate to the ChatBranch directory
+   cd /var/www/html/ChatBranch/
+
    # Install Composer if not already installed
    curl -sS https://getcomposer.org/installer | php
-   
+
    # Install required libraries for PDF, Word, Excel, PowerPoint parsing
    php composer.phar install
    ```
 
 4. **Set permissions**
    ```bash
-   sudo chmod 755 /var/www/html/ChatBranch/
-   
    # Check your web server user first
    grep -E "^User|^Group" /etc/httpd/conf/httpd.conf  # For Apache
    # or
    grep -E "^user" /etc/nginx/nginx.conf  # For Nginx
-   
+
    # Set ownership based on your system
    sudo chown -R apache:apache /var/www/html/ChatBranch/     # CentOS/RHEL/Amazon Linux
    # or
    sudo chown -R www-data:www-data /var/www/html/ChatBranch/ # Ubuntu/Debian
+
+   # Set proper directory permissions
+   sudo chmod 755 /var/www/html/ChatBranch/
    ```
 
 5. **Access the web setup**
@@ -80,12 +84,13 @@ This groundbreaking innovation transforms AI chat from one-size-fits-all to trul
    - Set base URL (optional, e.g., `/ChatBranch`)
    - Click "Install"
 
-7. **Security cleanup**
-   - After successful setup, delete `setup.php` for security:
+7. **Security cleanup (IMPORTANT)**
+   - After successful setup, **immediately delete `setup.php`** for security:
    ```bash
    cd /var/www/html/ChatBranch/
    rm setup.php
    ```
+   - **Note**: This step is critical to prevent unauthorized access to the setup interface
 
 ## Usage
 
@@ -324,26 +329,30 @@ ChatBranchは、高度な会話ツリー機能と**革新的なスレッド固�
 
 3. **Officeドキュメント解析ライブラリのインストール**
    ```bash
+   # ChatBranchディレクトリに移動
+   cd /var/www/html/ChatBranch/
+
    # Composerがインストールされていない場合はインストール
    curl -sS https://getcomposer.org/installer | php
-   
+
    # PDF、Word、Excel、PowerPoint解析用の必要ライブラリをインストール
    php composer.phar install
    ```
 
 4. **権限設定**
    ```bash
-   sudo chmod 755 /var/www/html/ChatBranch/
-   
    # Webサーバーのユーザーを最初に確認
    grep -E "^User|^Group" /etc/httpd/conf/httpd.conf  # Apache用
    # または
    grep -E "^user" /etc/nginx/nginx.conf  # Nginx用
-   
+
    # システムに応じて所有者を設定
    sudo chown -R apache:apache /var/www/html/ChatBranch/     # CentOS/RHEL/Amazon Linux
    # または
    sudo chown -R www-data:www-data /var/www/html/ChatBranch/ # Ubuntu/Debian
+
+   # 適切なディレクトリ権限を設定
+   sudo chmod 755 /var/www/html/ChatBranch/
    ```
 
 5. **Webセットアップにアクセス**
@@ -356,12 +365,13 @@ ChatBranchは、高度な会話ツリー機能と**革新的なスレッド固�
    - ベースURLを設定（オプション、例：`/ChatBranch`）
    - 「インストール」をクリック
 
-7. **セキュリティクリーンアップ**
-   - セットアップ完了後、セキュリティのため`setup.php`を削除：
+7. **セキュリティクリーンアップ（重要）**
+   - セットアップ完了後、**直ちに`setup.php`を削除**してください：
    ```bash
    cd /var/www/html/ChatBranch/
    rm setup.php
    ```
+   - **注意**: セットアップインターフェースへの不正アクセスを防ぐため、この手順は必須です
 
 ## 使い方
 

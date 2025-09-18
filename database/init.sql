@@ -6,7 +6,8 @@ CREATE TABLE IF NOT EXISTS threads (
     name VARCHAR(255) NOT NULL,
     thread_system_prompt TEXT DEFAULT '',
     created_at DATETIME DEFAULT (datetime('now','localtime')),
-    updated_at DATETIME DEFAULT (datetime('now','localtime'))
+    updated_at DATETIME DEFAULT (datetime('now','localtime')),
+    deleted_at DATETIME DEFAULT NULL
 );
 
 -- メッセージテーブル（ツリー構造対応）
@@ -18,6 +19,7 @@ CREATE TABLE IF NOT EXISTS messages (
     role VARCHAR(20) NOT NULL CHECK (role IN ('user', 'assistant')),
     is_context BOOLEAN DEFAULT 1,
     created_at DATETIME DEFAULT (datetime('now','localtime')),
+    deleted_at DATETIME DEFAULT NULL,
     FOREIGN KEY (thread_id) REFERENCES threads (id) ON DELETE CASCADE,
     FOREIGN KEY (parent_message_id) REFERENCES messages (id) ON DELETE CASCADE
 );
@@ -30,7 +32,8 @@ CREATE TABLE IF NOT EXISTS files (
     content_markdown TEXT,
     metadata TEXT, -- JSON形式
     file_size INTEGER,
-    created_at DATETIME DEFAULT (datetime('now','localtime'))
+    created_at DATETIME DEFAULT (datetime('now','localtime')),
+    deleted_at DATETIME DEFAULT NULL
 );
 
 -- メッセージ-ファイル関連テーブル

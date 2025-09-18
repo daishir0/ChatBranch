@@ -324,6 +324,26 @@ class ChatBranchApp {
      * メッセージ送信
      */
     async sendMessage() {
+        // Check if thread is selected
+        if (!this.currentThread) {
+            // Show alert and highlight new chat button
+            alert('Please create a new chat first before sending a message.');
+
+            // Temporarily enhance highlight effect
+            const newChatBtn = document.getElementById('newChatBtn');
+            if (newChatBtn) {
+                newChatBtn.classList.add('highlighted');
+                newChatBtn.style.animation = 'pulse 0.5s ease-in-out 3';
+
+                // Reset animation after effect
+                setTimeout(() => {
+                    newChatBtn.style.animation = 'pulse 2s infinite';
+                }, 1500);
+            }
+
+            return;
+        }
+
         return this.chatManager.sendMessage();
     }
     
@@ -430,14 +450,46 @@ class ChatBranchApp {
     updateThreadDependentButtons() {
         const personaBtn = document.getElementById('personaBtn');
         const treeToggleBtn = document.getElementById('treeToggleBtn');
-        
+        const sendBtn = document.getElementById('sendBtn');
+        const messageInput = document.getElementById('messageInput');
+        const newChatBtn = document.getElementById('newChatBtn');
+
         const hasThread = !!this.currentThread;
-        
+
         if (personaBtn) {
             personaBtn.disabled = !hasThread;
         }
         if (treeToggleBtn) {
             treeToggleBtn.disabled = !hasThread;
+        }
+
+        // Update send button and message input
+        if (sendBtn) {
+            sendBtn.disabled = !hasThread;
+            sendBtn.style.opacity = hasThread ? '1' : '0.5';
+        }
+        if (messageInput) {
+            messageInput.disabled = !hasThread;
+            messageInput.placeholder = hasThread ?
+                messageInput.getAttribute('data-original-placeholder') || 'Type your message...' :
+                'Please create a new chat first to start messaging';
+
+            // Store original placeholder on first run
+            if (!messageInput.getAttribute('data-original-placeholder')) {
+                messageInput.setAttribute('data-original-placeholder', messageInput.placeholder);
+            }
+        }
+
+        // Highlight new chat button when no thread selected OR no threads exist
+        if (newChatBtn) {
+            const noThreadsExist = !this.threadManager || !this.threadManager.allThreads || this.threadManager.allThreads.length === 0;
+            const shouldHighlight = !hasThread || noThreadsExist;
+
+            if (shouldHighlight) {
+                newChatBtn.classList.add('highlighted');
+            } else {
+                newChatBtn.classList.remove('highlighted');
+            }
         }
     }
     

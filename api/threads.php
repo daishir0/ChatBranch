@@ -173,7 +173,7 @@ function handleCreateEmpty($chatManager, $auth, $data) {
     
     // タイムスタンプ付きのスレッド名を生成
     $timestamp = date('Y-m-d H:i');
-    $name = '新規チャット ' . $timestamp;
+    $name = 'New Chat ' . $timestamp;
     
     $threadId = $chatManager->createThread($name);
     $thread = $chatManager->getThread($threadId);

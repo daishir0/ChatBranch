@@ -102,12 +102,14 @@ class ChatManager {
                 this.showScrollButtons();
                 
                 // Set currentMessageId to the last message in the displayed path
-                // ただし、既にcurrentMessageIdが設定されている場合（編集後など）は上書きしない
-                if (messagePath && messagePath.length > 0 && !this.app._currentMessageId) {
+                // ツリークリック時は常に表示されるパスの最後のメッセージ（通常AIメッセージ）をcurrentMessageIdに設定
+                if (messagePath && messagePath.length > 0) {
                     this.app._currentMessageId = messagePath[messagePath.length - 1].id;
-                    console.log('Set currentMessageId to:', this.app._currentMessageId);
-                } else if (this.app._currentMessageId) {
-                    console.log('Keeping existing currentMessageId:', this.app._currentMessageId);
+                    console.log('Set currentMessageId to last message in path:', this.app._currentMessageId);
+
+                    // デバッグ用ログ
+                    const lastMessage = messagePath[messagePath.length - 1];
+                    console.log('Last message role:', lastMessage.role, 'ID:', lastMessage.id);
                 }
             } else {
                 console.error('Data success is false:', data);

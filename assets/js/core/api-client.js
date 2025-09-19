@@ -217,7 +217,41 @@ class APIClient {
         
         return await response.json();
     }
-    
+
+    /**
+     * スレッドアーカイブ
+     */
+    async archiveThread(threadId) {
+        const formData = new FormData();
+        formData.append('action', 'archive');
+        formData.append('thread_id', threadId);
+        formData.append('csrf_token', window.csrfToken);
+
+        const response = await this.authenticatedFetch(`${this.apiBaseUrl}/threads.php`, {
+            method: 'POST',
+            body: formData
+        });
+
+        return await response.json();
+    }
+
+    /**
+     * スレッドアーカイブ解除
+     */
+    async unarchiveThread(threadId) {
+        const formData = new FormData();
+        formData.append('action', 'unarchive');
+        formData.append('thread_id', threadId);
+        formData.append('csrf_token', window.csrfToken);
+
+        const response = await this.authenticatedFetch(`${this.apiBaseUrl}/threads.php`, {
+            method: 'POST',
+            body: formData
+        });
+
+        return await response.json();
+    }
+
     // ===================
     // Settings API Methods
     // ===================

@@ -110,9 +110,14 @@ body {
 }
 
 .search-input-container {
-    position: relative;
     display: flex;
     align-items: center;
+    gap: 8px;
+}
+
+.search-input-wrapper {
+    position: relative;
+    flex: 1;
 }
 
 .search-input {
@@ -136,6 +141,8 @@ body {
 .search-clear-btn {
     position: absolute;
     right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
     background: none;
     border: none;
     color: var(--text-secondary);
@@ -159,6 +166,40 @@ body {
 
 .search-clear-btn.visible {
     opacity: 1;
+}
+
+.archive-toggle-btn {
+    background: none;
+    border: 1px solid var(--border-color);
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-size: 16px;
+    width: 40px;
+    height: 40px;
+    border-radius: var(--radius);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    -webkit-tap-highlight-color: transparent;
+    flex-shrink: 0;
+}
+
+.archive-toggle-btn:hover {
+    background-color: var(--bg-tertiary);
+    color: var(--text-primary);
+    border-color: var(--text-secondary);
+}
+
+.archive-toggle-btn.active {
+    background-color: var(--accent-color);
+    border-color: var(--accent-color);
+    color: white;
+}
+
+.archive-toggle-btn.active:hover {
+    background-color: #3b82f6;
+    border-color: #3b82f6;
 }
 
 .search-results-info {
@@ -213,6 +254,7 @@ body {
 }
 
 .thread-edit-btn,
+.thread-archive-btn,
 .thread-delete-btn {
     background: none;
     border: none;
@@ -234,6 +276,11 @@ body {
     color: var(--accent-color);
 }
 
+.thread-archive-btn:hover {
+    background-color: var(--bg-tertiary);
+    color: var(--warning-color);
+}
+
 .thread-delete-btn:hover {
     background-color: var(--bg-tertiary);
     color: var(--error-color);
@@ -253,11 +300,13 @@ body {
 }
 
 .thread-item.active .thread-edit-btn,
+.thread-item.active .thread-archive-btn,
 .thread-item.active .thread-delete-btn {
     color: rgba(255, 255, 255, 0.8);
 }
 
 .thread-item.active .thread-edit-btn:hover,
+.thread-item.active .thread-archive-btn:hover,
 .thread-item.active .thread-delete-btn:hover {
     color: white;
     background-color: rgba(255, 255, 255, 0.1);
@@ -270,6 +319,22 @@ body {
 
 .thread-time {
     font-size: 12px;
+    color: var(--text-muted);
+}
+
+/* Archived thread styles */
+.thread-item.archived {
+    background-color: var(--bg-secondary);
+    border-left: 3px solid var(--text-muted);
+    opacity: 0.7;
+}
+
+.thread-item.archived .thread-name {
+    color: var(--text-secondary);
+    font-style: italic;
+}
+
+.thread-item.archived .thread-time {
     color: var(--text-muted);
 }
 

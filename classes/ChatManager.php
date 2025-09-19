@@ -39,8 +39,38 @@ class ChatManager {
     public function deleteThread($threadId) {
         $sql = "DELETE FROM threads WHERE id = ?";
         $this->db->query($sql, [$threadId]);
-        
+
         $this->logger->info('Thread physically deleted', ['thread_id' => $threadId]);
+    }
+
+    public function archiveThread($threadId) {
+        $thread = $this->getThread($threadId);
+        if (!$thread) {
+            throw new Exception('Thread not found');
+        }
+
+        $newName = 'archived_' . $thread['name'];
+        $this->updateThreadName($threadId, $newName);
+
+        $this->logger->info('Thread archived', ['thread_id' => $threadId, 'name' => $newName]);
+    }
+
+    public function unarchiveThread($threadId) {
+        $thread = $this->getThread($threadId);
+        if (!$thread) {
+            throw new Exception('Thread not found');
+        }
+
+        if (str_starts_with($thread['name'], 'archived_')) {
+            $newName = substr($thread['name'], 9); // Remove 'archived_' prefix
+            $this->updateThreadName($threadId, $newName);
+
+            $this->logger->info('Thread unarchived', ['thread_id' => $threadId, 'name' => $newName]);
+        }
+    }
+
+    public function isThreadArchived($thread) {
+        return str_starts_with($thread['name'], 'archived_');
     }
     
     public function updateThreadSystemPrompt($threadId, $systemPrompt) {

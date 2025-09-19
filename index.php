@@ -78,8 +78,11 @@ $lang = Language::getInstance();
             <!-- Thread Search -->
             <div class="thread-search">
                 <div class="search-input-container">
-                    <input type="text" id="threadSearch" placeholder="🔍 <?= __('threads.search_placeholder') ?>" class="search-input">
-                    <button class="search-clear-btn" id="searchClearBtn" title="<?= __('common.clear') ?>">×</button>
+                    <div class="search-input-wrapper">
+                        <input type="text" id="threadSearch" placeholder="🔍 <?= __('threads.search_placeholder') ?>" class="search-input">
+                        <button class="search-clear-btn" id="searchClearBtn" title="<?= __('common.clear') ?>">×</button>
+                    </div>
+                    <button class="archive-toggle-btn" id="archiveToggleBtn" title="Toggle archive view">📦</button>
                 </div>
                 <div class="search-results-info" id="searchResultsInfo" style="display: none;"></div>
             </div>

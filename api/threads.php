@@ -114,7 +114,23 @@ try {
             $input = json_decode(file_get_contents('php://input'), true);
             handleSetPersona($chatManager, $auth, $input);
             break;
-            
+
+        case 'archive':
+            $postData = $_POST;
+            if (empty($postData) && $_SERVER['CONTENT_TYPE'] === 'application/x-www-form-urlencoded') {
+                parse_str(file_get_contents('php://input'), $postData);
+            }
+            handleArchive($chatManager, $auth, $postData);
+            break;
+
+        case 'unarchive':
+            $postData = $_POST;
+            if (empty($postData) && $_SERVER['CONTENT_TYPE'] === 'application/x-www-form-urlencoded') {
+                parse_str(file_get_contents('php://input'), $postData);
+            }
+            handleUnarchive($chatManager, $auth, $postData);
+            break;
+
         default:
             throw new Exception('Invalid action');
     }
@@ -299,4 +315,36 @@ function handleSetPersona($chatManager, $auth, $data) {
         'success' => true,
         'message' => 'Thread system prompt updated successfully'
     ]);
+}
+
+function handleArchive($chatManager, $auth, $data) {
+    if (!$auth->validateCSRFToken($data['csrf_token'] ?? '')) {
+        throw new Exception('Invalid CSRF token');
+    }
+
+    $threadId = $data['thread_id'] ?? null;
+
+    if (!$threadId) {
+        throw new Exception('Thread ID required');
+    }
+
+    $chatManager->archiveThread($threadId);
+
+    echo json_encode(['success' => true]);
+}
+
+function handleUnarchive($chatManager, $auth, $data) {
+    if (!$auth->validateCSRFToken($data['csrf_token'] ?? '')) {
+        throw new Exception('Invalid CSRF token');
+    }
+
+    $threadId = $data['thread_id'] ?? null;
+
+    if (!$threadId) {
+        throw new Exception('Thread ID required');
+    }
+
+    $chatManager->unarchiveThread($threadId);
+
+    echo json_encode(['success' => true]);
 }

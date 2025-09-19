@@ -145,6 +145,12 @@ class ChatBranchApp {
         searchClearBtn.addEventListener('click', () => {
             this.threadManager.clearSearch();
         });
+
+        // Archive Toggle
+        const archiveToggleBtn = document.getElementById('archiveToggleBtn');
+        archiveToggleBtn.addEventListener('click', () => {
+            this.threadManager.toggleArchiveMode();
+        });
         
         // Tree Toggle
         const treeToggleHandler = () => {

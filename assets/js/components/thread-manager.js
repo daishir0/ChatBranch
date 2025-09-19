@@ -5,11 +5,14 @@ class ThreadManager {
         this.app = app;
         this.allThreads = []; // Store all threads for search
         this.filteredThreads = []; // Store filtered threads
-        
+
         // 複数選択機能
         this.selectionMode = false;
         this.selectedThreads = new Set();
-        
+
+        // アーカイブ機能
+        this.isArchiveMode = false;
+
         this.setupBulkActionUI();
     }
     
@@ -19,10 +22,10 @@ class ThreadManager {
     async loadThreads() {
         try {
             const data = await this.app.apiClient.listThreads();
-            
+
             if (data.success) {
                 this.allThreads = data.threads;
-                this.filteredThreads = [...data.threads];
+                this.filterThreadsByMode();
                 this.renderThreads(this.filteredThreads);
             }
         } catch (error) {
@@ -48,24 +51,38 @@ class ThreadManager {
     renderThreads(threads) {
         const threadList = document.getElementById('threadList');
         threadList.innerHTML = '';
-        
+
         threads.forEach(thread => {
             const threadElement = document.createElement('div');
             threadElement.className = 'thread-item';
             threadElement.dataset.threadId = thread.id;
-            
+
+            // アーカイブ状態の判定とクラス追加
+            const isArchived = this.isThreadArchived(thread);
+            if (isArchived) {
+                threadElement.classList.add('archived');
+            }
+
             // 選択モード時はチェックボックスを表示
-            const checkboxHtml = this.selectionMode ? 
+            const checkboxHtml = this.selectionMode ?
                 `<input type="checkbox" class="thread-checkbox" data-thread-id="${thread.id}" ${this.selectedThreads.has(thread.id) ? 'checked' : ''}>` : '';
-            
+
+            // アーカイブボタンの設定
+            const archiveAction = isArchived ? 'Unarchive' : 'Archive';
+            const archiveIcon = isArchived ? '📤' : '📦';
+
+            // 表示用スレッド名（archived_プレフィックスを除去）
+            const displayName = this.getDisplayTitle(thread);
+
             threadElement.innerHTML = `
                 ${checkboxHtml}
                 <div class="thread-content" data-thread-id="${thread.id}">
-                    <div class="thread-name" data-thread-name="${AppUtils.escapeHtml(thread.name)}">${AppUtils.escapeHtml(thread.name)}</div>
+                    <div class="thread-name" data-thread-name="${AppUtils.escapeHtml(thread.name)}">${AppUtils.escapeHtml(displayName)}</div>
                     <div class="thread-time" data-raw-date="${thread.updated_at}">${AppUtils.formatDate(thread.updated_at)}</div>
                 </div>
                 <div class="thread-actions" style="${this.selectionMode ? 'display: none;' : ''}">
                     <button class="thread-edit-btn" data-thread-id="${thread.id}" title="Edit">✏️</button>
+                    <button class="thread-archive-btn" data-thread-id="${thread.id}" title="${archiveAction}">${archiveIcon}</button>
                     <button class="thread-delete-btn" data-thread-id="${thread.id}" title="Delete">🗑️</button>
                 </div>
             `;
@@ -125,7 +142,18 @@ class ThreadManager {
                 e.stopPropagation();
                 this.editThreadName(thread.id, thread.name);
             });
-            
+
+            // Archive button event
+            const archiveBtn = threadElement.querySelector('.thread-archive-btn');
+            archiveBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                if (isArchived) {
+                    this.unarchiveThread(thread.id);
+                } else {
+                    this.archiveThread(thread.id);
+                }
+            });
+
             // Delete button event
             const deleteBtn = threadElement.querySelector('.thread-delete-btn');
             deleteBtn.addEventListener('click', (e) => {
@@ -172,11 +200,16 @@ class ThreadManager {
      */
     searchThreads(query) {
         if (!query.trim()) {
-            this.filteredThreads = [...this.allThreads];
+            this.filterThreadsByMode();
             this.updateSearchResultsInfo('');
         } else {
             const normalizedQuery = query.toLowerCase().trim();
-            this.filteredThreads = this.allThreads.filter(thread => 
+            // アーカイブモードを考慮した検索
+            let baseThreads = this.isArchiveMode ?
+                this.allThreads.filter(thread => this.isThreadArchived(thread)) :
+                this.allThreads.filter(thread => !this.isThreadArchived(thread));
+
+            this.filteredThreads = baseThreads.filter(thread =>
                 thread.name.toLowerCase().includes(normalizedQuery)
             );
             this.updateSearchResultsInfo(query);
@@ -228,7 +261,7 @@ class ThreadManager {
     clearSearch() {
         const searchInput = document.getElementById('threadSearch');
         searchInput.value = '';
-        this.filteredThreads = [...this.allThreads];
+        this.filterThreadsByMode(); // アーカイブモードを考慮したフィルタリング
         this.renderThreads(this.filteredThreads);
         this.updateSearchClearButton('');
         this.updateSearchResultsInfo('');
@@ -448,6 +481,107 @@ class ThreadManager {
         } catch (error) {
             console.error('Bulk delete error:', error);
             alert('An error occurred during the deletion process.');
+        }
+    }
+
+    // === アーカイブ機能 ===
+
+    /**
+     * アーカイブモードの切り替え
+     */
+    toggleArchiveMode() {
+        this.isArchiveMode = !this.isArchiveMode;
+
+        // 検索をクリア
+        const searchInput = document.getElementById('threadSearch');
+        if (searchInput) {
+            searchInput.value = '';
+        }
+
+        this.filterThreadsByMode();
+        this.renderThreads(this.filteredThreads);
+        this.updateArchiveButtonState();
+        this.updateSearchResultsInfo('');
+    }
+
+    /**
+     * モードに基づいてスレッドをフィルタリング
+     */
+    filterThreadsByMode() {
+        if (this.isArchiveMode) {
+            // アーカイブモード: アーカイブされたスレッドのみ表示
+            this.filteredThreads = this.allThreads.filter(thread => this.isThreadArchived(thread));
+        } else {
+            // 通常モード: アーカイブされていないスレッドのみ表示
+            this.filteredThreads = this.allThreads.filter(thread => !this.isThreadArchived(thread));
+        }
+    }
+
+    /**
+     * アーカイブボタンの状態を更新
+     */
+    updateArchiveButtonState() {
+        const archiveBtn = document.getElementById('archiveToggleBtn');
+        if (archiveBtn) {
+            archiveBtn.classList.toggle('active', this.isArchiveMode);
+        }
+    }
+
+    /**
+     * スレッドがアーカイブされているかチェック
+     */
+    isThreadArchived(thread) {
+        return thread.name.startsWith('archived_');
+    }
+
+    /**
+     * 表示用のタイトルを取得（archived_プレフィックスを除去）
+     */
+    getDisplayTitle(thread) {
+        if (this.isThreadArchived(thread)) {
+            return thread.name.substring(9); // Remove 'archived_' prefix
+        }
+        return thread.name;
+    }
+
+    /**
+     * スレッドをアーカイブ
+     */
+    async archiveThread(threadId) {
+        try {
+            const data = await this.app.apiClient.archiveThread(threadId);
+            if (data.success) {
+                this.loadThreads(); // リストを再読み込み
+            } else {
+                console.error('Archive thread failed:', data);
+                alert('Failed to archive thread: ' + (data.error || data.message || 'Unknown error'));
+            }
+        } catch (error) {
+            console.error('Archive thread error:', error);
+            alert('An error occurred while archiving thread');
+        }
+    }
+
+    /**
+     * スレッドのアーカイブを解除
+     */
+    async unarchiveThread(threadId) {
+        try {
+            const data = await this.app.apiClient.unarchiveThread(threadId);
+            if (data.success) {
+                // アーカイブモードの場合は通常モードに切り替え
+                if (this.isArchiveMode) {
+                    this.isArchiveMode = false;
+                    this.updateArchiveButtonState();
+                }
+                this.loadThreads(); // リストを再読み込み
+            } else {
+                console.error('Unarchive thread failed:', data);
+                alert('Failed to unarchive thread: ' + (data.error || data.message || 'Unknown error'));
+            }
+        } catch (error) {
+            console.error('Unarchive thread error:', error);
+            alert('An error occurred while unarchiving thread');
         }
     }
 }

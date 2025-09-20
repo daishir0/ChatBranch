@@ -137,6 +137,11 @@ $lang = Language::getInstance();
                     <div class="new-tree-tips">
                         <small>💡 This will create a new root message without any parent connection</small>
                     </div>
+                    <div style="margin-top:12px;">
+                        <button id="copyRootLinkBtn" class="settings-btn" style="padding:8px 12px;">
+                            🔗 Copy root-start link
+                        </button>
+                    </div>
                 </div>
             </div>
             

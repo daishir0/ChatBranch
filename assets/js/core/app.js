@@ -58,11 +58,14 @@ class ChatBranchApp {
         
         await this.settingsManager.loadSettings();
         this.bindEvents();
-        this.threadManager.loadThreads();
+        await this.threadManager.loadThreads();
         this.mobileHandler.preventDoubleTabZoom();
         
         // 初期状態でスレッド依存ボタンを無効化
         this.updateThreadDependentButtons();
+
+        // Apply permalink (deep link) if present
+        this.applyPermalinkFromUrl();
     }
     
     /**
@@ -117,6 +120,23 @@ class ChatBranchApp {
         document.getElementById('attachFileBtn').addEventListener('click', () => {
             window.fileManager.show();
         });
+
+        // Copy root-start permalink (in New Tree mode)
+        const copyRootBtn = document.getElementById('copyRootLinkBtn');
+        if (copyRootBtn) {
+            copyRootBtn.addEventListener('click', async () => {
+                if (!this.currentThread) {
+                    alert('Please select a chat first.');
+                    return;
+                }
+                const ok = await this.messageActionsManager.copyRootPermalink(this.currentThread);
+                if (ok) {
+                    const original = copyRootBtn.textContent;
+                    copyRootBtn.textContent = '✅ Copied';
+                    setTimeout(() => { copyRootBtn.textContent = original; }, 1500);
+                }
+            });
+        }
     }
     
     /**
@@ -235,7 +255,7 @@ class ChatBranchApp {
             this.mobileHandler.closeMobileMenu();
         });
     }
-    
+
     /**
      * モーダル関連イベント
      */
@@ -305,6 +325,64 @@ class ChatBranchApp {
                 }
             });
         });
+    }
+    
+    /**
+     * パーマリンクを解釈して初期状態を設定
+     * 形式:
+     *  - ?thread=<id>&message=<id>  指定メッセージを含むパスを表示
+     *  - ?thread=<id>&start=root    ルート開始（親なし）で新規ツリーモードへ
+     *  - ?thread=<id>               スレッドのみ開く（通常表示）
+     */
+    applyPermalinkFromUrl() {
+        try {
+            const params = new URLSearchParams(window.location.search || '');
+            const threadParam = params.get('thread') || params.get('t');
+            if (!threadParam) return;
+
+            const threadId = parseInt(threadParam, 10);
+            if (!threadId) return;
+
+            // スレッド名を一覧から取得（なければ簡易名）
+            let threadName = 'Chat ' + threadId;
+            const found = (this.threadManager && this.threadManager.allThreads || []).find(t => t.id == threadId);
+            if (found) threadName = found.name;
+
+            // message と start=root の優先順位: message を優先
+            const messageParam = params.get('message') || params.get('m');
+            const startParam = params.get('start');
+
+            // ルート開始指定があり、message指定がない場合は先にNewTreeモードを有効化
+            if (!messageParam && startParam && startParam.toLowerCase() === 'root') {
+                this._currentMessageId = null;
+                if (this.uiManager) {
+                    this.uiManager.enterNewTreeMode();
+                }
+            }
+
+            // スレッド選択（UI更新を伴う）
+            this.threadManager.selectThread(threadId, threadName);
+
+            // 適用は selectThread() の直後に再ロード
+            setTimeout(() => {
+                if (messageParam) {
+                    const messageId = parseInt(messageParam, 10);
+                    if (messageId) {
+                        this._currentMessageId = messageId;
+                        this.chatManager.loadMessages();
+                        this.uiManager.loadTree();
+                    }
+                } else if (startParam && startParam.toLowerCase() === 'root') {
+                    this._currentMessageId = null;
+                    // ルート開始モードへ
+                    if (this.uiManager) {
+                        this.uiManager.enterNewTreeMode();
+                    }
+                }
+            }, 0);
+        } catch (e) {
+            console.error('Failed to apply permalink from URL:', e);
+        }
     }
     
     /**

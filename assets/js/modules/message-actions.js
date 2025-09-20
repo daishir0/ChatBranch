@@ -228,7 +228,7 @@ class MessageActionsManager {
         const message = this.findMessageInTree(this.app._currentThreadMessages, messageId);
         return message ? message.parent_message_id : null;
     }
-    
+
     /**
      * メッセージをコピー
      */
@@ -503,6 +503,42 @@ class MessageActionsManager {
                 button.title = originalTitle;
                 button.classList.remove('copy-success');
             }, 2000);
+        }
+    }
+
+    /**
+     * パーマリンクをコピー（ユーザーメッセージ専用）
+     */
+    async copyPermalink(messageId) {
+        try {
+            if (!this.app || !this.app._currentThread) {
+                throw new Error('Thread not selected');
+            }
+            const url = `${location.origin}${location.pathname}?thread=${this.app._currentThread}&message=${messageId}`;
+            await this.copyTextToClipboard(url);
+            return true;
+        } catch (error) {
+            console.error('Copy permalink error:', error);
+            alert('Failed to copy permalink');
+            return false;
+        }
+    }
+
+    /**
+     * ルート開始リンクをコピー（現在のスレッド）
+     */
+    async copyRootPermalink(threadId) {
+        try {
+            if (!threadId) {
+                throw new Error('Thread not selected');
+            }
+            const url = `${location.origin}${location.pathname}?thread=${threadId}&start=root`;
+            await this.copyTextToClipboard(url);
+            return true;
+        } catch (error) {
+            console.error('Copy root permalink error:', error);
+            alert('Failed to copy root-start link');
+            return false;
         }
     }
 }

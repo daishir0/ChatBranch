@@ -102,14 +102,16 @@ class ChatManager {
                 this.showScrollButtons();
                 
                 // Set currentMessageId to the last message in the displayed path
-                // ツリークリック時は常に表示されるパスの最後のメッセージ（通常AIメッセージ）をcurrentMessageIdに設定
-                if (messagePath && messagePath.length > 0) {
+                // ただし、新規ツリーモード中は上書きしない（ルート開始を維持するため）
+                if ((!this.app.uiManager || !this.app.uiManager.newTreeMode) && messagePath && messagePath.length > 0) {
                     this.app._currentMessageId = messagePath[messagePath.length - 1].id;
                     console.log('Set currentMessageId to last message in path:', this.app._currentMessageId);
 
                     // デバッグ用ログ
                     const lastMessage = messagePath[messagePath.length - 1];
                     console.log('Last message role:', lastMessage.role, 'ID:', lastMessage.id);
+                } else if (this.app.uiManager && this.app.uiManager.newTreeMode) {
+                    console.log('New Tree Mode active: keep currentMessageId as null for root-start');
                 }
             } else {
                 console.error('Data success is false:', data);
@@ -271,25 +273,30 @@ class ChatManager {
         const avatar = message.role === 'user' ? 'U' : 'AI';
         const avatarClass = message.role === 'user' ? 'user' : 'assistant';
         
-        // Configure action buttons
+        // Configure action menu (three-dots)
         let actionsHTML = '';
         if (message.role === 'user') {
-            // User message: edit, branch, delete buttons
-            // TODO: 分岐ボタンの表示条件を一時的に変更（元の仕様: userMessageIndex > 1）
-            const showBranchButton = true; // 全てのユーザーメッセージに表示
             actionsHTML = `
                 <div class="message-actions">
-                    <button class="message-action-btn copy-btn" onclick="app.copyMessage(${message.id})" title="Copy">📋</button>
-                    <button class="message-action-btn" onclick="app.editMessage(${message.id})" title="Edit">✏️</button>
-                    ${showBranchButton ? `<button class="message-action-btn" onclick="app.branchMessage(${message.id})" title="Branch">🌿</button>` : ''}
-                    <button class="message-action-btn" onclick="app.deleteMessage(${message.id})" title="Delete">🗑️</button>
+                    <button class="message-action-btn menu-trigger" title="Menu">⋯</button>
+                    <div class="message-menu" style="display:none; position:absolute; right:8px; top:24px; z-index:1000; background: var(--bg-secondary); border:1px solid var(--border-color); border-radius:6px; box-shadow: 0 2px 8px rgba(0,0,0,0.25); min-width: 180px;">
+                        <button class="menu-item" data-action="copy" style="display:block; width:100%; text-align:left; padding:8px 12px; background:none; border:none; color: var(--text-primary); cursor:pointer;">📋 Copy</button>
+                        <button class="menu-item" data-action="permalink" style="display:block; width:100%; text-align:left; padding:8px 12px; background:none; border:none; color: var(--text-primary); cursor:pointer;">🔗 Copy permalink</button>
+                        <div style="height:1px; background: var(--border-color); margin:4px 0;"></div>
+                        <button class="menu-item" data-action="edit" style="display:block; width:100%; text-align:left; padding:8px 12px; background:none; border:none; color: var(--text-primary); cursor:pointer;">✏️ Edit</button>
+                        <button class="menu-item" data-action="branch" style="display:block; width:100%; text-align:left; padding:8px 12px; background:none; border:none; color: var(--text-primary); cursor:pointer;">🌿 Branch</button>
+                        <button class="menu-item danger" data-action="delete" style="display:block; width:100%; text-align:left; padding:8px 12px; background:none; border:none; color: var(--error-color); cursor:pointer;">🗑️ Delete</button>
+                    </div>
                 </div>
             `;
         } else if (message.role === 'assistant') {
-            // AI message: copy button only
+            // AI message: only copy in menu
             actionsHTML = `
                 <div class="message-actions ai-actions">
-                    <button class="message-action-btn copy-btn" onclick="app.copyMessage(${message.id})" title="Copy">📋</button>
+                    <button class="message-action-btn menu-trigger" title="Menu">⋯</button>
+                    <div class="message-menu" style="display:none; position:absolute; right:8px; top:24px; z-index:1000; background: var(--bg-secondary); border:1px solid var(--border-color); border-radius:6px; box-shadow: 0 2px 8px rgba(0,0,0,0.25); min-width: 160px;">
+                        <button class="menu-item" data-action="copy" style="display:block; width:100%; text-align:left; padding:8px 12px; background:none; border:none; color: var(--text-primary); cursor:pointer;">📋 Copy</button>
+                    </div>
                 </div>
             `;
         }
@@ -322,6 +329,59 @@ class ChatManager {
                 ${tokenInfoHTML}
             </div>
         `;
+        
+        // Wire up menu interactions
+        const actionsContainer = messageDiv.querySelector('.message-actions');
+        if (actionsContainer) {
+            const trigger = actionsContainer.querySelector('.menu-trigger');
+            const menu = actionsContainer.querySelector('.message-menu');
+            if (trigger && menu) {
+                const closeMenu = () => { menu.style.display = 'none'; document.removeEventListener('click', onDocClick); document.removeEventListener('keydown', onEsc); };
+                const onDocClick = (e) => { if (!menu.contains(e.target) && e.target !== trigger) closeMenu(); };
+                const onEsc = (e) => { if (e.key === 'Escape') closeMenu(); };
+
+                trigger.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const isOpen = menu.style.display === 'block';
+                    document.querySelectorAll('.message-menu').forEach(m => m.style.display = 'none');
+                    if (!isOpen) {
+                        menu.style.display = 'block';
+                        setTimeout(() => {
+                            document.addEventListener('click', onDocClick);
+                            document.addEventListener('keydown', onEsc);
+                        }, 0);
+                    }
+                });
+
+                // Menu item handlers
+                menu.querySelectorAll('.menu-item').forEach(item => {
+                    item.addEventListener('click', async (ev) => {
+                        ev.stopPropagation();
+                        const action = item.getAttribute('data-action');
+                        try {
+                            if (action === 'copy') {
+                                await this.app.copyMessage(message.id);
+                            } else if (action === 'permalink') {
+                                const ok = await this.app.messageActionsManager.copyPermalink(message.id);
+                                if (ok) {
+                                    const original = item.textContent;
+                                    item.textContent = '✅ Copied';
+                                    setTimeout(() => { item.textContent = original; }, 1500);
+                                }
+                            } else if (action === 'edit') {
+                                this.app.editMessage(message.id);
+                            } else if (action === 'branch') {
+                                this.app.branchMessage(message.id);
+                            } else if (action === 'delete') {
+                                this.app.deleteMessage(message.id);
+                            }
+                        } finally {
+                            closeMenu();
+                        }
+                    });
+                });
+            }
+        }
         
         // Add double-tap prevention to dynamically created messages
         this.app.mobileHandler.addDoubleTabPreventionToElement(messageDiv);

@@ -156,11 +156,37 @@ class SettingsManager {
     applyTheme() {
         document.body.className = this.settings.theme + '-theme';
         
+        // Toggle highlight.js theme links (dark vs light)
+        try {
+            const darkLink = document.getElementById('hljs-dark');
+            const lightLink = document.getElementById('hljs-light');
+            if (darkLink && lightLink) {
+                if (this.settings.theme === 'light') {
+                    lightLink.disabled = false;
+                    darkLink.disabled = true;
+                } else {
+                    lightLink.disabled = true;
+                    darkLink.disabled = false;
+                }
+            }
+        } catch (e) {
+            console.warn('Highlight.js theme toggle failed:', e);
+        }
+        
         // Also update Mermaid theme
         if (typeof mermaid !== 'undefined' && this.messageRenderer) {
             this.messageRenderer.initializeMermaidTheme();
             // Re-render existing diagrams (optional)
             this.reRenderMermaidDiagrams();
+        }
+
+        // Update tree view to match theme
+        try {
+            if (window.treeViewer && typeof window.treeViewer.updateTheme === 'function') {
+                window.treeViewer.updateTheme();
+            }
+        } catch (e) {
+            console.warn('Tree theme update failed:', e);
         }
     }
     

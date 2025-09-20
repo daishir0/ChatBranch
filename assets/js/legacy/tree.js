@@ -58,10 +58,7 @@ class VisTreeViewer {
                         scaleFactor: 0.8
                     }
                 },
-                color: {
-                    color: '#848484',
-                    highlight: '#4a9eff'
-                },
+                color: this.getEdgeColorByTheme(),
                 width: 2,
                 smooth: {
                     enabled: true,
@@ -105,6 +102,11 @@ class VisTreeViewer {
             this.handleResize();
             this.updateOptionsForScreenSize();
         });
+    }
+    
+    getEdgeColorByTheme() {
+        const isLight = document.body.classList.contains('light-theme');
+        return isLight ? { color: '#9ca3af', highlight: '#2563eb' } : { color: '#848484', highlight: '#4a9eff' };
     }
     
     handleResize() {
@@ -155,6 +157,19 @@ class VisTreeViewer {
                 this.network.fit();
             }, 100);
         }
+    }
+    
+    updateTheme() {
+        if (!this.network) return;
+        const edgeColor = this.getEdgeColorByTheme();
+        const nodeFontColor = '#ffffff';
+        this.network.setOptions({
+            edges: { color: edgeColor },
+            nodes: { font: { color: nodeFontColor } }
+        });
+        setTimeout(() => {
+            try { this.network.redraw(); this.network.fit(); } catch(e) {}
+        }, 50);
     }
     
     render(tree) {

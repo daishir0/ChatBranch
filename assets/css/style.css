@@ -16,14 +16,16 @@
 }
 
 .light-theme {
+    /* Improved light palette for higher contrast */
     --bg-primary: #ffffff;
-    --bg-secondary: #f8f9fa;
-    --bg-tertiary: #e9ecef;
-    --text-primary: #212529;
-    --text-secondary: #495057;
-    --text-muted: #6c757d;
-    --border-color: #dee2e6;
-    --shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    --bg-secondary: #f5f7fb;
+    --bg-tertiary: #eef1f6;
+    --text-primary: #111827;   /* near-black */
+    --text-secondary: #374151; /* dark gray */
+    --text-muted: #6B7280;     /* slate-500 */
+    --border-color: #e5e7eb;   /* gray-200 */
+    --accent-color: #2563eb;   /* accessible blue */
+    --shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
 }
 
 * {
@@ -3431,6 +3433,91 @@ html,
         padding: 6px 10px;
         font-size: 11px;
     }
+}
+
+/* ===== Light theme specific readability tweaks (no effect on dark) ===== */
+.light-theme .sidebar,
+.light-theme .chat-header,
+.light-theme .tree-panel {
+    background: #fff;
+}
+.light-theme .tree-panel { border-top: 1px solid var(--border-color); }
+
+.light-theme .input-group,
+.light-theme #messageInput {
+    background: #fff;
+    border: 1px solid var(--border-color);
+}
+
+/* Message bubbles */
+.light-theme .message.assistant .message-content {
+    background: #ffffff;
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+}
+.light-theme .message.user .message-content {
+    background: #e7f3ff; /* light blue */
+    color: #0f172a;      /* slate-900 */
+    border: 1px solid #cfe3ff;
+}
+.light-theme .message.user .message-content .markdown-content a {
+    color: #0b63d1 !important;
+}
+
+/* Menus */
+.light-theme .message-menu,
+.light-theme .thread-menu {
+    background: #ffffff;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 8px 20px rgba(0,0,0,.08);
+}
+.light-theme .menu-item:hover,
+.light-theme .thread-menu-item:hover {
+    background: #f3f4f6;
+}
+.light-theme .menu-item.danger,
+.light-theme .thread-menu-item.danger { color: #b91c1c; }
+.light-theme .menu-item.danger:hover,
+.light-theme .thread-menu-item.danger:hover { background: #fee2e2; }
+
+/* Thread list */
+.light-theme .thread-item:hover { background: #f3f4f6; }
+.light-theme .thread-item.active { background: var(--accent-color); color: #fff; }
+.light-theme .thread-item.active .thread-name,
+.light-theme .thread-item.active .thread-time { color: #fff; }
+.light-theme .thread-item.archived { background: #fafafa; border-left: 3px solid #9CA3AF; }
+
+/* Buttons */
+.light-theme #sendBtn,
+.light-theme #attachFileBtn { background: #0ea5e9; color: #fff; }
+.light-theme #sendBtn:hover { background: #0284c7; }
+.light-theme .new-chat-btn { background: var(--accent-color); }
+.light-theme .new-chat-btn:hover { background: #1d4ed8; }
+
+/* Scroll buttons */
+.light-theme .scroll-nav-btn {
+    background: var(--accent-color);
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(37,99,235,.25);
+}
+
+/* Markdown readability */
+.light-theme .markdown-content table tr:nth-child(even){ background:#fafafa; }
+.light-theme .markdown-content blockquote {
+    border-left: 4px solid #e5e7eb;
+    background: #f9fafb;
+}
+.light-theme .markdown-content code {
+    background: #f3f4f6;
+    border: 1px solid #e5e7eb;
+}
+
+/* Focus ring for keyboard users */
+.light-theme .message-action-btn:focus,
+.light-theme .thread-menu-item:focus,
+.light-theme .menu-item:focus {
+    outline: 2px solid #93c5fd;
+    outline-offset: 2px;
 }
 
 /* 横向きモバイル（高さが極小）での最適化 */

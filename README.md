@@ -105,6 +105,16 @@ Configuration tips: `config.php` includes `auth` (Basic Auth), `openai.api_key`,
 - Check directory permissions and server user
 - Remove `setup.php` after installation
 
+## Publication
+ChatBranch — The AI Conversation Platform that Changes How We Think (Ready Tensor)
+- URL: https://app.readytensor.ai/publications/chatbranch-the-ai-conversation-platform-that-changes-how-we-think-HFKsqg1ERUig
+- Key takeaways:
+  - Parallel exploration with branching/sub-branching (e.g., Strategy, Risk, Financial) keeps context while diverging lines of inquiry
+  - Visual conversation trees help teams see the full decision landscape and maintain shared understanding
+  - Robust relational design (threads/messages/parents) preserves structure for analysis and review; cumulative token usage informs cost/length
+  - Practical workflows: sibling branching from any user message; root-start links to begin fresh paths in the same thread
+  - Business value: reduces context switching and meetings, increases traceability, speeds up consensus and strategic decisions
+
 ## License
 MIT
 
@@ -213,6 +223,16 @@ sudo chmod 755 /var/www/html/ChatBranch
 - PHP 拡張（PDO SQLite, cURL, JSON）を有効化
 - ディレクトリ権限/サーバーユーザーを確認
 - セットアップ後に `setup.php` を削除
+
+## 技術記事（Publication）
+ChatBranch — The AI Conversation Platform that Changes How We Think（Ready Tensor）
+- URL: https://app.readytensor.ai/publications/chatbranch-the-ai-conversation-platform-that-changes-how-we-think-HFKsqg1ERUig
+- 要点:
+  - 分岐／サブ分岐により、戦略・リスク・財務など複数観点を並行検討しつつ文脈を保持
+  - 会話ツリーの可視化で、意思決定の全体像を共有・整理しやすい
+  - スレッド／メッセージ／親子関係の堅牢なデータ設計により、構造化された記録と分析が可能（累積トークン情報も有用）
+  - 実務フロー: 任意のユーザーメッセージから兄弟分岐、同一スレッドのルート開始リンクで新規パスを開始
+  - ビジネス価値: 文脈切替や会議回数を削減し、トレーサビリティを高め、合意形成と戦略決定を加速
 
 ## ライセンス
 MIT

@@ -320,36 +320,59 @@ class ChatManager {
     }
     
     /**
-     * Calculate cumulative token usage for a message path
+     * Calculate accurate cumulative token usage for a message path
      */
     public function calculateCumulativeTokenUsage($messagePath) {
-        $totalTokens = 0;
-        $promptTokens = 0;
-        $completionTokens = 0;
-        $maxTokens = 128000; // Default fallback
+        $contextTokens = 0;        // Context consumed (latest prompt_tokens)
+        $completionTokens = 0;     // All AI outputs combined
+        $totalBilledTokens = 0;    // Actual OpenAI billing total
+        $maxTokens = 128000;       // Default fallback
         $currentModel = null;
         $latestModel = null;
         $latestMaxTokens = null;
+        $latestPromptTokens = 0;
 
-        // First pass: accumulate tokens and find the latest model
+        // Pass 1: Find latest assistant message for accurate context calculation
+        $assistantMessages = [];
         foreach ($messagePath as $message) {
             if ($message['role'] === 'assistant') {
                 $usage = $this->getTokenUsage($message['id']);
                 if ($usage) {
-                    $totalTokens += $usage['total_tokens'] ?? 0;
-                    $promptTokens += $usage['prompt_tokens'] ?? 0;
-                    $completionTokens += $usage['completion_tokens'] ?? 0;
-
-                    // Always update to the latest model (last occurrence wins)
-                    if (isset($usage['model'])) {
-                        $latestModel = $usage['model'];
-                    }
-                    if (isset($usage['model_info']['max_context_tokens'])) {
-                        $latestMaxTokens = $usage['model_info']['max_context_tokens'];
-                    }
+                    $assistantMessages[] = [
+                        'id' => $message['id'],
+                        'usage' => $usage,
+                        'created_at' => $message['created_at'] ?? null
+                    ];
                 }
             }
         }
+
+        // Pass 2: Calculate accurate token consumption
+        foreach ($assistantMessages as $assistantMsg) {
+            $usage = $assistantMsg['usage'];
+
+            // Accumulate completion tokens (actual AI output cost)
+            $completionTokens += $usage['completion_tokens'] ?? 0;
+
+            // Track the latest prompt_tokens (most recent context size)
+            if (isset($usage['prompt_tokens'])) {
+                $latestPromptTokens = $usage['prompt_tokens'];
+            }
+
+            // Track model information from latest message
+            if (isset($usage['model'])) {
+                $latestModel = $usage['model'];
+            }
+            if (isset($usage['model_info']['max_context_tokens'])) {
+                $latestMaxTokens = $usage['model_info']['max_context_tokens'];
+            }
+
+            // Add total_tokens for billing accuracy (without duplication)
+            $totalBilledTokens += $usage['total_tokens'] ?? 0;
+        }
+
+        // Use latest prompt_tokens as context consumption (no duplication)
+        $contextTokens = $latestPromptTokens;
 
         // Priority: User settings > Latest model from history > Config fallback
         $userSelectedModel = $this->getCurrentModel();
@@ -368,16 +391,25 @@ class ChatManager {
             $maxTokens = $this->getModelContextLimit($currentModel);
         }
 
-        $usagePercentage = $maxTokens > 0 ? round(($totalTokens / $maxTokens) * 100, 2) : 0;
+        // Calculate accurate usage based on context consumption vs context limit
+        $usagePercentage = $maxTokens > 0 ? round(($contextTokens / $maxTokens) * 100, 2) : 0;
+
+        // Calculate display totals (context + all completions for user understanding)
+        $displayTotal = $contextTokens + $completionTokens;
 
         return [
-            'total_tokens' => $totalTokens,
-            'prompt_tokens' => $promptTokens,
-            'completion_tokens' => $completionTokens,
-            'max_tokens' => $maxTokens,
+            'context_tokens' => $contextTokens,           // Actual context consumption (accurate)
+            'completion_tokens' => $completionTokens,     // All AI outputs combined
+            'display_total' => $displayTotal,             // Context + completions for display
+            'billing_total' => $totalBilledTokens,        // Total OpenAI billing (with overlaps)
+            'max_tokens' => $maxTokens,                   // Model context limit
             'current_model' => $currentModel,
-            'usage_percentage' => $usagePercentage,
-            'usage_display' => "Tokens used: " . number_format($totalTokens) . "/" . number_format($maxTokens) . " ({$currentModel}) - {$usagePercentage}%"
+            'usage_percentage' => $usagePercentage,       // Based on context vs limit
+            'usage_display' => "Context: " . number_format($contextTokens) . " + Output: " . number_format($completionTokens) . " = " . number_format($displayTotal) . "/" . number_format($maxTokens) . " ({$currentModel}) - {$usagePercentage}%",
+
+            // Legacy compatibility (for existing code)
+            'total_tokens' => $displayTotal,
+            'prompt_tokens' => $contextTokens
         ];
     }
     

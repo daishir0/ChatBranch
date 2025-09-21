@@ -64,7 +64,11 @@ try {
         case 'system':
             handleGetSystemConfig($config);
             break;
-            
+
+        case 'models':
+            handleGetAvailableModels($config);
+            break;
+
         default:
             throw new Exception('Invalid action');
     }
@@ -83,7 +87,7 @@ function handleGetSettings($settingsManager) {
         
         // Ensure we have the expected structure for frontend compatibility
         $frontendSettings = [
-            'model' => $settings['default_model'] ?? 'gpt-4o-mini',
+            'model' => $settings['default_model'] ?? 'gpt-5-mini', // Changed default to gpt-5-mini
             'systemPrompt' => $settings['system_prompt'] ?? 'You are a helpful assistant.',
             'theme' => $settings['theme'] ?? 'dark'
         ];
@@ -155,7 +159,7 @@ function handleResetSettings($settingsManager, $auth, $logger) {
     // Get the reset settings to return to frontend
     $settings = $settingsManager->getAllSettings();
     $frontendSettings = [
-        'model' => $settings['default_model'] ?? 'gpt-4o-mini',
+        'model' => $settings['default_model'] ?? 'gpt-5-mini', // Changed default to gpt-5-mini
         'systemPrompt' => $settings['system_prompt'] ?? 'You are a helpful assistant.',
         'theme' => $settings['theme'] ?? 'dark'
     ];
@@ -172,5 +176,87 @@ function handleGetSystemConfig($config) {
         'success' => true,
         'timezone' => $config['system']['timezone'] ?? 'UTC',
         'locale' => 'ja-JP' // 将来的にconfigから取得可能
+    ]);
+}
+
+function handleGetAvailableModels($config) {
+    // Define available models with their specifications
+    $models = [
+        [
+            'id' => 'gpt-5-mini',
+            'name' => 'GPT-5 Mini',
+            'description' => 'Latest reasoning model - balanced performance and cost',
+            'contextTokens' => 272000,
+            'outputTokens' => 128000,
+            'isReasoning' => true,
+            'recommended' => true,
+            'category' => 'GPT-5 Series'
+        ],
+        [
+            'id' => 'gpt-5',
+            'name' => 'GPT-5',
+            'description' => 'Most advanced reasoning model with superior performance',
+            'contextTokens' => 272000,
+            'outputTokens' => 128000,
+            'isReasoning' => true,
+            'recommended' => false,
+            'category' => 'GPT-5 Series'
+        ],
+        [
+            'id' => 'gpt-4o-mini',
+            'name' => 'GPT-4o Mini',
+            'description' => 'Fast and efficient model for general tasks',
+            'contextTokens' => 128000,
+            'outputTokens' => 16000,
+            'isReasoning' => false,
+            'recommended' => false,
+            'category' => 'GPT-4 Series'
+        ],
+        [
+            'id' => 'gpt-4o',
+            'name' => 'GPT-4o',
+            'description' => 'High-performance model with multimodal capabilities',
+            'contextTokens' => 128000,
+            'outputTokens' => 16000,
+            'isReasoning' => false,
+            'recommended' => false,
+            'category' => 'GPT-4 Series'
+        ],
+        [
+            'id' => 'o1-preview',
+            'name' => 'o1-preview',
+            'description' => 'Advanced reasoning model for complex problems',
+            'contextTokens' => 128000,
+            'outputTokens' => 32000,
+            'isReasoning' => true,
+            'recommended' => false,
+            'category' => 'o1 Series'
+        ],
+        [
+            'id' => 'o1-mini',
+            'name' => 'o1-mini',
+            'description' => 'Reasoning model optimized for coding and math',
+            'contextTokens' => 128000,
+            'outputTokens' => 65000,
+            'isReasoning' => true,
+            'recommended' => false,
+            'category' => 'o1 Series'
+        ],
+        [
+            'id' => 'gpt-3.5-turbo',
+            'name' => 'GPT-3.5 Turbo',
+            'description' => 'Fast and cost-effective model for simple tasks',
+            'contextTokens' => 16385,
+            'outputTokens' => 4096,
+            'isReasoning' => false,
+            'recommended' => false,
+            'category' => 'GPT-3.5 Series'
+        ]
+    ];
+
+    echo json_encode([
+        'success' => true,
+        'models' => $models,
+        'currentDefault' => $config['openai']['default_model'] ?? 'gpt-5-mini'
     ]);
 }

@@ -17,31 +17,37 @@ class SettingsManager {
      */
     async loadAvailableModels() {
         try {
-            const response = await this.app.apiClient.authenticatedFetch(`${this.app.apiClient.apiBaseUrl}/models.php`);
+            const response = await this.app.apiClient.authenticatedFetch(`${this.app.apiClient.apiBaseUrl}/settings.php?action=models`);
             const data = await response.json();
-            
+
             if (data.success) {
                 this.availableModels = data.models;
                 this.renderModelSelect();
             } else {
                 console.error('Failed to load models:', data.error);
-                // Fallback
+                // Fallback with all available models
                 this.availableModels = [
-                    { id: 'gpt-5', name: 'GPT-5 (Full Model)', description: 'Most capable model', category: 'premium', enabled: true },
-                    { id: 'gpt-5-mini', name: 'GPT-5 Mini (Recommended)', description: 'Perfect balance', category: 'standard', enabled: true, default: true },
-                    { id: 'gpt-5-nano', name: 'GPT-5 Nano (Ultra-Fast)', description: 'Ultra-low-latency', category: 'basic', enabled: true },
-                    { id: 'gpt-4o-mini', name: 'GPT-4o Mini (Legacy)', description: 'Previous generation', category: 'legacy', enabled: true }
+                    { id: 'gpt-5-mini', name: 'GPT-5 Mini (Recommended)', description: 'Latest reasoning model - balanced performance and cost', recommended: true },
+                    { id: 'gpt-5', name: 'GPT-5', description: 'Most advanced reasoning model with superior performance' },
+                    { id: 'gpt-4o-mini', name: 'GPT-4o Mini', description: 'Fast and efficient model for general tasks' },
+                    { id: 'gpt-4o', name: 'GPT-4o', description: 'High-performance model with multimodal capabilities' },
+                    { id: 'o1-preview', name: 'o1-preview', description: 'Advanced reasoning model for complex problems' },
+                    { id: 'o1-mini', name: 'o1-mini', description: 'Reasoning model optimized for coding and math' },
+                    { id: 'gpt-3.5-turbo', name: 'GPT-3.5 Turbo', description: 'Fast and cost-effective model for simple tasks' }
                 ];
                 this.renderModelSelect();
             }
         } catch (error) {
             console.error('Error loading models:', error);
-            // フォールバック
+            // Fallback with all available models
             this.availableModels = [
-                { id: 'gpt-5', name: 'GPT-5 (Full Model)', description: 'Most capable model', category: 'premium', enabled: true },
-                { id: 'gpt-5-mini', name: 'GPT-5 Mini (Recommended)', description: 'Perfect balance', category: 'standard', enabled: true, default: true },
-                { id: 'gpt-5-nano', name: 'GPT-5 Nano (Ultra-Fast)', description: 'Ultra-low-latency', category: 'basic', enabled: true },
-                { id: 'gpt-4o-mini', name: 'GPT-4o Mini (Legacy)', description: 'Previous generation', category: 'legacy', enabled: true }
+                { id: 'gpt-5-mini', name: 'GPT-5 Mini (Recommended)', description: 'Latest reasoning model - balanced performance and cost', recommended: true },
+                { id: 'gpt-5', name: 'GPT-5', description: 'Most advanced reasoning model with superior performance' },
+                { id: 'gpt-4o-mini', name: 'GPT-4o Mini', description: 'Fast and efficient model for general tasks' },
+                { id: 'gpt-4o', name: 'GPT-4o', description: 'High-performance model with multimodal capabilities' },
+                { id: 'o1-preview', name: 'o1-preview', description: 'Advanced reasoning model for complex problems' },
+                { id: 'o1-mini', name: 'o1-mini', description: 'Reasoning model optimized for coding and math' },
+                { id: 'gpt-3.5-turbo', name: 'GPT-3.5 Turbo', description: 'Fast and cost-effective model for simple tasks' }
             ];
             this.renderModelSelect();
         }
@@ -53,24 +59,63 @@ class SettingsManager {
     renderModelSelect() {
         const modelSelect = document.getElementById('modelSelect');
         if (!modelSelect) return;
-        
+
         modelSelect.innerHTML = '';
-        
-        // Show only enabled models
-        const enabledModels = this.availableModels.filter(model => model.enabled);
-        
-        enabledModels.forEach(model => {
-            const option = document.createElement('option');
-            option.value = model.id;
-            option.textContent = model.name;
-            
-            // Add description if available
-            if (model.description) {
-                option.title = model.description;
+
+        // Group models by category
+        const categories = {};
+        this.availableModels.forEach(model => {
+            const category = model.category || 'Other';
+            if (!categories[category]) {
+                categories[category] = [];
             }
-            
-            modelSelect.appendChild(option);
+            categories[category].push(model);
         });
+
+        // Desired category order for better UX
+        const categoryOrder = ['GPT-5 Series', 'GPT-4 Series', 'o1 Series', 'GPT-3.5 Series', 'Other'];
+
+        categoryOrder.forEach(categoryName => {
+            if (categories[categoryName] && categories[categoryName].length > 0) {
+                // Add category optgroup
+                const optgroup = document.createElement('optgroup');
+                optgroup.label = categoryName;
+
+                categories[categoryName].forEach(model => {
+                    const option = document.createElement('option');
+                    option.value = model.id;
+
+                    // Add (Recommended) suffix for recommended models
+                    const displayName = model.recommended ? `${model.name} (Recommended)` : model.name;
+                    option.textContent = displayName;
+
+                    // Add description as tooltip
+                    if (model.description) {
+                        option.title = model.description;
+                    }
+
+                    optgroup.appendChild(option);
+                });
+
+                modelSelect.appendChild(optgroup);
+            }
+        });
+
+        // If no categories, add models directly
+        if (Object.keys(categories).length === 0) {
+            this.availableModels.forEach(model => {
+                const option = document.createElement('option');
+                option.value = model.id;
+                const displayName = model.recommended ? `${model.name} (Recommended)` : model.name;
+                option.textContent = displayName;
+
+                if (model.description) {
+                    option.title = model.description;
+                }
+
+                modelSelect.appendChild(option);
+            });
+        }
     }
     
     /**

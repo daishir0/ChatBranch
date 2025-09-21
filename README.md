@@ -19,10 +19,10 @@ Highlights
 ## Installation
 
 ### Prerequisites
-- PHP 7.4+ (PHP 8+ recommended)
+- PHP 8.2+ (required for OpenAI library)
 - Apache/Nginx
 - PDO SQLite, cURL, JSON PHP extensions
-- Composer (for document parsing libraries)
+- Composer (for dependencies including OpenAI library)
 - Write permission to the app directory
 
 ### Step-by-step
@@ -32,9 +32,13 @@ git clone https://github.com/daishir0/ChatBranch.git
 sudo cp -r ChatBranch /var/www/html/ChatBranch
 cd /var/www/html/ChatBranch
 ```
-2) Install libraries (optional but recommended for Office/PDF parsing)
+2) Install dependencies (required for OpenAI integration and Office/PDF parsing)
 ```bash
-php composer.phar install || (curl -sS https://getcomposer.org/installer | php && php composer.phar install)
+# Install Composer if not available
+curl -sS https://getcomposer.org/installer | php
+
+# Install all dependencies including OpenAI PHP client
+php composer.phar install
 ```
 3) Set ownership/permission (adjust user/group for your server)
 ```bash
@@ -49,6 +53,8 @@ sudo chmod 755 /var/www/html/ChatBranch
 - After installation, delete `setup.php` for security
 
 Configuration tips: `config.php` includes `auth` (Basic Auth), `openai.api_key`, `system.base_url`, and `system.timezone`.
+
+**OpenAI Integration**: This application uses the industry-standard `openai-php/client` library for robust OpenAI API integration with support for GPT-4, GPT-3.5, and future models. Context compression is disabled to provide transparent error handling for token limits.
 
 ## Usage
 
@@ -101,9 +107,11 @@ Configuration tips: `config.php` includes `auth` (Basic Auth), `openai.api_key`,
 - English and Japanese are included; add more under `lang/`
 
 ### Troubleshooting
-- Ensure PHP extensions (PDO SQLite, cURL, JSON) are enabled
+- Ensure PHP 8.2+ and extensions (PDO SQLite, cURL, JSON) are enabled
+- Run `php composer.phar install` to install required dependencies
 - Check directory permissions and server user
 - Remove `setup.php` after installation
+- For token limit errors: the app now shows clear error messages instead of auto-compressing context
 
 ## Publication
 ChatBranch — The AI Conversation Platform that Changes How We Think (Ready Tensor)
@@ -138,10 +146,10 @@ ChatBranch は、会話をツリーで管理する Web ベースの AI チャッ
 ## インストール
 
 ### 前提
-- PHP 7.4+（PHP 8+ 推奨）
+- PHP 8.2+（OpenAI ライブラリに必要）
 - Apache/Nginx
 - PDO SQLite / cURL / JSON 拡張
-- Composer（ドキュメント解析用）
+- Composer（OpenAI ライブラリを含む依存関係管理用）
 - アプリディレクトリへの書き込み権限
 
 ### 手順
@@ -151,9 +159,13 @@ git clone https://github.com/daishir0/ChatBranch.git
 sudo cp -r ChatBranch /var/www/html/ChatBranch
 cd /var/www/html/ChatBranch
 ```
-2) 依存インストール（推奨）
+2) 依存関係インストール（OpenAI 統合とドキュメント解析に必要）
 ```bash
-php composer.phar install || (curl -sS https://getcomposer.org/installer | php && php composer.phar install)
+# Composer がない場合はインストール
+curl -sS https://getcomposer.org/installer | php
+
+# OpenAI PHP クライアントを含むすべての依存関係をインストール
+php composer.phar install
 ```
 3) 権限
 ```bash
@@ -168,6 +180,8 @@ sudo chmod 755 /var/www/html/ChatBranch
 - セットアップ後は `setup.php` を必ず削除
 
 `config.php` の主な設定: `auth`（Basic 認証）, `openai.api_key`, `system.base_url`, `system.timezone`。
+
+**OpenAI 統合**: このアプリケーションは業界標準の `openai-php/client` ライブラリを使用して、GPT-4、GPT-3.5、および将来のモデルに対応した堅牢な OpenAI API 統合を提供します。コンテキスト圧縮は無効化され、トークン制限に対する透明なエラーハンドリングを提供します。
 
 ## 使い方
 
@@ -220,9 +234,11 @@ sudo chmod 755 /var/www/html/ChatBranch
 - 英語/日本語を同梱。`lang/` に追加可能
 
 ### トラブルシューティング
-- PHP 拡張（PDO SQLite, cURL, JSON）を有効化
+- PHP 8.2+ と拡張（PDO SQLite, cURL, JSON）を有効化
+- `php composer.phar install` で必要な依存関係をインストール
 - ディレクトリ権限/サーバーユーザーを確認
 - セットアップ後に `setup.php` を削除
+- トークン制限エラー: 自動圧縮の代わりに明確なエラーメッセージを表示するように変更
 
 ## 技術記事（Publication）
 ChatBranch — The AI Conversation Platform that Changes How We Think（Ready Tensor）

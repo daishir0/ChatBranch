@@ -6,6 +6,8 @@
         "smalot/pdfparser": "^2.12",
         "phpoffice/phpword": "^1.4",
         "phpoffice/phpspreadsheet": "^5.0",
-        "phpoffice/phppresentation": "^0.9.0"
+        "phpoffice/phppresentation": "^0.9.0",
+        "openai-php/client": "^0.16.1",
+        "guzzlehttp/guzzle": "^7.10"
     }
 }

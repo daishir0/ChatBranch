@@ -326,8 +326,12 @@ class ChatManager {
         $totalTokens = 0;
         $promptTokens = 0;
         $completionTokens = 0;
-        $maxTokens = 128000; // GPT-5-mini limit
-        
+        $maxTokens = 128000; // Default fallback
+        $currentModel = null;
+        $latestModel = null;
+        $latestMaxTokens = null;
+
+        // First pass: accumulate tokens and find the latest model
         foreach ($messagePath as $message) {
             if ($message['role'] === 'assistant') {
                 $usage = $this->getTokenUsage($message['id']);
@@ -335,19 +339,45 @@ class ChatManager {
                     $totalTokens += $usage['total_tokens'] ?? 0;
                     $promptTokens += $usage['prompt_tokens'] ?? 0;
                     $completionTokens += $usage['completion_tokens'] ?? 0;
+
+                    // Always update to the latest model (last occurrence wins)
+                    if (isset($usage['model'])) {
+                        $latestModel = $usage['model'];
+                    }
+                    if (isset($usage['model_info']['max_context_tokens'])) {
+                        $latestMaxTokens = $usage['model_info']['max_context_tokens'];
+                    }
                 }
             }
         }
-        
+
+        // Priority: User settings > Latest model from history > Config fallback
+        $userSelectedModel = $this->getCurrentModel();
+
+        if ($userSelectedModel && $userSelectedModel !== 'gpt-5-mini') {
+            // User has explicitly selected a different model - use that
+            $currentModel = $userSelectedModel;
+            $maxTokens = $this->getModelContextLimit($currentModel);
+        } else if ($latestModel) {
+            // Use the latest model from conversation history
+            $currentModel = $latestModel;
+            $maxTokens = $latestMaxTokens ?? $this->getModelContextLimit($latestModel);
+        } else {
+            // Fallback to user settings or config
+            $currentModel = $userSelectedModel ?? 'gpt-5-mini';
+            $maxTokens = $this->getModelContextLimit($currentModel);
+        }
+
         $usagePercentage = $maxTokens > 0 ? round(($totalTokens / $maxTokens) * 100, 2) : 0;
-        
+
         return [
             'total_tokens' => $totalTokens,
             'prompt_tokens' => $promptTokens,
             'completion_tokens' => $completionTokens,
             'max_tokens' => $maxTokens,
+            'current_model' => $currentModel,
             'usage_percentage' => $usagePercentage,
-            'usage_display' => "Tokens used: " . number_format($totalTokens) . "/" . number_format($maxTokens) . " - {$usagePercentage}%"
+            'usage_display' => "Tokens used: " . number_format($totalTokens) . "/" . number_format($maxTokens) . " ({$currentModel}) - {$usagePercentage}%"
         ];
     }
     
@@ -376,14 +406,61 @@ class ChatManager {
         // Calculate cumulative token usage for this message
         $messagePath = $this->getMessagePathForTokens($threadId, $node['id']);
         $tokenUsage = $this->calculateCumulativeTokenUsage($messagePath);
-        
+
         $node['cumulative_tokens'] = $tokenUsage;
-        
+
         // Process children recursively
         if (isset($node['children']) && is_array($node['children'])) {
             foreach ($node['children'] as &$child) {
                 $this->enrichNodeWithTokenUsage($child, $threadId);
             }
         }
+    }
+
+    /**
+     * Get current model from user settings, fallback to config
+     */
+    private function getCurrentModel() {
+        // Try to get from user settings first
+        try {
+            require_once __DIR__ . '/SettingsManager.php';
+
+            $settingsManager = new SettingsManager($this->db);
+            $model = $settingsManager->getSetting('default_model');
+            if ($model && !empty($model)) {
+                return $model;
+            }
+        } catch (Exception $e) {
+            // Fallback to config if settings read fails
+            if ($this->logger) {
+                $this->logger->debug('Failed to load model from settings, using config fallback', ['error' => $e->getMessage()]);
+            }
+        }
+
+        // Fallback to config
+        $config = require __DIR__ . '/../config.php';
+        return $config['openai']['default_model'] ?? 'gpt-5-mini';
+    }
+
+    /**
+     * Get model context limit
+     */
+    private function getModelContextLimit($model) {
+        // Model context limits - Official OpenAI specifications (synchronized with OpenAIClient)
+        $contextLimits = [
+            'gpt-4o-mini' => 128000,     // Official: 128K context window
+            'gpt-4o' => 128000,          // Official: 128K context window
+            'gpt-4-turbo' => 128000,
+            'gpt-4' => 8192,
+            'gpt-3.5-turbo' => 16385,
+            'gpt-3.5-turbo-1106' => 16385,
+            'gpt-3.5-turbo-instruct' => 4096,
+            'o1-preview' => 128000,      // Official: 128K context window
+            'o1-mini' => 128000,         // Official: 128K context window
+            'gpt-5-mini' => 272000,      // Official: 272K input tokens
+            'gpt-5' => 272000,           // Official: 272K input tokens
+        ];
+
+        return $contextLimits[$model] ?? 128000;
     }
 }

@@ -143,13 +143,16 @@ class ChatManager {
                 path.push(directMessage);
             }
         }
-        
-        // If clicked message has children, include the first child (AI response)
+
+        // If clicked message has children, include the first child (AI response only)
         const clickedMessage = this.findMessageById(tree, this.app._currentMessageId);
         if (clickedMessage && clickedMessage.children && clickedMessage.children.length > 0) {
-            path.push(clickedMessage.children[0]);
+            const firstChild = clickedMessage.children[0];
+            if (firstChild.role === 'assistant') {  // AIメッセージのみ追加
+                path.push(firstChild);
+            }
         }
-        
+
         return path;
     }
     

@@ -54,7 +54,24 @@ sudo chmod 755 /var/www/html/ChatBranch
 
 Configuration tips: `config.php` includes `auth` (Basic Auth), `openai.api_key`, `system.base_url`, and `system.timezone`.
 
-**OpenAI Integration**: This application uses the industry-standard `openai-php/client` library for robust OpenAI API integration with support for GPT-4, GPT-3.5, and future models. Context compression is disabled to provide transparent error handling for token limits.
+**OpenAI Integration**: This application uses the industry-standard `openai-php/client` library for robust OpenAI API integration with support for multiple model series. Context compression is disabled to provide transparent error handling for token limits.
+
+### Supported AI Models
+- **GPT-5 Series**: Latest reasoning models with advanced capabilities
+  - `gpt-5-mini` (recommended): Balanced performance and cost
+  - `gpt-5`: Most advanced reasoning model
+- **GPT-4 Series**: High-performance models with multimodal capabilities
+  - `gpt-4o-mini`: Fast and efficient for general tasks
+  - `gpt-4o`: High-performance with multimodal capabilities
+  - `gpt-4o-search-preview`: GPT-4o with real-time web search
+  - `gpt-4o-mini-search-preview`: GPT-4o Mini with real-time web search
+- **o1 Series**: Advanced reasoning models for complex problems
+  - `o1-preview`: Advanced reasoning for complex problems
+  - `o1-mini`: Optimized for coding and math
+- **GPT-3.5 Series**: Fast and cost-effective models
+  - `gpt-3.5-turbo`: Fast and cost-effective for simple tasks
+
+**Web Search Feature**: Select any Search Preview model (`gpt-4o-search-preview` or `gpt-4o-mini-search-preview`) to automatically enable real-time web search capabilities. The AI can access current information and provide up-to-date responses with source citations.
 
 ## Usage
 
@@ -181,7 +198,24 @@ sudo chmod 755 /var/www/html/ChatBranch
 
 `config.php` の主な設定: `auth`（Basic 認証）, `openai.api_key`, `system.base_url`, `system.timezone`。
 
-**OpenAI 統合**: このアプリケーションは業界標準の `openai-php/client` ライブラリを使用して、GPT-4、GPT-3.5、および将来のモデルに対応した堅牢な OpenAI API 統合を提供します。コンテキスト圧縮は無効化され、トークン制限に対する透明なエラーハンドリングを提供します。
+**OpenAI 統合**: このアプリケーションは業界標準の `openai-php/client` ライブラリを使用して、複数のモデルシリーズに対応した堅牢な OpenAI API 統合を提供します。コンテキスト圧縮は無効化され、トークン制限に対する透明なエラーハンドリングを提供します。
+
+### 対応AIモデル
+- **GPT-5 シリーズ**: 高度な機能を持つ最新の推論モデル
+  - `gpt-5-mini`（推奨）: パフォーマンスとコストのバランス
+  - `gpt-5`: 最も高度な推論モデル
+- **GPT-4 シリーズ**: マルチモーダル機能を持つ高性能モデル
+  - `gpt-4o-mini`: 一般的なタスクに高速で効率的
+  - `gpt-4o`: マルチモーダル機能を持つ高性能モデル
+  - `gpt-4o-search-preview`: リアルタイム Web 検索機能付き GPT-4o
+  - `gpt-4o-mini-search-preview`: リアルタイム Web 検索機能付き GPT-4o Mini
+- **o1 シリーズ**: 複雑な問題に対応する高度な推論モデル
+  - `o1-preview`: 複雑な問題に対応する高度な推論
+  - `o1-mini`: コーディングと数学に最適化
+- **GPT-3.5 シリーズ**: 高速でコスト効率の良いモデル
+  - `gpt-3.5-turbo`: シンプルなタスクに高速でコスト効率的
+
+**Web 検索機能**: Search Preview モデル（`gpt-4o-search-preview` または `gpt-4o-mini-search-preview`）を選択すると、リアルタイム Web 検索機能が自動的に有効になります。AI は最新の情報にアクセスし、ソース付きの最新の回答を提供できます。
 
 ## 使い方
 

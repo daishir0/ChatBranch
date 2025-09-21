@@ -223,6 +223,26 @@ function handleGetAvailableModels($config) {
             'category' => 'GPT-4 Series'
         ],
         [
+            'id' => 'gpt-4o-search-preview',
+            'name' => 'GPT-4o Search',
+            'description' => 'GPT-4o with real-time web search capabilities',
+            'contextTokens' => 128000,
+            'outputTokens' => 16000,
+            'isReasoning' => false,
+            'recommended' => false,
+            'category' => 'GPT-4 Series'
+        ],
+        [
+            'id' => 'gpt-4o-mini-search-preview',
+            'name' => 'GPT-4o Mini Search',
+            'description' => 'GPT-4o Mini with real-time web search capabilities',
+            'contextTokens' => 128000,
+            'outputTokens' => 16000,
+            'isReasoning' => false,
+            'recommended' => false,
+            'category' => 'GPT-4 Series'
+        ],
+        [
             'id' => 'o1-preview',
             'name' => 'o1-preview',
             'description' => 'Advanced reasoning model for complex problems',

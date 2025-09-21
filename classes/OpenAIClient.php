@@ -63,8 +63,14 @@ class OpenAIClient {
             'messages' => $formattedMessages
         ];
 
+        // Search Preview models use web_search_options parameter and don't support temperature
+        if ($this->isSearchPreviewModel($model)) {
+            $requestParams['web_search_options'] = (object)[];  // Empty object, not array
+            $requestParams['max_tokens'] = $maxTokens;
+            // Search Preview models don't support temperature parameter
+        }
         // GPT-5 and o1 models use max_completion_tokens and don't support temperature
-        if ($this->isReasoningModel($model)) {
+        else if ($this->isReasoningModel($model)) {
             $requestParams['max_completion_tokens'] = $maxTokens;
             // o1/GPT-5 models don't support temperature parameter
         } else {
@@ -188,6 +194,16 @@ class OpenAIClient {
         return in_array($model, $reasoningModels) ||
                strpos($model, 'o1-') === 0 ||
                strpos($model, 'gpt-5') === 0;
+    }
+
+    /**
+     * Check if model is a search preview model with web search capabilities
+     */
+    private function isSearchPreviewModel($model) {
+        return in_array($model, [
+            'gpt-4o-search-preview',
+            'gpt-4o-mini-search-preview'
+        ]);
     }
 
     /**

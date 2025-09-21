@@ -480,17 +480,19 @@ class ChatManager {
     private function getModelContextLimit($model) {
         // Model context limits - Official OpenAI specifications (synchronized with OpenAIClient)
         $contextLimits = [
-            'gpt-4o-mini' => 128000,     // Official: 128K context window
-            'gpt-4o' => 128000,          // Official: 128K context window
+            'gpt-4o-mini' => 128000,                // Official: 128K context window
+            'gpt-4o' => 128000,                     // Official: 128K context window
+            'gpt-4o-search-preview' => 128000,      // Search Preview: 128K context window
+            'gpt-4o-mini-search-preview' => 128000, // Search Preview: 128K context window
             'gpt-4-turbo' => 128000,
             'gpt-4' => 8192,
             'gpt-3.5-turbo' => 16385,
             'gpt-3.5-turbo-1106' => 16385,
             'gpt-3.5-turbo-instruct' => 4096,
-            'o1-preview' => 128000,      // Official: 128K context window
-            'o1-mini' => 128000,         // Official: 128K context window
-            'gpt-5-mini' => 272000,      // Official: 272K input tokens
-            'gpt-5' => 272000,           // Official: 272K input tokens
+            'o1-preview' => 128000,                 // Official: 128K context window
+            'o1-mini' => 128000,                    // Official: 128K context window
+            'gpt-5-mini' => 272000,                 // Official: 272K input tokens
+            'gpt-5' => 272000,                      // Official: 272K input tokens
         ];
 
         return $contextLimits[$model] ?? 128000;

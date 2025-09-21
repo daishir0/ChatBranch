@@ -144,6 +144,8 @@ class SettingsManager {
             'gpt-5',
             'gpt-4o-mini',
             'gpt-4o',
+            'gpt-4o-search-preview',
+            'gpt-4o-mini-search-preview',
             'o1-preview',
             'o1-mini',
             'gpt-3.5-turbo'

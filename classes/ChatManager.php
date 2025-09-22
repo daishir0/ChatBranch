@@ -30,9 +30,9 @@ class ChatManager {
     }
     
     public function updateThreadName($threadId, $name) {
-        $sql = "UPDATE threads SET name = ?, updated_at = datetime('now','localtime') WHERE id = ?";
+        $sql = "UPDATE threads SET name = ? WHERE id = ?";
         $this->db->query($sql, [$name, $threadId]);
-        
+
         $this->logger->info('Thread name updated', ['thread_id' => $threadId, 'name' => $name]);
     }
     

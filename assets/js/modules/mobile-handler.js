@@ -256,36 +256,12 @@ class MobileHandler {
         let originalHeight = '';
         let isExpanded = false;
 
-        // スクロールボタンの元の表示状態を保存
-        let scrollButtonsOriginalDisplay = {
-            scrollToTop: '',
-            scrollToBottom: ''
-        };
-
         // フォーカス時に高さを画面の80%に変更
         messageInput.addEventListener('focus', () => {
             if (isExpanded) return;
 
             // 元の高さを保存
             originalHeight = messageInput.style.height || getComputedStyle(messageInput).height;
-
-            // スクロールボタンの元の表示状態を保存して隠す
-            const scrollToTopBtn = document.getElementById('scrollToTop');
-            const scrollToBottomBtn = document.getElementById('scrollToBottom');
-
-            if (scrollToTopBtn) {
-                // 計算されたスタイルも含めて現在の表示状態を取得
-                const computedDisplay = getComputedStyle(scrollToTopBtn).display;
-                scrollButtonsOriginalDisplay.scrollToTop = scrollToTopBtn.style.display || computedDisplay;
-                scrollToTopBtn.style.display = 'none';
-            }
-
-            if (scrollToBottomBtn) {
-                // 計算されたスタイルも含めて現在の表示状態を取得
-                const computedDisplay = getComputedStyle(scrollToBottomBtn).display;
-                scrollButtonsOriginalDisplay.scrollToBottom = scrollToBottomBtn.style.display || computedDisplay;
-                scrollToBottomBtn.style.display = 'none';
-            }
 
             // 画面の80%の高さに変更
             const newHeight = window.innerHeight * 0.8;
@@ -304,28 +280,6 @@ class MobileHandler {
             messageInput.style.height = originalHeight;
             messageInput.style.minHeight = '';
             messageInput.style.maxHeight = '';
-
-            // スクロールボタンの表示状態を元に戻す
-            const scrollToTopBtn = document.getElementById('scrollToTop');
-            const scrollToBottomBtn = document.getElementById('scrollToBottom');
-
-            if (scrollToTopBtn) {
-                // 元々noneだった場合はnoneのまま、そうでなければ元の状態に戻す
-                if (scrollButtonsOriginalDisplay.scrollToTop === 'none') {
-                    scrollToTopBtn.style.display = 'none';
-                } else {
-                    scrollToTopBtn.style.display = scrollButtonsOriginalDisplay.scrollToTop === 'flex' ? 'flex' : '';
-                }
-            }
-
-            if (scrollToBottomBtn) {
-                // 元々noneだった場合はnoneのまま、そうでなければ元の状態に戻す
-                if (scrollButtonsOriginalDisplay.scrollToBottom === 'none') {
-                    scrollToBottomBtn.style.display = 'none';
-                } else {
-                    scrollToBottomBtn.style.display = scrollButtonsOriginalDisplay.scrollToBottom === 'flex' ? 'flex' : '';
-                }
-            }
 
             isExpanded = false;
         });

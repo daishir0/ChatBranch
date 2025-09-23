@@ -4,7 +4,6 @@ class MobileHandler {
     constructor(app) {
         this.app = app;
         this.initMobileViewportFix();
-        this.initMobileTextareaRows();
     }
     
     /**
@@ -244,35 +243,6 @@ class MobileHandler {
         if (/iPhone|iPad|iPod/.test(navigator.userAgent)) {
             window.addEventListener('scroll', setViewportHeight);
         }
-    }
-
-    /**
-     * モバイルでのテキストエリア行数拡張
-     */
-    initMobileTextareaRows() {
-        const messageInput = document.getElementById('messageInput');
-        if (!messageInput) return;
-
-        let originalRows = messageInput.rows || 3;
-        let isExpanded = false;
-
-        // フォーカス時にモバイルでrows=10に変更
-        messageInput.addEventListener('focus', () => {
-            // モバイルデバイスの場合のみ拡張
-            if (window.innerWidth <= 768 && !isExpanded) {
-                originalRows = messageInput.rows;
-                messageInput.rows = 10;
-                isExpanded = true;
-            }
-        });
-
-        // ブラー時に元のrows数に戻す
-        messageInput.addEventListener('blur', () => {
-            if (isExpanded) {
-                messageInput.rows = originalRows;
-                isExpanded = false;
-            }
-        });
     }
 }
 

@@ -4,6 +4,7 @@ class MobileHandler {
     constructor(app) {
         this.app = app;
         this.initMobileViewportFix();
+        this.initTextareaHeightExpansion();
     }
     
     /**
@@ -243,6 +244,45 @@ class MobileHandler {
         if (/iPhone|iPad|iPod/.test(navigator.userAgent)) {
             window.addEventListener('scroll', setViewportHeight);
         }
+    }
+
+    /**
+     * テキストエリア高さ拡張機能（シンプル版）
+     */
+    initTextareaHeightExpansion() {
+        const messageInput = document.getElementById('messageInput');
+        if (!messageInput) return;
+
+        let originalHeight = '';
+        let isExpanded = false;
+
+        // フォーカス時に高さを画面の80%に変更
+        messageInput.addEventListener('focus', () => {
+            if (isExpanded) return;
+
+            // 元の高さを保存
+            originalHeight = messageInput.style.height || getComputedStyle(messageInput).height;
+
+            // 画面の80%の高さに変更
+            const newHeight = window.innerHeight * 0.8;
+            messageInput.style.height = `${newHeight}px`;
+            messageInput.style.minHeight = `${newHeight}px`;
+            messageInput.style.maxHeight = `${newHeight}px`;
+
+            isExpanded = true;
+        });
+
+        // ブラー時に元の高さに戻す
+        messageInput.addEventListener('blur', () => {
+            if (!isExpanded) return;
+
+            // 元の高さに戻す
+            messageInput.style.height = originalHeight;
+            messageInput.style.minHeight = '';
+            messageInput.style.maxHeight = '';
+
+            isExpanded = false;
+        });
     }
 }
 

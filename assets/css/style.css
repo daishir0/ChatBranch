@@ -1730,6 +1730,10 @@ html,
     padding: 16px 24px;
     border-top: 1px solid var(--border-color);
     flex-shrink: 0;
+    position: sticky;
+    bottom: 0;
+    background: var(--bg-primary);
+    z-index: 10;
 }
 
 #fileManagerModal .file-upload-area {
@@ -2237,6 +2241,10 @@ html,
         width: 100vw;
         height: 100vh;
     }
+
+    #fileManagerModal .modal-body {
+        padding-bottom: 80px; /* フッターの高さ分の余白を追加 */
+    }
     
     #fileManagerModal .modal-header {
         padding: 12px 16px;
@@ -2244,6 +2252,13 @@ html,
     
     #fileManagerModal .modal-footer {
         padding: 12px 16px;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: var(--bg-primary);
+        border-top: 1px solid var(--border-color);
+        z-index: 100;
     }
     
     #fileManagerModal .file-controls {

@@ -346,17 +346,11 @@ class SettingsManager {
     }
     
     /**
-     * ペルソナボタン状態更新
+     * ペルソナボタン状態更新 (persona functionality moved to thread menu)
      */
     updatePersonaButtonState(persona) {
-        const personaBtn = document.getElementById('personaBtn');
-        if (persona && persona.trim()) {
-            personaBtn.classList.add('active');
-            personaBtn.title = 'Thread persona is set';
-        } else {
-            personaBtn.classList.remove('active');
-            personaBtn.title = 'Set thread persona';
-        }
+        // Persona functionality moved to thread menu - no button to update
+        // This method is kept for backward compatibility
     }
     
     /**

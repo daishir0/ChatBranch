@@ -84,6 +84,7 @@ class ThreadManager {
                     <button class="thread-menu-trigger" data-thread-id="${thread.id}" title="Menu" style="background:none;border:none;color:var(--text-muted);cursor:pointer;padding:4px;border-radius:4px;font-size:14px;min-width:24px;height:24px;display:flex;align-items:center;justify-content:center;">⋯</button>
                     <div class="thread-menu" style="display:none; position:absolute; right:12px; z-index:1000; background: var(--bg-secondary); border:1px solid var(--border-color); border-radius:6px; box-shadow: 0 2px 8px rgba(0,0,0,0.25); min-width: 180px;">
                         <button class="thread-menu-item" data-action="edit" style="display:block;width:100%;text-align:left;padding:8px 12px;background:none;border:none;color:var(--text-primary);cursor:pointer;">✏️ Edit</button>
+                        <button class="thread-menu-item" data-action="persona" style="display:block;width:100%;text-align:left;padding:8px 12px;background:none;border:none;color:var(--text-primary);cursor:pointer;">🎭 Persona</button>
                         <button class="thread-menu-item" data-action="toggle-archive" style="display:block;width:100%;text-align:left;padding:8px 12px;background:none;border:none;color:var(--text-primary);cursor:pointer;">${archiveIcon} ${archiveAction}</button>
                         <div style="height:1px;background:var(--border-color);margin:4px 0;"></div>
                         <button class="thread-menu-item danger" data-action="delete" style="display:block;width:100%;text-align:left;padding:8px 12px;background:none;border:none;color:var(--error-color);cursor:pointer;">🗑️ Delete</button>
@@ -178,6 +179,13 @@ class ThreadManager {
                         const action = item.getAttribute('data-action');
                         if (action === 'edit') {
                             this.editThreadName(thread.id, thread.name);
+                        } else if (action === 'persona') {
+                            // Switch to this thread first
+                            this.selectThread(thread.id, thread.name);
+                            // Then open persona modal
+                            setTimeout(() => {
+                                this.app.settingsManager.showThreadPersona();
+                            }, 100);
                         } else if (action === 'toggle-archive') {
                             if (isArchived) {
                                 this.unarchiveThread(thread.id);

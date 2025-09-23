@@ -235,10 +235,7 @@ class ChatBranchApp {
             this.settingsManager.saveSettings();
         });
         
-        // Thread Persona
-        document.getElementById('personaBtn').addEventListener('click', () => {
-            this.settingsManager.showThreadPersona();
-        });
+        // Thread Persona functionality moved to thread menu
         
         document.getElementById('threadPersonaClose').addEventListener('click', () => {
             this.uiManager.hideModal('threadPersonaModal');
@@ -559,7 +556,6 @@ class ChatBranchApp {
      * スレッド依存ボタンの状態を更新
      */
     updateThreadDependentButtons() {
-        const personaBtn = document.getElementById('personaBtn');
         const treeToggleBtn = document.getElementById('treeToggleBtn');
         const treeFullscreenBtn = document.getElementById('treeFullscreenBtn');
         const sendBtn = document.getElementById('sendBtn');
@@ -567,10 +563,6 @@ class ChatBranchApp {
         const newChatBtn = document.getElementById('newChatBtn');
 
         const hasThread = !!this.currentThread;
-
-        if (personaBtn) {
-            personaBtn.disabled = !hasThread;
-        }
         if (treeToggleBtn) {
             treeToggleBtn.disabled = !hasThread;
         }

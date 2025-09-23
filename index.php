@@ -107,7 +107,6 @@ $lang = Language::getInstance();
                     </div>
                 </div>
                 <div class="chat-actions">
-                    <button class="persona-btn" id="personaBtn" title="<?= __('settings.thread_persona') ?>">🎭</button>
                     <button class="tree-toggle-btn" id="treeToggleBtn" title="Toggle Message Tree">🌳</button>
                     <button class="new-tree-btn" id="newTreeBtn" title="Start New Tree">🆕</button>
                 </div>

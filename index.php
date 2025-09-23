@@ -177,7 +177,6 @@ $lang = Language::getInstance();
             <div class="modal-content file-manager-modal">
                 <div class="modal-header">
                     <h3><?= __('files.title') ?></h3>
-                    <button class="modal-close" id="fileManagerClose">×</button>
                 </div>
                 <div class="modal-body">
                     <!-- Upload Area -->
@@ -240,6 +239,7 @@ $lang = Language::getInstance();
                     </div>
                 </div>
                 <div class="modal-footer">
+                    <button class="btn-secondary" id="fileManagerClose"><?= __('common.close') ?></button>
                     <button class="btn-secondary" id="clearSelectionBtn"><?= __('files.clear_selection') ?></button>
                     <button class="btn-primary" id="selectFilesBtn"><?= __('files.attach_selected') ?></button>
                 </div>

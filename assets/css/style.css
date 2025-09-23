@@ -40,12 +40,16 @@ body {
     color: var(--text-primary);
     line-height: 1.6;
     height: 100vh;
+    height: 100dvh; /* Dynamic viewport height for mobile */
+    height: calc(var(--vh, 1vh) * 100); /* Fallback for older browsers */
     overflow: hidden;
 }
 
 .app-container {
     display: flex;
     height: 100vh;
+    height: 100dvh; /* Dynamic viewport height for mobile */
+    height: calc(var(--vh, 1vh) * 100); /* Fallback for older browsers */
 }
 
 /* Sidebar Styles */

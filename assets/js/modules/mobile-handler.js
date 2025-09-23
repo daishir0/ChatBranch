@@ -3,6 +3,7 @@
 class MobileHandler {
     constructor(app) {
         this.app = app;
+        this.initMobileViewportFix();
     }
     
     /**
@@ -217,6 +218,31 @@ class MobileHandler {
                 }
             }
         });
+    }
+
+    /**
+     * モバイルビューポート高さ修正
+     */
+    initMobileViewportFix() {
+        // モバイルブラウザでの実際のビューポート高さを動的に計算
+        const setViewportHeight = () => {
+            const vh = window.innerHeight * 0.01;
+            document.documentElement.style.setProperty('--vh', `${vh}px`);
+        };
+
+        // 初期設定
+        setViewportHeight();
+
+        // リサイズとオリエンテーション変更時に再計算
+        window.addEventListener('resize', setViewportHeight);
+        window.addEventListener('orientationchange', () => {
+            setTimeout(setViewportHeight, 100); // iOS対応で少し遅延
+        });
+
+        // iOS Safari アドレスバー対応
+        if (/iPhone|iPad|iPod/.test(navigator.userAgent)) {
+            window.addEventListener('scroll', setViewportHeight);
+        }
     }
 }
 

@@ -74,12 +74,18 @@ class VisTreeViewer {
                 keyboard: false,
                 zoomView: true,
                 dragView: true,
-                dragNodes: false
+                dragNodes: false,
+                tooltipDelay: 300,  // ツールチップ表示の遅延時間（ミリ秒）
+                hideEdgesOnDrag: false,
+                hideNodesOnDrag: false
             }
         };
         
         this.network = new vis.Network(this.container, data, options);
-        
+
+        // カスタムツールチップの設定
+        this.setupCustomTooltip();
+
         // Add click event listener (only for user messages)
         this.network.on('selectNode', (params) => {
             if (params.nodes.length > 0) {
@@ -286,6 +292,9 @@ class VisTreeViewer {
                     }
                 }
             });
+
+            // フルスクリーン用カスタムツールチップの設定
+            this.setupFullscreenTooltip();
         }
 
         // Clear and populate fullscreen tree
@@ -325,7 +334,8 @@ class VisTreeViewer {
                 font: {
                     color: color.color === '#fff' ? '#000' : '#fff',
                     size: 14  // Larger font for fullscreen
-                }
+                },
+                title: this.formatTooltipContent(node)  // ツールチップにメッセージ全文を表示
             });
 
             if (parentId) {
@@ -362,7 +372,8 @@ class VisTreeViewer {
                 chosen: node.role === 'user',
                 opacity: node.role === 'user' ? 1.0 : 0.8,
                 // Explicitly set level for hierarchical layout
-                level: level
+                level: level,
+                title: this.formatTooltipContent(node)  // ツールチップにメッセージ全文を表示
             };
             
             this.nodes.add(nodeData);
@@ -499,6 +510,210 @@ class VisTreeViewer {
         // This would traverse the network to find the path to a specific message
         const connectedNodes = this.network.getConnectedNodes(messageId);
         return connectedNodes;
+    }
+
+    /**
+     * ツールチップ用のメッセージ内容をフォーマット
+     */
+    formatTooltipContent(node) {
+        const timestamp = this.formatTimestamp(node.created_at);
+        const role = node.role === 'user' ? 'User' : 'AI';
+
+        // メッセージ内容をHTML エンコードして改行を保持
+        let content = node.content || '';
+
+        // HTMLタグを除去
+        content = content.replace(/<[^>]*>/g, '');
+
+        // 長すぎる場合は制限（ツールチップが大きくなりすぎるのを防ぐ）
+        if (content.length > 500) {
+            content = content.substring(0, 500) + '...';
+        }
+
+        // 改行文字を保持
+        content = content.replace(/\n/g, '\n');
+
+        return `【${role}】 ${timestamp}\n\n${content}`;
+    }
+
+    /**
+     * カスタムツールチップの設定
+     */
+    setupCustomTooltip() {
+        // カスタムツールチップ要素を作成
+        this.tooltipElement = document.createElement('div');
+        this.tooltipElement.className = 'custom-tree-tooltip';
+        this.tooltipElement.style.cssText = `
+            position: absolute;
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            line-height: 1.4;
+            max-width: 300px;
+            word-wrap: break-word;
+            white-space: pre-wrap;
+            z-index: 1000;
+            pointer-events: none;
+            display: none;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+            border: 1px solid rgba(255,255,255,0.1);
+        `;
+        document.body.appendChild(this.tooltipElement);
+
+        // vis.jsのhoverイベントを使用
+        this.network.on('hoverNode', (params) => {
+            this.showCustomTooltipForNode(params.node, params.event);
+        });
+
+        this.network.on('blurNode', (params) => {
+            this.hideCustomTooltip();
+        });
+
+        // マウス移動時の位置更新
+        this.container.addEventListener('mousemove', (event) => {
+            if (this.tooltipElement.style.display === 'block') {
+                this.updateTooltipPosition(event);
+            }
+        });
+    }
+
+    /**
+     * 指定位置のノードIDを取得
+     */
+    getNodeAtPosition(event) {
+        if (!this.network) return null;
+
+        const rect = this.container.getBoundingClientRect();
+        const x = event.clientX - rect.left;
+        const y = event.clientY - rect.top;
+
+        const nodeId = this.network.getNodeAt({ x, y });
+        return nodeId;
+    }
+
+    /**
+     * ノード用カスタムツールチップを表示
+     */
+    showCustomTooltipForNode(nodeId, event) {
+        const nodeData = this.nodes.get(nodeId);
+        if (!nodeData || !nodeData.title) return;
+
+        this.tooltipElement.textContent = nodeData.title;
+        this.tooltipElement.style.display = 'block';
+        this.updateTooltipPosition(event);
+    }
+
+    /**
+     * ツールチップの位置を更新
+     */
+    updateTooltipPosition(event) {
+        if (!event) return;
+
+        const x = event.clientX || event.pageX || 0;
+        const y = event.clientY || event.pageY || 0;
+
+        this.tooltipElement.style.left = (x + 10) + 'px';
+        this.tooltipElement.style.top = (y - 10) + 'px';
+    }
+
+    /**
+     * カスタムツールチップを表示（旧メソッド - 互換性のため残す）
+     */
+    showCustomTooltip(nodeId, event) {
+        this.showCustomTooltipForNode(nodeId, event);
+    }
+
+    /**
+     * カスタムツールチップを非表示
+     */
+    hideCustomTooltip() {
+        if (this.tooltipElement) {
+            this.tooltipElement.style.display = 'none';
+        }
+    }
+
+    /**
+     * フルスクリーン用カスタムツールチップの設定
+     */
+    setupFullscreenTooltip() {
+        // フルスクリーン用ツールチップ要素を作成（まだ存在しない場合）
+        if (!this.fullscreenTooltipElement) {
+            this.fullscreenTooltipElement = document.createElement('div');
+            this.fullscreenTooltipElement.className = 'custom-tree-tooltip fullscreen-tooltip';
+            this.fullscreenTooltipElement.style.cssText = `
+                position: absolute;
+                background: rgba(0, 0, 0, 0.95);
+                color: white;
+                padding: 16px;
+                border-radius: 8px;
+                font-size: 14px;
+                line-height: 1.5;
+                max-width: 400px;
+                word-wrap: break-word;
+                white-space: pre-wrap;
+                z-index: 2100;
+                pointer-events: none;
+                display: none;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+                border: 1px solid rgba(255,255,255,0.2);
+            `;
+            document.body.appendChild(this.fullscreenTooltipElement);
+        }
+
+        // フルスクリーンネットワークのhoverイベント
+        this.fullscreenNetwork.on('hoverNode', (params) => {
+            this.showFullscreenTooltip(params.node, params.event);
+        });
+
+        this.fullscreenNetwork.on('blurNode', (params) => {
+            this.hideFullscreenTooltip();
+        });
+
+        // フルスクリーンコンテナでのマウス移動時の位置更新
+        const fullscreenContainer = document.getElementById('fullscreenTreeContainer');
+        if (fullscreenContainer) {
+            fullscreenContainer.addEventListener('mousemove', (event) => {
+                if (this.fullscreenTooltipElement && this.fullscreenTooltipElement.style.display === 'block') {
+                    this.updateFullscreenTooltipPosition(event);
+                }
+            });
+        }
+    }
+
+    /**
+     * フルスクリーン用ツールチップを表示
+     */
+    showFullscreenTooltip(nodeId, event) {
+        const nodeData = this.fullscreenNodes.get(nodeId);
+        if (!nodeData || !nodeData.title) return;
+
+        this.fullscreenTooltipElement.textContent = nodeData.title;
+        this.fullscreenTooltipElement.style.display = 'block';
+        this.updateFullscreenTooltipPosition(event);
+    }
+
+    /**
+     * フルスクリーン用ツールチップの位置を更新
+     */
+    updateFullscreenTooltipPosition(event) {
+        if (!event || !this.fullscreenTooltipElement) return;
+
+        const x = event.clientX || event.pageX || 0;
+        const y = event.clientY || event.pageY || 0;
+
+        this.fullscreenTooltipElement.style.left = (x + 15) + 'px';
+        this.fullscreenTooltipElement.style.top = (y - 15) + 'px';
+    }
+
+    /**
+     * フルスクリーン用ツールチップを非表示
+     */
+    hideFullscreenTooltip() {
+        if (this.fullscreenTooltipElement) {
+            this.fullscreenTooltipElement.style.display = 'none';
+        }
     }
 }
 

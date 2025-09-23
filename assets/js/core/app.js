@@ -184,13 +184,26 @@ class ChatBranchApp {
             treeToggleHandler();
         });
 
-        // Tree Fullscreen (double-click)
-        treeToggleBtn.addEventListener('dblclick', (e) => {
-            e.preventDefault();
-            if (this.currentThread) {
-                this.uiManager.showFullscreenTree();
-            }
-        });
+        // Tree Fullscreen Button
+        const treeFullscreenBtn = document.getElementById('treeFullscreenBtn');
+        if (treeFullscreenBtn) {
+            treeFullscreenBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                if (this.currentThread) {
+                    this.uiManager.showFullscreenTree();
+                }
+            });
+
+            // タッチデバイス対応
+            treeFullscreenBtn.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                if (this.currentThread) {
+                    this.uiManager.showFullscreenTree();
+                }
+            });
+        }
 
         // New Tree Mode Event
         const newTreeToggleHandler = () => {
@@ -548,6 +561,7 @@ class ChatBranchApp {
     updateThreadDependentButtons() {
         const personaBtn = document.getElementById('personaBtn');
         const treeToggleBtn = document.getElementById('treeToggleBtn');
+        const treeFullscreenBtn = document.getElementById('treeFullscreenBtn');
         const sendBtn = document.getElementById('sendBtn');
         const messageInput = document.getElementById('messageInput');
         const newChatBtn = document.getElementById('newChatBtn');
@@ -559,6 +573,10 @@ class ChatBranchApp {
         }
         if (treeToggleBtn) {
             treeToggleBtn.disabled = !hasThread;
+        }
+        if (treeFullscreenBtn) {
+            treeFullscreenBtn.disabled = !hasThread;
+            treeFullscreenBtn.style.display = hasThread ? 'flex' : 'none';
         }
 
         // Update send button and message input

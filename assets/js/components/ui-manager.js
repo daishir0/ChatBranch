@@ -55,9 +55,16 @@ class UIManager {
     showTreeView() {
         const treePanel = document.getElementById('treePanel');
         const toggleBtn = document.getElementById('treeToggleBtn');
-        
+        const fullscreenBtn = document.getElementById('treeFullscreenBtn');
+
         treePanel.style.display = 'block';
         toggleBtn.classList.add('active');
+
+        // フルスクリーンボタンを表示
+        if (fullscreenBtn && this.app.currentThread) {
+            fullscreenBtn.style.display = 'flex';
+        }
+
         this.loadTree();
     }
     
@@ -67,9 +74,15 @@ class UIManager {
     hideTreeView() {
         const treePanel = document.getElementById('treePanel');
         const toggleBtn = document.getElementById('treeToggleBtn');
+        const fullscreenBtn = document.getElementById('treeFullscreenBtn');
 
         treePanel.style.display = 'none';
         toggleBtn.classList.remove('active');
+
+        // フルスクリーンボタンを非表示
+        if (fullscreenBtn) {
+            fullscreenBtn.style.display = 'none';
+        }
     }
 
     /**
@@ -92,6 +105,11 @@ class UIManager {
     hideFullscreenTree() {
         const fullscreenModal = document.getElementById('fullscreenTreeModal');
         fullscreenModal.style.display = 'none';
+
+        // フルスクリーンツールチップを非表示
+        if (window.treeViewer && window.treeViewer.hideFullscreenTooltip) {
+            window.treeViewer.hideFullscreenTooltip();
+        }
 
         // キーハンドラーを削除
         this.removeFullscreenKeyHandler();

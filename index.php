@@ -118,6 +118,7 @@ $lang = Language::getInstance();
                 <div class="tree-container" id="treeContainer">
                     <!-- Message tree will be displayed here -->
                 </div>
+                <button class="tree-fullscreen-btn" id="treeFullscreenBtn" title="Open Fullscreen View">⛶</button>
             </div>
             
             <!-- Chat Messages -->

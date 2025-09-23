@@ -558,6 +558,7 @@ class ChatBranchApp {
     updateThreadDependentButtons() {
         const treeToggleBtn = document.getElementById('treeToggleBtn');
         const treeFullscreenBtn = document.getElementById('treeFullscreenBtn');
+        const newTreeBtn = document.getElementById('newTreeBtn');
         const sendBtn = document.getElementById('sendBtn');
         const messageInput = document.getElementById('messageInput');
         const newChatBtn = document.getElementById('newChatBtn');
@@ -569,6 +570,10 @@ class ChatBranchApp {
         if (treeFullscreenBtn) {
             treeFullscreenBtn.disabled = !hasThread;
             treeFullscreenBtn.style.display = hasThread ? 'flex' : 'none';
+        }
+        if (newTreeBtn) {
+            newTreeBtn.disabled = !hasThread;
+            newTreeBtn.style.opacity = hasThread ? '1' : '0.5';
         }
 
         // Update send button and message input

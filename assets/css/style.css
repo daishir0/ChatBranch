@@ -1000,11 +1000,11 @@ body {
 }
 
 .scroll-to-bottom {
-    bottom: 215px; /* 上ボタンの直上に配置 */
+    bottom: 160px; /* 下の位置に配置 */
 }
 
 .scroll-to-top {
-    bottom: 160px; /* さらに上に配置 */
+    bottom: 215px; /* 上の位置に配置 */
 }
 
 /* モバイル対応 */
@@ -1017,11 +1017,11 @@ body {
     }
     
     .scroll-to-bottom {
-        bottom: 210px; /* モバイルでも上ボタンの直上に配置 */
+        bottom: 160px; /* モバイルでも下の位置に配置 */
     }
-    
+
     .scroll-to-top {
-        bottom: 160px;
+        bottom: 210px; /* モバイルでも上の位置に配置 */
     }
 }
 

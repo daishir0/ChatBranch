@@ -175,11 +175,11 @@ class VisTreeViewer {
     render(tree) {
         this.nodes.clear();
         this.edges.clear();
-        
+
         if (!tree || tree.length === 0) return;
-        
+
         this.processTreeNodes(tree);
-        
+
         // Fit the network after rendering
         setTimeout(() => {
             if (this.network) {
@@ -191,6 +191,154 @@ class VisTreeViewer {
                 });
             }
         }, 100);
+    }
+
+    renderFullscreen(tree) {
+        // Create a temporary fullscreen network for the fullscreen container
+        const fullscreenContainer = document.getElementById('fullscreenTreeContainer');
+        if (!fullscreenContainer) {
+            console.error('Fullscreen tree container not found');
+            return;
+        }
+
+        // Initialize fullscreen network if not exists
+        if (!this.fullscreenNetwork) {
+            const fullscreenNodes = new vis.DataSet([]);
+            const fullscreenEdges = new vis.DataSet([]);
+
+            const data = {
+                nodes: fullscreenNodes,
+                edges: fullscreenEdges
+            };
+
+            // Enhanced options for fullscreen view
+            const options = {
+                layout: {
+                    hierarchical: {
+                        direction: 'UD',
+                        sortMethod: 'directed',
+                        nodeSpacing: 180,  // Larger spacing for fullscreen
+                        levelSeparation: 150,
+                        treeSpacing: 250,
+                        blockShifting: true,
+                        edgeMinimization: true,
+                        parentCentralization: true,
+                        shakeTowards: 'leaves'
+                    }
+                },
+                physics: {
+                    enabled: false
+                },
+                nodes: {
+                    shape: 'box',
+                    margin: 15,  // Larger margin for better readability
+                    font: {
+                        size: 14,  // Larger font for fullscreen
+                        face: 'arial'
+                    },
+                    borderWidth: 2,
+                    shadow: true,
+                    widthConstraint: {
+                        minimum: 150,  // Larger minimum width
+                        maximum: 350   // Larger maximum width
+                    },
+                    heightConstraint: {
+                        minimum: 50,
+                        maximum: 120
+                    }
+                },
+                edges: {
+                    width: 2,
+                    color: {
+                        color: '#848484',
+                        highlight: '#4285f4',
+                        hover: '#4285f4'
+                    },
+                    arrows: {
+                        to: { enabled: true, scaleFactor: 1.2 }
+                    },
+                    smooth: {
+                        type: 'cubicBezier',
+                        forceDirection: 'vertical',
+                        roundness: 0.4
+                    }
+                },
+                interaction: {
+                    hover: true,
+                    selectConnectedEdges: false,
+                    tooltipDelay: 200
+                }
+            };
+
+            this.fullscreenNetwork = new vis.Network(fullscreenContainer, data, options);
+            this.fullscreenNodes = fullscreenNodes;
+            this.fullscreenEdges = fullscreenEdges;
+
+            // Add click event for fullscreen network
+            this.fullscreenNetwork.on('click', (params) => {
+                if (params.nodes.length > 0) {
+                    const nodeId = params.nodes[0];
+                    if (window.app) {
+                        window.app.currentMessageId = nodeId;
+                        // Close fullscreen and load the message
+                        window.app.uiManager.hideFullscreenTree();
+                        window.app.chatManager.loadMessages();
+                    }
+                }
+            });
+        }
+
+        // Clear and populate fullscreen tree
+        this.fullscreenNodes.clear();
+        this.fullscreenEdges.clear();
+
+        if (!tree || tree.length === 0) return;
+
+        this.processFullscreenTreeNodes(tree);
+
+        // Fit the fullscreen network after rendering
+        setTimeout(() => {
+            if (this.fullscreenNetwork) {
+                this.fullscreenNetwork.fit({
+                    animation: {
+                        duration: 1000,
+                        easingFunction: 'easeInOutQuart'
+                    }
+                });
+            }
+        }, 100);
+    }
+
+    processFullscreenTreeNodes(nodes, parentId = null, level = 0) {
+        nodes.forEach(node => {
+            const preview = this.getMessagePreview(node.content);
+            const timestamp = this.formatTimestamp(node.created_at);
+
+            const isSelected = window.app && window.app.currentMessageId === node.id;
+            const color = this.getNodeColor(node.role, isSelected);
+
+            this.fullscreenNodes.add({
+                id: node.id,
+                label: `${preview}\n${timestamp}`,
+                level: level,
+                color: color,
+                font: {
+                    color: color.color === '#fff' ? '#000' : '#fff',
+                    size: 14  // Larger font for fullscreen
+                }
+            });
+
+            if (parentId) {
+                this.fullscreenEdges.add({
+                    from: parentId,
+                    to: node.id
+                });
+            }
+
+            if (node.children && node.children.length > 0) {
+                this.processFullscreenTreeNodes(node.children, node.id, level + 1);
+            }
+        });
     }
     
     processTreeNodes(nodes, parentId = null, level = 0) {

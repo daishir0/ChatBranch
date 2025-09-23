@@ -67,9 +67,76 @@ class UIManager {
     hideTreeView() {
         const treePanel = document.getElementById('treePanel');
         const toggleBtn = document.getElementById('treeToggleBtn');
-        
+
         treePanel.style.display = 'none';
         toggleBtn.classList.remove('active');
+    }
+
+    /**
+     * フルスクリーンツリービュー表示
+     */
+    showFullscreenTree() {
+        const fullscreenModal = document.getElementById('fullscreenTreeModal');
+        fullscreenModal.style.display = 'flex';
+
+        // フルスクリーン用のツリーを読み込み
+        this.loadFullscreenTree();
+
+        // ESCキーでフルスクリーンを閉じるイベントリスナーを追加
+        this.setupFullscreenKeyHandler();
+    }
+
+    /**
+     * フルスクリーンツリービュー非表示
+     */
+    hideFullscreenTree() {
+        const fullscreenModal = document.getElementById('fullscreenTreeModal');
+        fullscreenModal.style.display = 'none';
+
+        // キーハンドラーを削除
+        this.removeFullscreenKeyHandler();
+    }
+
+    /**
+     * フルスクリーン用ツリーデータ読み込み
+     */
+    async loadFullscreenTree() {
+        if (!this.app.currentThread) return;
+
+        try {
+            const data = await this.app.apiClient.getThreadTree(this.app.currentThread);
+
+            if (data.success) {
+                // フルスクリーン用のコンテナでツリーを表示
+                window.treeViewer.renderFullscreen(data.tree);
+            }
+        } catch (error) {
+            console.error('Failed to load fullscreen tree:', error);
+        }
+    }
+
+    /**
+     * フルスクリーンモード用キーボードイベント設定
+     */
+    setupFullscreenKeyHandler() {
+        this.fullscreenKeyHandler = (e) => {
+            if (e.key === 'Escape') {
+                e.preventDefault();
+                this.hideFullscreenTree();
+            }
+        };
+
+        document.addEventListener('keydown', this.fullscreenKeyHandler);
+    }
+
+    /**
+     * フルスクリーンモード用キーボードイベント削除
+     */
+    removeFullscreenKeyHandler() {
+        if (this.fullscreenKeyHandler) {
+            document.removeEventListener('keydown', this.fullscreenKeyHandler);
+            this.fullscreenKeyHandler = null;
+        }
     }
     
     /**

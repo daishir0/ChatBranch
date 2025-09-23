@@ -330,6 +330,24 @@ $lang = Language::getInstance();
             </div>
         </div>
         
+        <!-- Fullscreen Tree Modal -->
+        <div class="modal fullscreen-tree-modal" id="fullscreenTreeModal" style="display: none;">
+            <div class="fullscreen-tree-content">
+                <div class="fullscreen-tree-header">
+                    <div class="fullscreen-tree-title">
+                        <span class="tree-icon">🌳</span>
+                        <h3>Message Tree - Fullscreen View</h3>
+                    </div>
+                    <button class="fullscreen-tree-close" id="fullscreenTreeClose" title="Close (ESC)">×</button>
+                </div>
+                <div class="fullscreen-tree-body">
+                    <div class="fullscreen-tree-container" id="fullscreenTreeContainer">
+                        <!-- Fullscreen tree will be displayed here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Thread Persona Modal -->
         <div class="modal" id="threadPersonaModal" style="display: none;">
             <div class="modal-content persona-modal">

@@ -176,12 +176,20 @@ class ChatBranchApp {
         const treeToggleHandler = () => {
             this.uiManager.toggleTreeView();
         };
-        
+
         const treeToggleBtn = document.getElementById('treeToggleBtn');
         treeToggleBtn.addEventListener('click', treeToggleHandler);
         treeToggleBtn.addEventListener('touchend', (e) => {
             e.preventDefault();
             treeToggleHandler();
+        });
+
+        // Tree Fullscreen (double-click)
+        treeToggleBtn.addEventListener('dblclick', (e) => {
+            e.preventDefault();
+            if (this.currentThread) {
+                this.uiManager.showFullscreenTree();
+            }
         });
 
         // New Tree Mode Event
@@ -312,16 +320,26 @@ class ChatBranchApp {
         document.getElementById('branchAttachFileBtn').addEventListener('click', () => {
             window.branchFileManager.show();
         });
-        
+
         document.getElementById('editAttachFileBtn').addEventListener('click', () => {
             window.editFileManager.show();
         });
-        
+
+        // Fullscreen Tree Modal
+        document.getElementById('fullscreenTreeClose').addEventListener('click', () => {
+            this.uiManager.hideFullscreenTree();
+        });
+
         // Modal Close Events
         document.querySelectorAll('.modal').forEach(modal => {
             modal.addEventListener('click', (e) => {
                 if (e.target === modal) {
-                    modal.style.display = 'none';
+                    // Special handling for fullscreen tree modal
+                    if (modal.id === 'fullscreenTreeModal') {
+                        this.uiManager.hideFullscreenTree();
+                    } else {
+                        modal.style.display = 'none';
+                    }
                 }
             });
         });

@@ -958,6 +958,7 @@ body {
     border: 1px solid var(--border-color);
     border-radius: var(--radius);
     overflow: hidden;
+    gap: 8px;
 }
 
 #messageInput {
@@ -971,6 +972,7 @@ body {
     font-size: 16px;
     line-height: 1.4;
     max-height: 200px;
+    min-width: 0;
 }
 
 #messageInput:focus {
@@ -979,9 +981,11 @@ body {
 
 .input-actions {
     display: flex;
-    align-items: flex-end;
+    flex-direction: column;
+    align-items: center;
     padding: 8px;
     gap: 4px;
+    flex-shrink: 0;
 }
 
 #attachFileBtn, #sendBtn {
@@ -2195,14 +2199,7 @@ html,
     flex-direction: column;
 }
 
-.input-actions {
-    position: absolute;
-    bottom: 8px;
-    right: 8px;
-    display: flex;
-    gap: 4px;
-    z-index: 10;
-}
+/* .input-actions styles moved to main chat input section above */
 
 .input-actions button {
     background: rgba(255, 255, 255, 0.9);

@@ -293,12 +293,13 @@ class ChatManager {
                 </div>
             `;
         } else if (message.role === 'assistant') {
-            // AI message: only copy in menu
+            // AI message: copy and copy all in menu
             actionsHTML = `
                 <div class="message-actions ai-actions">
                     <button class="message-action-btn menu-trigger" title="Menu">⋯</button>
                     <div class="message-menu" style="display:none; position:absolute; right:8px; top:24px; z-index:1000; background: var(--bg-secondary); border:1px solid var(--border-color); border-radius:6px; box-shadow: 0 2px 8px rgba(0,0,0,0.25); min-width: 160px;">
                         <button class="menu-item" data-action="copy" style="display:block; width:100%; text-align:left; padding:8px 12px; background:none; border:none; color: var(--text-primary); cursor:pointer;">📋 Copy</button>
+                        <button class="menu-item" data-action="copy-all" style="display:block; width:100%; text-align:left; padding:8px 12px; background:none; border:none; color: var(--text-primary); cursor:pointer;">📑 Copy All</button>
                     </div>
                 </div>
             `;
@@ -364,6 +365,13 @@ class ChatManager {
                         try {
                             if (action === 'copy') {
                                 await this.app.copyMessage(message.id);
+                            } else if (action === 'copy-all') {
+                                const result = await this.app.messageActionsManager.copyAllMessages(message.id);
+                                if (result && result.success) {
+                                    const original = item.textContent;
+                                    item.textContent = `✅ Copied (${result.messageCount} messages)`;
+                                    setTimeout(() => { item.textContent = original; }, 2000);
+                                }
                             } else if (action === 'permalink') {
                                 const ok = await this.app.messageActionsManager.copyPermalink(message.id);
                                 if (ok) {

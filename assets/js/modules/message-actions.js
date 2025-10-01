@@ -541,6 +541,124 @@ class MessageActionsManager {
             return false;
         }
     }
+
+    /**
+     * ルートから指定メッセージまでの全会話をコピー
+     */
+    async copyAllMessages(messageId) {
+        try {
+            console.log('Copying all messages from root to:', messageId);
+
+            // Step 1: メッセージツリーからルートまでのパスを取得
+            const messagePath = this.getPathFromRoot(messageId);
+
+            if (!messagePath || messagePath.length === 0) {
+                console.error('Could not find message path');
+                throw new Error('Could not find message path');
+            }
+
+            console.log(`Found ${messagePath.length} messages in path`);
+
+            // Step 2: 各メッセージのコンテンツを整形
+            const formattedMessages = [];
+            let userCount = 0;
+            let aiCount = 0;
+
+            for (const message of messagePath) {
+                const role = message.role === 'user' ? 'User' : 'Assistant';
+                let content = message.content || '';
+
+                // カウント
+                if (message.role === 'user') {
+                    userCount++;
+                } else {
+                    aiCount++;
+                }
+
+                // ファイル添付情報を追加
+                let attachmentInfo = '';
+                if (message.role === 'user' && message.files && message.files.length > 0) {
+                    const fileNames = message.files.map(f => f.name || f.filename || f).join(', ');
+                    attachmentInfo = `\n[Attached: ${fileNames}]`;
+                }
+
+                // メッセージフォーマット
+                formattedMessages.push(`[${role}]${attachmentInfo}\n${content}`);
+            }
+
+            // Step 3: 全メッセージを結合 (空行2つで区切り)
+            const allContent = formattedMessages.join('\n\n\n');
+
+            console.log(`Total content length: ${allContent.length} characters`);
+            console.log(`Messages: ${userCount} user + ${aiCount} AI = ${messagePath.length} total`);
+
+            // Step 4: クリップボードにコピー
+            await this.copyTextToClipboard(allContent);
+
+            // Step 5: 成功フィードバック
+            return {
+                success: true,
+                messageCount: messagePath.length,
+                userCount: userCount,
+                aiCount: aiCount
+            };
+
+        } catch (error) {
+            console.error('Copy all messages failed:', error);
+            console.error('Error stack:', error.stack);
+            alert(`Copy all failed: ${error.message}`);
+            return { success: false };
+        }
+    }
+
+    /**
+     * ルートから指定メッセージまでのパスを取得
+     */
+    getPathFromRoot(targetMessageId) {
+        if (!this.app._currentThreadMessages || this.app._currentThreadMessages.length === 0) {
+            console.error('No thread messages available');
+            return null;
+        }
+
+        // ツリーを探索してパスを構築
+        const path = [];
+        const found = this.findPathInTree(this.app._currentThreadMessages, targetMessageId, path);
+
+        if (found) {
+            console.log('Path found:', path.map(m => `${m.role}:${m.id}`).join(' -> '));
+            return path;
+        }
+
+        console.error('Message not found in tree:', targetMessageId);
+        return null;
+    }
+
+    /**
+     * ツリー内のメッセージパスを再帰的に検索
+     */
+    findPathInTree(messages, targetId, currentPath) {
+        for (const message of messages) {
+            // 現在のメッセージをパスに追加
+            currentPath.push(message);
+
+            // ターゲットが見つかった
+            if (message.id == targetId) {
+                return true;
+            }
+
+            // 子要素を探索
+            if (message.children && message.children.length > 0) {
+                if (this.findPathInTree(message.children, targetId, currentPath)) {
+                    return true;
+                }
+            }
+
+            // 見つからなかったので、このメッセージをパスから削除
+            currentPath.pop();
+        }
+
+        return false;
+    }
 }
 
 // グローバルに公開

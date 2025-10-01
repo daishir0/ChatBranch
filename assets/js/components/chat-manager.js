@@ -12,13 +12,27 @@ class ChatManager {
     async sendMessage() {
         const messageInput = document.getElementById('messageInput');
         const message = messageInput.value.trim();
-        
-        if (!message) return;
-        
+
+        // 空白の場合、直近のユーザーメッセージを入力
+        if (!message) {
+            const lastUserMessage = this.getLastUserMessage();
+            if (lastUserMessage) {
+                messageInput.value = lastUserMessage.content;
+                messageInput.focus();
+
+                // ハイライトアニメーション
+                messageInput.classList.add('resend-highlight');
+                setTimeout(() => messageInput.classList.remove('resend-highlight'), 1000);
+
+                console.log('📝 Last user message loaded for resend:', lastUserMessage.id);
+            }
+            return;
+        }
+
         const sendBtn = document.getElementById('sendBtn');
         sendBtn.disabled = true;
         messageInput.disabled = true;
-        
+
         this.app.uiManager.showLoading();
         
         try {
@@ -590,6 +604,35 @@ class ChatManager {
             this.hideScrollButtons();
             this.app.uiManager.hideTreeView();
         }
+    }
+
+    /**
+     * 直近のユーザーメッセージを取得
+     */
+    getLastUserMessage() {
+        if (!this.app._currentThreadMessages || this.app._currentThreadMessages.length === 0) {
+            console.log('No thread messages available');
+            return null;
+        }
+
+        // 現在表示中のメッセージパスを取得
+        const messagePath = this.getMessagePath(this.app._currentThreadMessages);
+
+        if (!messagePath || messagePath.length === 0) {
+            console.log('No message path found');
+            return null;
+        }
+
+        // 逆順でユーザーメッセージを検索
+        for (let i = messagePath.length - 1; i >= 0; i--) {
+            if (messagePath[i].role === 'user') {
+                console.log('Found last user message:', messagePath[i].id);
+                return messagePath[i];
+            }
+        }
+
+        console.log('No user message found in path');
+        return null;
     }
 }
 

@@ -157,11 +157,10 @@ $lang = Language::getInstance();
                 
                 <form class="chat-form" id="chatForm">
                     <div class="input-group">
-                        <textarea 
-                            id="messageInput" 
-                            placeholder="<?= __('chat.placeholder') ?>" 
+                        <textarea
+                            id="messageInput"
+                            placeholder="<?= __('chat.placeholder') ?>"
                             rows="3"
-                            required
                         ></textarea>
                         <div class="input-actions">
                             <button type="button" id="attachFileBtn" title="<?= __('files.upload') ?>">📎</button>

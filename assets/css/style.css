@@ -1134,6 +1134,20 @@ body {
     outline: none;
 }
 
+/* Resend highlight animation */
+#messageInput.resend-highlight {
+    animation: resendPulse 1s ease-out;
+}
+
+@keyframes resendPulse {
+    0% {
+        background-color: var(--primary-color-alpha, rgba(74, 158, 255, 0.2));
+    }
+    100% {
+        background-color: transparent;
+    }
+}
+
 .input-actions {
     display: flex;
     flex-direction: column;

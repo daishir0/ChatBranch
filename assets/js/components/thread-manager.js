@@ -145,8 +145,11 @@ class ThreadManager {
             const menuTrigger = threadElement.querySelector('.thread-menu-trigger');
             const menu = threadElement.querySelector('.thread-menu');
             if (menuTrigger && menu) {
+                const threadActions = threadElement.querySelector('.thread-actions');
                 const closeMenu = () => {
                     menu.style.display = 'none';
+                    if (threadActions) threadActions.classList.remove('menu-open');
+                    threadElement.classList.remove('menu-open');
                     document.removeEventListener('click', onDocClick);
                     document.removeEventListener('keydown', onEsc);
                 };
@@ -163,9 +166,15 @@ class ThreadManager {
                     menu.style.right = '12px';
 
                     const isOpen = menu.style.display === 'block';
+                    // Close all other menus
                     document.querySelectorAll('.thread-menu').forEach(m => m.style.display = 'none');
+                    document.querySelectorAll('.thread-actions').forEach(a => a.classList.remove('menu-open'));
+                    document.querySelectorAll('.thread-item').forEach(t => t.classList.remove('menu-open'));
+
                     if (!isOpen) {
                         menu.style.display = 'block';
+                        if (threadActions) threadActions.classList.add('menu-open');
+                        threadElement.classList.add('menu-open');
                         setTimeout(() => {
                             document.addEventListener('click', onDocClick);
                             document.addEventListener('keydown', onEsc);

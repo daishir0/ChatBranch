@@ -229,6 +229,8 @@ body {
     border-radius: var(--radius);
     transition: background-color 0.2s;
     border: none;
+    position: relative;
+    z-index: 1;
     width: 100%;
     background: none;
     color: var(--text-secondary);
@@ -303,6 +305,14 @@ body {
 
 .thread-item.active .thread-actions {
     opacity: 1;
+}
+
+.thread-actions.menu-open {
+    opacity: 1;
+}
+
+.thread-item.menu-open {
+    z-index: 1001;
 }
 
 .thread-item.active .thread-edit-btn,

@@ -20,6 +20,9 @@ class ChatBranchApp {
         
         // Set up file attachment manager after DOM is ready
         this.setupFileAttachmentManager();
+
+        // Observe composer size to update spacer height and scroll button position
+        this.observeComposerHeight();
         
         // Set up cross-references
         this.settingsManager.messageRenderer = this.chatManager.messageRenderer;
@@ -67,6 +70,20 @@ class ChatBranchApp {
         // Apply permalink (deep link) if present
         this.applyPermalinkFromUrl();
     }
+
+    observeComposerHeight() {
+        const composer = document.querySelector('.chat-input-container');
+        if (!composer || !('ResizeObserver' in window)) return;
+        const ro = new ResizeObserver(entries => {
+            for (const entry of entries) {
+                const h = entry.target.offsetHeight || (entry.contentRect && entry.contentRect.height) || 72;
+                document.documentElement.style.setProperty('--composer-h', h + 'px');
+            }
+        });
+        ro.observe(composer);
+        // Initialize once
+        document.documentElement.style.setProperty('--composer-h', (composer.offsetHeight || 72) + 'px');
+    }
     
     /**
      * イベントバインディング
@@ -97,6 +114,29 @@ class ChatBranchApp {
         
         // Message Input
         const messageInput = document.getElementById('messageInput');
+
+        // Auto-resize textarea for better mobile input UX
+        const autosize = () => {
+            if (!messageInput) return;
+            messageInput.style.height = 'auto';
+            const maxPx = Math.floor(window.innerHeight * 0.4);
+            const next = Math.min(messageInput.scrollHeight, maxPx);
+            messageInput.style.height = next + 'px';
+            // Reflect container height so other UI (e.g., buttons) can avoid overlapping
+            const inputContainer = document.querySelector('.chat-input-container');
+            if (inputContainer) {
+                document.documentElement.style.setProperty('--composer-h', inputContainer.offsetHeight + 'px');
+            }
+        };
+        // Initialize autosize and keep it in sync
+        if (messageInput) {
+            autosize();
+            messageInput.addEventListener('input', autosize);
+            messageInput.addEventListener('focus', () => {
+                setTimeout(autosize, 50);
+            });
+        }
+
         messageInput.addEventListener('keydown', (e) => {
             if (e.key === 'Enter') {
                 // Check if device is mobile

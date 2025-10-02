@@ -50,7 +50,7 @@ $lang = Language::getInstance();
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <title>ChatBranch - AI Chat with Conversation Trees</title>
     
     <!-- Favicon -->
@@ -148,28 +148,28 @@ $lang = Language::getInstance();
             <!-- Scroll Navigation Buttons -->
             <button class="scroll-nav-btn scroll-to-bottom" id="scrollToBottom" title="Scroll to Bottom">↓</button>
             <button class="scroll-nav-btn scroll-to-top" id="scrollToTop" title="Scroll to Top">↑</button>
-            
-            <!-- Chat Input -->
-            <div class="chat-input-container">
-                <div class="file-attachments" id="fileAttachments" style="display: none;">
-                    <!-- File attachment display area -->
-                </div>
-                
-                <form class="chat-form" id="chatForm">
-                    <div class="input-group">
-                        <textarea
-                            id="messageInput"
-                            placeholder="<?= __('chat.placeholder') ?>"
-                            rows="3"
-                        ></textarea>
-                        <div class="input-actions">
-                            <button type="button" id="attachFileBtn" title="<?= __('files.upload') ?>">📎</button>
-                            <button type="submit" id="sendBtn" title="<?= __('chat.send') ?>">➤</button>
-                        </div>
-                    </div>
-                </form>
-            </div>
         </main>
+        
+        <!-- Chat Input (Fixed Composer) moved outside scroll container -->
+        <div class="chat-input-container">
+            <div class="file-attachments" id="fileAttachments" style="display: none;">
+                <!-- File attachment display area -->
+            </div>
+            
+            <form class="chat-form" id="chatForm">
+                <div class="input-group">
+                    <textarea
+                        id="messageInput"
+                        placeholder="<?= __('chat.placeholder') ?>"
+                        rows="3"
+                    ></textarea>
+                    <div class="input-actions">
+                        <button type="button" id="attachFileBtn" title="<?= __('files.upload') ?>">📎</button>
+                        <button type="submit" id="sendBtn" title="<?= __('chat.send') ?>">➤</button>
+                    </div>
+                </div>
+            </form>
+        </div>
         
         <!-- File Manager Modal -->
         <div class="modal" id="fileManagerModal" style="display: none;">

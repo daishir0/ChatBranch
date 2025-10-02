@@ -4,6 +4,7 @@ class MobileHandler {
     constructor(app) {
         this.app = app;
         this.initMobileViewportFix();
+        this._preKBMainScrollTop = null;
     }
     
     /**
@@ -243,6 +244,198 @@ class MobileHandler {
         if (/iPhone|iPad|iPod/.test(navigator.userAgent)) {
             window.addEventListener('scroll', setViewportHeight);
         }
+
+        // VisualViewport を利用してキーボード表示・非表示に追従
+        const updateKeyboardState = () => {
+            try {
+                if (!window.visualViewport) return;
+                const vv = window.visualViewport;
+                // Account for iOS toolbar offset: keyboard height ~= innerHeight - vv.height - vv.offsetTop
+                const kb = Math.max(0, window.innerHeight - vv.height - (vv.offsetTop || 0));
+                document.documentElement.style.setProperty('--kb', `${kb}px`);
+                document.body.classList.toggle('kb-open', kb > 0);
+
+                // 入力エリアの実測高さを変数に反映（スクロールボタンや余白に利用）
+                const inputContainer = document.querySelector('.chat-input-container');
+                if (inputContainer) {
+                    document.documentElement.style.setProperty('--composer-h', `${inputContainer.offsetHeight}px`);
+                }
+
+                // If using iOS sticky mode, don't attempt restore/freeze here
+                if (!document.body.classList.contains('ios-sticky-mode')) {
+                    const mainContent = document.querySelector('.main-content');
+                    if (kb > 0) {
+                        // Store current scroll to restore after iOS adjustments
+                        if (mainContent && this._preKBMainScrollTop === null) {
+                            this._preKBMainScrollTop = mainContent.scrollTop;
+                        }
+                        // Attempt to counter Safari's auto scroll by restoring position
+                        if (mainContent) {
+                            const restore = () => {
+                                try { mainContent.scrollTop = this._preKBMainScrollTop || 0; } catch (e) {}
+                            };
+                            requestAnimationFrame(() => {
+                                restore();
+                                setTimeout(restore, 50);
+                                setTimeout(restore, 150);
+                            });
+                        }
+                    } else {
+                        // Keyboard closed, release lock and clear state
+                        this._preKBMainScrollTop = null;
+                    }
+                }
+            } catch (e) {
+                // fail-safe: do nothing
+            }
+        };
+
+        if (window.visualViewport) {
+            window.visualViewport.addEventListener('resize', updateKeyboardState);
+            window.visualViewport.addEventListener('scroll', updateKeyboardState);
+            updateKeyboardState();
+        }
+
+        // 入力フォーカス時にメッセージ末尾へ、かつ各寸法を更新
+        const messageInput = document.getElementById('messageInput');
+        if (messageInput) {
+            // 共通: フォーカス時にスクロール末尾へ軽く補助
+            messageInput.addEventListener('focus', () => {
+                setTimeout(() => {
+                    const scrollArea = document.getElementById('messagesContainer');
+                    if (scrollArea) scrollArea.scrollTop = scrollArea.scrollHeight;
+                    updateKeyboardState();
+                }, 50);
+            }, { passive: true });
+
+            // 入力中も高さを追跡
+            messageInput.addEventListener('input', () => {
+                const inputContainer = document.querySelector('.chat-input-container');
+                if (inputContainer) {
+                    document.documentElement.style.setProperty('--composer-h', `${inputContainer.offsetHeight}px`);
+                }
+            });
+        }
+    }
+
+    /**
+     * iOS用のオーバーレイ入力（プロキシ）を初期化
+     */
+    _initIOSOverlayInput() {
+        const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent);
+        const isMobile = window.innerWidth <= 768;
+        if (!isIOS || !isMobile) return;
+
+        // 既に作成済みならスキップ
+        if (this._overlay) return;
+
+        const overlay = document.createElement('div');
+        overlay.className = 'ios-input-overlay';
+        overlay.style.display = 'none';
+        overlay.innerHTML = `
+            <form class="overlay-form">
+                <div class="input-group">
+                    <textarea class="overlay-textarea" rows="3"></textarea>
+                    <div class="input-actions">
+                        <button type="button" class="overlay-attach">📎</button>
+                        <button type="submit" class="overlay-send">➤</button>
+                    </div>
+                </div>
+            </form>
+        `;
+        document.body.appendChild(overlay);
+
+        // Wiring
+        const textarea = overlay.querySelector('.overlay-textarea');
+        const attachBtn = overlay.querySelector('.overlay-attach');
+        const form = overlay.querySelector('.overlay-form');
+        const original = document.getElementById('messageInput');
+
+        // プレースホルダーは元の入力欄に合わせる
+        const orig = document.getElementById('messageInput');
+        if (orig && orig.placeholder) textarea.placeholder = orig.placeholder;
+
+        const autoSize = () => {
+            textarea.style.height = 'auto';
+            const maxPx = Math.floor(window.innerHeight * 0.4);
+            const next = Math.min(textarea.scrollHeight, maxPx);
+            textarea.style.height = next + 'px';
+            const h = overlay.offsetHeight;
+            document.documentElement.style.setProperty('--composer-h', h + 'px');
+        };
+
+        const syncToOriginal = () => {
+            if (original) original.value = textarea.value;
+        };
+
+        // Submit: sync back and call app send
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            syncToOriginal();
+            this.app.chatManager.sendMessage();
+            this._hideIOSOverlay();
+        });
+
+        // Attach: delegate to original file manager
+        attachBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            try { if (window.fileManager) window.fileManager.show(); } catch (err) {}
+        });
+
+        // Sync typing back to original and autosize
+        textarea.addEventListener('input', () => {
+            syncToOriginal();
+            autoSize();
+        });
+
+        // VisualViewportでオーバーレイ位置を更新
+        const updateOverlay = () => {
+            if (!this._overlayOpen) return;
+            autoSize();
+        };
+        if (window.visualViewport) {
+            window.visualViewport.addEventListener('resize', updateOverlay);
+            window.visualViewport.addEventListener('scroll', updateOverlay);
+        }
+
+        this._overlay = overlay;
+        this._overlayTextarea = textarea;
+    }
+
+    _showIOSOverlay() {
+        if (!this._overlay) return;
+        document.body.classList.add('ios-overlay-open');
+        // 初期値をコピー
+        const original = document.getElementById('messageInput');
+        if (original) this._overlayTextarea.value = original.value;
+        this._overlay.style.display = 'block';
+        this._overlayOpen = true;
+        // キーボード上に配置
+        setTimeout(() => {
+            this._overlayTextarea.focus();
+            const evt = new Event('input');
+            this._overlayTextarea.dispatchEvent(evt);
+        }, 0);
+    }
+
+    _hideIOSOverlay() {
+        if (!this._overlay) return;
+        this._overlay.style.display = 'none';
+        this._overlayOpen = false;
+        document.body.classList.remove('ios-overlay-open');
+        // 元の入力にフォーカス戻す（任意）
+        const original = document.getElementById('messageInput');
+        if (original) original.blur();
+    }
+
+    _canOpenOverlay() {
+        try {
+            // スレッド未選択（送信不可）の時はオーバーレイを開かない
+            if (!this.app || !this.app._currentThread) return false;
+            const sendBtn = document.getElementById('sendBtn');
+            if (sendBtn && sendBtn.disabled) return false;
+        } catch (e) {}
+        return true;
     }
 }
 

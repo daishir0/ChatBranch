@@ -269,14 +269,43 @@ class ChatManager {
             container.appendChild(messageElement);
         }
         
+        // 一旦末尾へスクロール
         container.scrollTop = container.scrollHeight;
-        
-        // スクロールボタンの表示を更新
+
+        // 遅延レンダリング（ハイライト、Mermaid、画像読み込み等）に備えて、
+        // しばらくの間は変化の度に末尾へ寄せる（ユーザーが操作する前の初期安定化）
+        try {
+            const settleMs = 800; // 監視時間
+            const start = Date.now();
+            let rafId = null;
+
+            const scrollToBottom = () => {
+                container.scrollTop = container.scrollHeight;
+            };
+
+            // 追加の確定スクロール（タイマー）
+            setTimeout(scrollToBottom, 50);
+            setTimeout(scrollToBottom, 200);
+            setTimeout(scrollToBottom, 600);
+
+            // DOM変化を監視してそのたびに下寄せ
+            const mo = new MutationObserver(() => {
+                // フレーム終端で実行
+                if (rafId) cancelAnimationFrame(rafId);
+                rafId = requestAnimationFrame(scrollToBottom);
+            });
+            mo.observe(container, { childList: true, subtree: true });
+
+            // 一定時間後に監視を終了
+            setTimeout(() => { try { mo.disconnect(); } catch (_){} }, settleMs);
+        } catch (_) {}
+
+        // スクロールボタンの表示を更新（少し遅らせる）
         setTimeout(() => {
             if (this.app.uiManager) {
                 this.app.uiManager.updateScrollButtons();
             }
-        }, 100);
+        }, 150);
     }
     
     /**

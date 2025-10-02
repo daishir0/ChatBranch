@@ -13,6 +13,7 @@
     --warning-color: #f59e0b;
     --radius: 8px;
     --shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    --sidebar-width: 280px; /* desktop sidebar width */
 }
 
 .light-theme {
@@ -34,22 +35,27 @@
     padding: 0;
 }
 
+html, body {
+    height: 100%;
+}
+
 body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
     background-color: var(--bg-primary);
     color: var(--text-primary);
     line-height: 1.6;
-    height: 100vh;
-    height: 100dvh; /* Dynamic viewport height for mobile */
-    height: calc(var(--vh, 1vh) * 100); /* Fallback for older browsers */
+    height: 100%;
     overflow: hidden;
 }
 
 .app-container {
     display: flex;
-    height: 100vh;
-    height: 100dvh; /* Dynamic viewport height for mobile */
-    height: calc(var(--vh, 1vh) * 100); /* Fallback for older browsers */
+    height: 100%;
+}
+
+/* Allow pinch-zoom and native gestures at root; specific areas override as needed */
+html, body {
+    touch-action: auto;
 }
 
 /* Sidebar Styles */
@@ -474,6 +480,9 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 10;
 }
 
 .header-left {
@@ -694,6 +703,9 @@ body {
 
 /* Mobile responsiveness for fullscreen tree */
 @media (max-width: 768px) {
+    :root {
+        --sidebar-width: 0px; /* no left offset on mobile layout */
+    }
     .fullscreen-tree-content {
         width: 98%;
         height: 98%;
@@ -834,6 +846,8 @@ body {
     padding: 24px;
     touch-action: pan-y;
     position: relative;
+    /* Keep content clear of the fixed composer */
+    padding-bottom: calc(var(--composer-h, 72px) + env(safe-area-inset-bottom) + 16px);
 }
 
 .welcome-message {
@@ -987,7 +1001,7 @@ body {
 
 /* スクロールナビゲーションボタン */
 .scroll-nav-btn {
-    position: absolute;
+    position: fixed;
     right: 20px;
     width: 45px;
     height: 45px;
@@ -1015,11 +1029,11 @@ body {
 }
 
 .scroll-to-bottom {
-    bottom: 160px; /* 下の位置に配置 */
+    bottom: 160px; /* default, will be overridden below */
 }
 
 .scroll-to-top {
-    bottom: 215px; /* 上の位置に配置 */
+    bottom: 215px; /* default, will be overridden below */
 }
 
 /* モバイル対応 */
@@ -1032,13 +1046,103 @@ body {
     }
     
     .scroll-to-bottom {
-        bottom: 160px; /* モバイルでも下の位置に配置 */
+        bottom: 160px; /* default, will be overridden below */
     }
 
     .scroll-to-top {
-        bottom: 210px; /* モバイルでも上の位置に配置 */
+        bottom: 210px; /* default, will be overridden below */
     }
 }
+
+/* Reposition scroll buttons to sit above input area and safe area */
+.scroll-nav-btn {
+    bottom: calc(var(--composer-h, 72px) + env(safe-area-inset-bottom) + 12px) !important;
+}
+
+/* Hide floating buttons when the keyboard is open for safety */
+/* Keep scroll buttons visible even when keyboard is open; they are positioned above input via bottom calc */
+
+/* When the keyboard is open, pin the input bar to viewport and lift above keyboard */
+body.kb-open .chat-input-container {
+    position: fixed !important;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 110; /* above header (100) and scroll buttons (100) */
+    background-color: var(--bg-primary);
+    transform: translateY(calc(-1 * var(--kb, 0px)));
+    will-change: transform;
+}
+
+/* Ensure messages don’t hide behind the elevated input bar on iOS */
+body.kb-open .messages-container {
+    padding-bottom: calc(var(--chat-input-h, 72px) + var(--kb, 0px) + env(safe-area-inset-bottom) + 16px) !important;
+}
+
+/* Override when using iOS sticky mode: do not fix/transform, rely on sticky */
+/* iOS overlay input bar */
+.ios-input-overlay {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: calc(env(safe-area-inset-bottom) + var(--kb, 0px));
+    z-index: 1200;
+    background-color: var(--bg-primary);
+    border-top: 1px solid var(--border-color);
+    padding: 16px 24px calc(16px + env(safe-area-inset-bottom)) 24px;
+}
+
+/* Overlay logic deprecated: always show fixed composer */
+
+.ios-input-overlay .input-group {
+    display: flex;
+    align-items: flex-end;
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius);
+    overflow: hidden;
+    gap: 8px;
+}
+.ios-input-overlay .overlay-textarea {
+    flex: 1;
+    padding: 16px;
+    border: none;
+    background: none;
+    color: var(--text-primary);
+    resize: none;
+    font-family: inherit;
+    font-size: 16px;
+    line-height: 1.4;
+    max-height: min(40vh, 320px);
+}
+.ios-input-overlay .input-actions {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 8px;
+    gap: 4px;
+    flex-shrink: 0;
+}
+.ios-input-overlay .overlay-attach,
+.ios-input-overlay .overlay-send {
+    width: 40px;
+    height: 40px;
+    border: none;
+    border-radius: var(--radius);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    transition: all 0.2s;
+}
+.ios-input-overlay .overlay-attach { background: none; color: var(--text-muted); }
+.ios-input-overlay .overlay-attach:hover { background-color: var(--bg-tertiary); color: var(--text-primary); }
+.ios-input-overlay .overlay-send { background-color: var(--accent-color); color: white; }
+.ios-input-overlay .overlay-send:hover { background-color: #3b82f6; }
+
+/* While the keyboard is open on iOS, freeze main scroll to prevent Safari from auto-scrolling to top */
+/* Remove scroll freeze; rely on fixed composer and single scroll area */
 
 /* Token usage display */
 .token-usage-info {
@@ -1073,10 +1177,29 @@ body {
     color: #f87171;
 }
 
+/* Spacer at messages end to avoid overlap with fixed composer */
+.bottom-spacer {
+    height: calc(var(--composer-h, 72px) + env(safe-area-inset-bottom));
+}
+
 /* Chat Input */
 .chat-input-container {
+    position: fixed;
+    left: var(--sidebar-width);
+    right: 0;
+    bottom: calc(env(safe-area-inset-bottom) + var(--kb, 0px));
+    z-index: 110;
+    background-color: var(--bg-primary);
     padding: 24px;
+    /* Keep input clear of the iOS home indicator */
+    padding-bottom: calc(24px + env(safe-area-inset-bottom));
     border-top: 1px solid var(--border-color);
+}
+
+/* When mobile sidebar is open, ensure sidebar is on top and composer doesn't block clicks */
+.sidebar.open ~ .chat-input-container {
+    z-index: 50; /* below sidebar (100) */
+    pointer-events: none; /* allow clicking items in the sidebar */
 }
 
 .file-attachments {
@@ -1137,7 +1260,7 @@ body {
     font-family: inherit;
     font-size: 16px;
     line-height: 1.4;
-    max-height: 200px;
+    max-height: min(40vh, 320px);
     min-width: 0;
 }
 
@@ -1562,7 +1685,9 @@ body {
         position: fixed;
         left: -280px;
         top: 0;
-        height: 100vh;
+        /* Use bottom instead of fixed height so we can lift above keyboard */
+        bottom: env(safe-area-inset-bottom);
+        height: auto;
         z-index: 100;
         transition: left 0.3s ease;
         box-shadow: 2px 0 10px rgba(0, 0, 0, 0.3);
@@ -1586,19 +1711,12 @@ body {
     }
     
     .chat-header {
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        z-index: 100;
         padding: 8px 16px;
         background-color: var(--bg-primary);
         border-bottom: 1px solid var(--border-color);
     }
     
-    .main-content {
-        padding-top: 60px; /* ヘッダーの高さ分のオフセット */
-    }
+    
     
     .thread-info h2 {
         font-size: 16px;
@@ -1661,6 +1779,17 @@ body {
     
     .messages-container {
         padding: 16px;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+        /* Keep content clear of the fixed composer on mobile as well */
+        padding-bottom: calc(var(--composer-h, 72px) + env(safe-area-inset-bottom) + 16px);
+    }
+}
+
+/* When keyboard is open on mobile, keep sidebar above it so footer buttons remain visible */
+@media (max-width: 768px) {
+    body.kb-open .sidebar {
+        bottom: calc(env(safe-area-inset-bottom) + var(--kb, 0px));
     }
 }
 
@@ -1687,6 +1816,13 @@ html,
     -moz-user-select: none;
     -ms-user-select: none;
     user-select: none;
+}
+
+/* Re-enable selection and native interactions on form controls */
+textarea, input {
+    -webkit-user-select: text !important;
+    user-select: text !important;
+    touch-action: auto;
 }
 
 /* メッセージコンテナは縦スクロールのみ */

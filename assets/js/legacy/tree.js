@@ -282,15 +282,22 @@ class VisTreeViewer {
             this.fullscreenNodes = fullscreenNodes;
             this.fullscreenEdges = fullscreenEdges;
 
-            // Add click event for fullscreen network
-            this.fullscreenNetwork.on('click', (params) => {
+            // Add click event for fullscreen network (only allow user messages)
+            this.fullscreenNetwork.on('selectNode', (params) => {
                 if (params.nodes.length > 0) {
                     const nodeId = params.nodes[0];
-                    if (window.app) {
-                        window.app.currentMessageId = nodeId;
-                        // Close fullscreen and load the message
-                        window.app.uiManager.hideFullscreenTree();
-                        window.app.chatManager.loadMessages();
+                    const nodeData = this.fullscreenNodes.get(nodeId);
+
+                    // Only allow selection of user messages
+                    if (nodeData && nodeData.label.includes('[User]')) {
+                        if (window.app) {
+                            this.selectNode(nodeId);
+                            // Close fullscreen and load the message
+                            window.app.uiManager.hideFullscreenTree();
+                        }
+                    } else {
+                        // Deselect AI nodes immediately
+                        this.fullscreenNetwork.unselectAll();
                     }
                 }
             });
@@ -330,7 +337,7 @@ class VisTreeViewer {
 
             this.fullscreenNodes.add({
                 id: node.id,
-                label: `${preview}\n${timestamp}`,
+                label: `[${node.role === 'user' ? 'User' : 'AI'}]\n${preview}\n${timestamp}`,
                 level: level,
                 color: color,
                 font: {

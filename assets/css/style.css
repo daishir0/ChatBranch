@@ -342,16 +342,17 @@ body {
 .thread-item.archived {
     background-color: var(--bg-secondary);
     border-left: 3px solid var(--text-muted);
-    opacity: 0.7;
 }
 
 .thread-item.archived .thread-name {
     color: var(--text-secondary);
     font-style: italic;
+    opacity: 0.7;
 }
 
 .thread-item.archived .thread-time {
     color: var(--text-muted);
+    opacity: 0.7;
 }
 
 /* 複数選択機能のスタイル */

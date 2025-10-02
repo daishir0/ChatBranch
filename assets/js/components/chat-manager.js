@@ -117,13 +117,20 @@ class ChatManager {
                 
                 // Set currentMessageId to the last message in the displayed path
                 // ただし、新規ツリーモード中は上書きしない（ルート開始を維持するため）
+                // また、現在のメッセージがユーザーメッセージの場合も上書きしない（ツリークリック時）
                 if ((!this.app.uiManager || !this.app.uiManager.newTreeMode) && messagePath && messagePath.length > 0) {
-                    this.app._currentMessageId = messagePath[messagePath.length - 1].id;
-                    console.log('Set currentMessageId to last message in path:', this.app._currentMessageId);
-
-                    // デバッグ用ログ
                     const lastMessage = messagePath[messagePath.length - 1];
-                    console.log('Last message role:', lastMessage.role, 'ID:', lastMessage.id);
+                    const currentMessage = this.findMessageById(this.app._currentThreadMessages, this.app._currentMessageId);
+
+                    // 現在のメッセージがユーザーメッセージでない場合のみ上書き
+                    // （ツリーでユーザーノードをクリックした場合は保持）
+                    if (!currentMessage || currentMessage.role !== 'user') {
+                        this.app._currentMessageId = lastMessage.id;
+                        console.log('Set currentMessageId to last message in path:', this.app._currentMessageId);
+                        console.log('Last message role:', lastMessage.role, 'ID:', lastMessage.id);
+                    } else {
+                        console.log('Keep currentMessageId as user node:', this.app._currentMessageId);
+                    }
                 } else if (this.app.uiManager && this.app.uiManager.newTreeMode) {
                     console.log('New Tree Mode active: keep currentMessageId as null for root-start');
                 }

@@ -7,7 +7,9 @@ class VisTreeViewer {
         this.nodes = new vis.DataSet([]);
         this.edges = new vis.DataSet([]);
         this.currentMessageId = null;
-        
+        this.tooltipHideTimer = null;
+        this.fullscreenTooltipHideTimer = null;
+
         this.initializeNetwork();
     }
     
@@ -75,7 +77,7 @@ class VisTreeViewer {
                 zoomView: true,
                 dragView: true,
                 dragNodes: false,
-                tooltipDelay: 300,  // ツールチップ表示の遅延時間（ミリ秒）
+                tooltipDelay: 1000,  // ツールチップ表示の遅延時間（ミリ秒）
                 hideEdgesOnDrag: false,
                 hideNodesOnDrag: false
             }
@@ -272,7 +274,7 @@ class VisTreeViewer {
                 interaction: {
                     hover: true,
                     selectConnectedEdges: false,
-                    tooltipDelay: 200
+                    tooltipDelay: 1000
                 }
             };
 
@@ -557,6 +559,8 @@ class VisTreeViewer {
             z-index: 1000;
             pointer-events: none;
             display: none;
+            opacity: 1;
+            transition: opacity 0.2s ease-out;
             box-shadow: 0 2px 8px rgba(0,0,0,0.3);
             border: 1px solid rgba(255,255,255,0.1);
         `;
@@ -630,7 +634,23 @@ class VisTreeViewer {
      */
     hideCustomTooltip() {
         if (this.tooltipElement) {
-            this.tooltipElement.style.display = 'none';
+            // 既存のタイマーをキャンセル
+            if (this.tooltipHideTimer) {
+                clearTimeout(this.tooltipHideTimer);
+                this.tooltipHideTimer = null;
+            }
+
+            // フェードアウト開始前に0.2秒遅延
+            this.tooltipHideTimer = setTimeout(() => {
+                // opacityを0にしてフェードアウト
+                this.tooltipElement.style.opacity = '0';
+                // フェードアウト完了後にdisplay: noneにして、opacityを戻す
+                setTimeout(() => {
+                    this.tooltipElement.style.display = 'none';
+                    this.tooltipElement.style.opacity = '1';
+                    this.tooltipHideTimer = null;
+                }, 200);
+            }, 200);
         }
     }
 
@@ -656,6 +676,8 @@ class VisTreeViewer {
                 z-index: 2100;
                 pointer-events: none;
                 display: none;
+                opacity: 1;
+                transition: opacity 0.2s ease-out;
                 box-shadow: 0 4px 12px rgba(0,0,0,0.4);
                 border: 1px solid rgba(255,255,255,0.2);
             `;
@@ -712,7 +734,23 @@ class VisTreeViewer {
      */
     hideFullscreenTooltip() {
         if (this.fullscreenTooltipElement) {
-            this.fullscreenTooltipElement.style.display = 'none';
+            // 既存のタイマーをキャンセル
+            if (this.fullscreenTooltipHideTimer) {
+                clearTimeout(this.fullscreenTooltipHideTimer);
+                this.fullscreenTooltipHideTimer = null;
+            }
+
+            // フェードアウト開始前に0.2秒遅延
+            this.fullscreenTooltipHideTimer = setTimeout(() => {
+                // opacityを0にしてフェードアウト
+                this.fullscreenTooltipElement.style.opacity = '0';
+                // フェードアウト完了後にdisplay: noneにして、opacityを戻す
+                setTimeout(() => {
+                    this.fullscreenTooltipElement.style.display = 'none';
+                    this.fullscreenTooltipElement.style.opacity = '1';
+                    this.fullscreenTooltipHideTimer = null;
+                }, 200);
+            }, 200);
         }
     }
 }

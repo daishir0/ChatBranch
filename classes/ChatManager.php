@@ -25,7 +25,7 @@ class ChatManager {
     }
     
     public function getThread($threadId) {
-        $sql = "SELECT * FROM threads WHERE id = ?";
+        $sql = "SELECT * FROM threads WHERE id = ? AND deleted_at IS NULL";
         return $this->db->fetchOne($sql, [$threadId]);
     }
     
@@ -37,10 +37,16 @@ class ChatManager {
     }
     
     public function deleteThread($threadId) {
-        $sql = "DELETE FROM threads WHERE id = ?";
+        // 1. スレッドに紐づく全メッセージを論理削除
+        $sql = "UPDATE messages SET deleted_at = datetime('now','localtime')
+                WHERE thread_id = ? AND deleted_at IS NULL";
+        $result = $this->db->query($sql, [$threadId]);
+
+        // 2. スレッド自体を論理削除
+        $sql = "UPDATE threads SET deleted_at = datetime('now','localtime') WHERE id = ?";
         $this->db->query($sql, [$threadId]);
 
-        $this->logger->info('Thread physically deleted', ['thread_id' => $threadId]);
+        $this->logger->info('Thread and its messages logically deleted', ['thread_id' => $threadId]);
     }
 
     public function archiveThread($threadId) {
@@ -84,7 +90,7 @@ class ChatManager {
     }
     
     public function getThreadSystemPrompt($threadId) {
-        $sql = "SELECT thread_system_prompt FROM threads WHERE id = ?";
+        $sql = "SELECT thread_system_prompt FROM threads WHERE id = ? AND deleted_at IS NULL";
         $result = $this->db->fetchOne($sql, [$threadId]);
         return $result ? $result['thread_system_prompt'] : '';
     }
@@ -124,12 +130,12 @@ class ChatManager {
     }
     
     public function getMessage($messageId) {
-        $sql = "SELECT * FROM messages WHERE id = ?";
+        $sql = "SELECT * FROM messages WHERE id = ? AND deleted_at IS NULL";
         return $this->db->fetchOne($sql, [$messageId]);
     }
     
     public function getMessages($threadId) {
-        $sql = "SELECT * FROM messages WHERE thread_id = ? ORDER BY created_at ASC";
+        $sql = "SELECT * FROM messages WHERE thread_id = ? AND deleted_at IS NULL ORDER BY created_at ASC";
         return $this->db->fetchAll($sql, [$threadId]);
     }
     
@@ -208,19 +214,19 @@ class ChatManager {
     }
     
     public function getMessageChildren($messageId) {
-        $sql = "SELECT * FROM messages WHERE parent_message_id = ? ORDER BY created_at ASC";
+        $sql = "SELECT * FROM messages WHERE parent_message_id = ? AND deleted_at IS NULL ORDER BY created_at ASC";
         return $this->db->fetchAll($sql, [$messageId]);
     }
     
     public function deleteMessage($messageId) {
-        // First delete all child messages recursively
+        // First delete all child messages recursively (logical delete)
         $deletedChildCount = $this->deleteChildMessages($messageId);
-        
-        // Then delete the specified message itself
-        $sql = "DELETE FROM messages WHERE id = ?";
+
+        // Then logically delete the specified message itself
+        $sql = "UPDATE messages SET deleted_at = datetime('now','localtime') WHERE id = ?";
         $this->db->query($sql, [$messageId]);
-        
-        $this->logger->info('Message and children deleted', [
+
+        $this->logger->info('Message and children logically deleted', [
             'message_id' => $messageId,
             'child_count' => $deletedChildCount
         ]);
@@ -229,32 +235,34 @@ class ChatManager {
     public function deleteChildMessages($messageId) {
         // Get all child messages recursively
         $childIds = $this->getChildMessageIds($messageId);
-        
+
         if (!empty($childIds)) {
             $placeholders = str_repeat('?,', count($childIds) - 1) . '?';
-            $sql = "DELETE FROM messages WHERE id IN ($placeholders)";
+            $sql = "UPDATE messages SET deleted_at = datetime('now','localtime') WHERE id IN ($placeholders)";
             $this->db->query($sql, $childIds);
-            
-            $this->logger->info('Child messages deleted', [
+
+            $this->logger->info('Child messages logically deleted', [
                 'parent_message_id' => $messageId,
                 'deleted_count' => count($childIds),
                 'deleted_ids' => $childIds
             ]);
         }
-        
+
         return count($childIds);
     }
     
     private function getChildMessageIds($messageId, &$childIds = []) {
+        // 削除対象を取得するため、deleted_atの条件は付けない
+        // （既に論理削除されたメッセージの子も含める）
         $sql = "SELECT id FROM messages WHERE parent_message_id = ?";
         $children = $this->db->fetchAll($sql, [$messageId]);
-        
+
         foreach ($children as $child) {
             $childIds[] = $child['id'];
             // Recursively get grandchildren
             $this->getChildMessageIds($child['id'], $childIds);
         }
-        
+
         return $childIds;
     }
     

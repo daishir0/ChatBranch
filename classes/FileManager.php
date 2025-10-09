@@ -435,33 +435,33 @@ class FileManager {
     }
     
     public function getFile($fileId) {
-        $sql = "SELECT * FROM files WHERE id = ?";
+        $sql = "SELECT * FROM files WHERE id = ? AND deleted_at IS NULL";
         return $this->db->fetchOne($sql, [$fileId]);
     }
     
     public function getFiles($limit = null, $offset = 0) {
         if ($limit === null) {
-            $sql = "SELECT * FROM files ORDER BY created_at DESC";
+            $sql = "SELECT * FROM files WHERE deleted_at IS NULL ORDER BY created_at DESC";
             return $this->db->fetchAll($sql);
         } else {
-            $sql = "SELECT * FROM files ORDER BY created_at DESC LIMIT ? OFFSET ?";
+            $sql = "SELECT * FROM files WHERE deleted_at IS NULL ORDER BY created_at DESC LIMIT ? OFFSET ?";
             return $this->db->fetchAll($sql, [$limit, $offset]);
         }
     }
     
     public function searchFiles($query, $limit = null) {
         if ($limit === null) {
-            $sql = "SELECT * FROM files WHERE 
-                    original_name LIKE ? 
+            $sql = "SELECT * FROM files WHERE
+                    original_name LIKE ? AND deleted_at IS NULL
                     ORDER BY created_at DESC";
-            
+
             $searchTerm = "%{$query}%";
             return $this->db->fetchAll($sql, [$searchTerm]);
         } else {
-            $sql = "SELECT * FROM files WHERE 
-                    original_name LIKE ? 
+            $sql = "SELECT * FROM files WHERE
+                    original_name LIKE ? AND deleted_at IS NULL
                     ORDER BY created_at DESC LIMIT ?";
-            
+
             $searchTerm = "%{$query}%";
             return $this->db->fetchAll($sql, [$searchTerm, $limit]);
         }
@@ -472,30 +472,29 @@ class FileManager {
         if (!$fileId || !is_numeric($fileId)) {
             throw new Exception('Invalid file ID');
         }
-        
+
         $file = $this->getFile($fileId);
         if (!$file) {
             throw new Exception('File not found');
         }
-        
+
         try {
-            // Delete related records first (message_files)
-            $sql = "DELETE FROM message_files WHERE file_id = ?";
-            $this->db->query($sql, [$fileId]);
-            
-            // Delete the file record
-            $sql = "DELETE FROM files WHERE id = ?";
+            // 論理削除: message_filesの削除は不要
+            // （filesテーブルが論理削除されれば、JOINクエリでフィルタされるため）
+
+            // ファイルレコードを論理削除
+            $sql = "UPDATE files SET deleted_at = datetime('now','localtime') WHERE id = ?";
             $result = $this->db->query($sql, [$fileId]);
-            
+
             if ($result === false) {
-                throw new Exception('Database deletion failed');
+                throw new Exception('Database update failed');
             }
-            
-            $this->logger->info('File record deleted', [
+
+            $this->logger->info('File record logically deleted', [
                 'file_id' => $fileId,
                 'original_name' => $file['original_name']
             ]);
-            
+
         } catch (Exception $e) {
             $this->logger->error('File deletion error', [
                 'file_id' => $fileId,
@@ -511,10 +510,10 @@ class FileManager {
     }
     
     public function getMessageFiles($messageId) {
-        $sql = "SELECT f.* FROM files f 
-                JOIN message_files mf ON f.id = mf.file_id 
-                WHERE mf.message_id = ?";
-        
+        $sql = "SELECT f.* FROM files f
+                JOIN message_files mf ON f.id = mf.file_id
+                WHERE mf.message_id = ? AND f.deleted_at IS NULL";
+
         return $this->db->fetchAll($sql, [$messageId]);
     }
 }
